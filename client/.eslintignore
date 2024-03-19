@@ -1,0 +1,6 @@
+node_modules
+/build
+/package
+.env
+.env.*
+/src/env.d.ts
