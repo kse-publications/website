@@ -1,1 +1,2 @@
+cd client
 npx lint-staged
