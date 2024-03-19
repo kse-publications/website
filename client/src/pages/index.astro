@@ -1,7 +1,12 @@
 ---
+import "@/styles/globals.css";
 import Layout from "../layouts/Layout.astro";
+import { Button } from "@/components/ui/button";
 ---
 
 <Layout title="Welcome to Astro.">
-  <h1 class="text-3xl font-bold underline text-center">Hello world!</h1>
+  <section class="max-w-4xl mx-auto justify-center flex gap-2 flex-col items-center py-4">
+    <h1 class="text-3xl font-bold underline text-center">KSE docs</h1>
+    <Button>shadcn/ui button</Button>
+  </section>
 </Layout>
