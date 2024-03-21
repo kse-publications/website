@@ -1,0 +1,33 @@
+﻿
+services:
+  publications.api:
+    image: publications.api
+    container_name: publications.api
+    build:
+      context: .
+      dockerfile: Publications.API/Dockerfile
+    restart: on-failure
+    ports:
+      - "80:8080"
+      - "443:8081"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis/redis-stack
+    container_name: redis
+    restart: on-failure
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - redis-data:/data
+
+volumes:
+  redis-data:
