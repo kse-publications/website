@@ -27,6 +27,6 @@ if (app.Environment.IsDevelopment())
 app.UseCors("FrontEndClient");
 app.UseHttpsRedirection();
 
-app.MapGet("/test" , () => "I am working");
+app.MapGet("/test" , () => "CD github workflow test");
 
 app.Run();
