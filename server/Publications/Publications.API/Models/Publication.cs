@@ -15,10 +15,10 @@ public class Publication
     [Searchable]
     public string Title { get; set; } = null!;
     
-    [Indexed]
+    [Indexed(Sortable = true)]
     public string Type { get; set;} = null!;
     
-    [Indexed]
+    [Indexed(Sortable = true)]
     public int Year { get; set; }
     
     public string Link { get; set; } = null!;
@@ -34,5 +34,6 @@ public class Publication
     [Indexed(CascadeDepth = 1)]
     public Publisher? Publisher { get; set; }
     
+    [Indexed(Sortable = true)]
     public DateTime LastModified { get; set; }
 }
