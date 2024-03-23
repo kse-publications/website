@@ -1,4 +1,5 @@
-﻿using Publications.API.Models;
+﻿using Publications.API.DTOs;
+using Publications.API.Models;
 
 namespace Publications.API.Repositories;
 
@@ -7,16 +8,19 @@ namespace Publications.API.Repositories;
 /// </summary>
 public interface IPublicationsRepository
 {
-    Task<IReadOnlyCollection<Publication>> GetAllAsync(
+    Task<PaginatedCollection<Publication>> GetAllAsync(
+        PaginationDTO paginationDto,
         CancellationToken cancellationToken = default);
     
-    Task<IReadOnlyCollection<Publication>> GetByFullTextSearchAsync(
-        string searchTerm, CancellationToken cancellationToken = default);
+    Task<PaginatedCollection<Publication>> GetByFullTextSearchAsync(
+        PaginationSearchDTO paginationSearchDto,
+        CancellationToken cancellationToken = default);
     
-    Task<IReadOnlyCollection<Publication>> GetByAutoCompleteAsync(
-        string searchTerm, CancellationToken cancellationToken = default);
+    Task<PaginatedCollection<Publication>> GetByAutoCompleteAsync(
+        PaginationSearchDTO paginationSearchDto,
+        CancellationToken cancellationToken = default);
     
-    Task<Publication> GetByIdAsync(
+    Task<Publication?> GetByIdAsync(
         Guid id, CancellationToken cancellationToken = default);
     
     Task InsertOrUpdateAsync(

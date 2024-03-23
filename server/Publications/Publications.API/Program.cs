@@ -1,6 +1,7 @@
 
 using Microsoft.OpenApi.Models;
 using Publications.API;
+using Publications.API.Repositories;
 using Redis.OM;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,6 +30,7 @@ var builder = WebApplication.CreateBuilder(args);
         connectionString: builder.Configuration.GetConnectionString("Redis")!));
 
     builder.Services.AddHostedService<RedisHostedService>();
+    builder.Services.AddScoped<IPublicationsRepository, PublicationsRepository>();
 }
 
 var app = builder.Build();
