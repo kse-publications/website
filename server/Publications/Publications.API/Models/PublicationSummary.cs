@@ -1,5 +1,9 @@
 ﻿namespace Publications.API.Models;
 
+/// <summary>
+/// A DTO that represents a publication summary.
+/// Only part of the <see cref="Publication"/>'s properties are included.
+/// </summary>
 public class PublicationSummary
 { 
     public Guid Id { get; set; }

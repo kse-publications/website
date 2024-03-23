@@ -2,6 +2,9 @@
 
 namespace Publications.API.Models;
 
+/// <summary>
+/// Aggregate root that represents a publication.
+/// </summary>
 [Document(StorageType = StorageType.Json, Prefixes = new[] { "publication" })]
 public class Publication
 {

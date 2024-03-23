@@ -2,6 +2,9 @@
 
 namespace Publications.API.Repositories;
 
+/// <summary>
+/// Contract for a repository that manages <see cref="Publication"/>s.
+/// </summary>
 public interface IPublicationsRepository
 {
     Task<IReadOnlyCollection<Publication>> GetAllAsync(

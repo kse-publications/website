@@ -2,6 +2,9 @@
 
 namespace Publications.API.Models;
 
+/// <summary>
+/// Represents an author of a <see cref="Publication"/>.
+/// </summary>
 public class Author
 {
     [Indexed]
