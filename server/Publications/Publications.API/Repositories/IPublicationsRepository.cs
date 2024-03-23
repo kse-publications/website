@@ -1,20 +1,22 @@
-﻿namespace Publications.API.Abstractions;
+﻿using Publications.API.Models;
+
+namespace Publications.API.Repositories;
 
 public interface IPublicationsRepository
 {
-    Task<IReadOnlyCollection<IPublication>> GetAllAsync(
+    Task<IReadOnlyCollection<Publication>> GetAllAsync(
         CancellationToken cancellationToken = default);
     
-    Task<IReadOnlyCollection<IPublication>> GetByFullTextSearchAsync(
+    Task<IReadOnlyCollection<Publication>> GetByFullTextSearchAsync(
         string searchTerm, CancellationToken cancellationToken = default);
     
-    Task<IReadOnlyCollection<IPublication>> GetByAutoCompleteAsync(
+    Task<IReadOnlyCollection<Publication>> GetByAutoCompleteAsync(
         string searchTerm, CancellationToken cancellationToken = default);
     
-    Task<IPublicationsDetails> GetByIdAsync(
+    Task<Publication> GetByIdAsync(
         Guid id, CancellationToken cancellationToken = default);
     
     Task InsertOrUpdateAsync(
-        IEnumerable<IPublicationsDetails> publications,
+        IEnumerable<Publication> publications,
         CancellationToken cancellationToken = default);
 }
