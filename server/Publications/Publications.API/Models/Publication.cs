@@ -10,23 +10,24 @@ public class Publication
     public Guid Id { get; set; }
     
     [Searchable]
-    public string Title { get; set; }
+    public string Title { get; set; } = null!;
     
     [Indexed]
-    public string Type { get; set;}
+    public string Type { get; set;} = null!;
     
     [Indexed]
-    public int Year { get; }
+    public int Year { get; set; }
     
-    public string Link { get; }
-    
-    [Searchable]
-    public string[] Keywords { get; }
+    public string Link { get; set; } = null!;
     
     [Searchable]
-    public string Abstract { get; }
+    public string[] Keywords { get; set; } = Array.Empty<string>();
+
+    [Searchable] 
+    public string Abstract { get; set; } = string.Empty;
     
-    public ICollection<Author> Authors { get; }
+    public ICollection<Author> Authors { get; set; } = new List<Author>();
     
-    public Publisher Publishers { get; }
+    [Indexed(CascadeDepth = 1)]
+    public Publisher? Publisher { get; set; }
 }
