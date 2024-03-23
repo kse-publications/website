@@ -33,4 +33,6 @@ public class Publication
     
     [Indexed(CascadeDepth = 1)]
     public Publisher? Publisher { get; set; }
+    
+    public DateTime LastModified { get; set; }
 }
