@@ -45,6 +45,6 @@ var app = builder.Build();
     app.UseHttpsRedirection();
 }
 
-app.MapGet("/test" , () => "CD github workflow test");
+app.MapGet("/test" , () => "CD github workflow test!");
 
 app.Run();
