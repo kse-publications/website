@@ -1,7 +1,8 @@
 
 using Microsoft.OpenApi.Models;
 using Publications.API;
-using Publications.API.Notion;
+using Publications.API.BackgroundJobs;
+using Publications.API.DTOs;
 using Publications.API.Repositories;
 using Redis.OM;
 

@@ -1,4 +1,4 @@
-﻿namespace Publications.API.Notion;
+﻿namespace Publications.API.DTOs;
 
 public record NotionDatabaseOptions
 {

@@ -1,10 +1,11 @@
 ﻿using Microsoft.Extensions.Options;
 using Notion.Client;
+using Publications.API.DTOs;
 using Publications.API.Models;
 
-namespace Publications.API.Notion;
+namespace Publications.API.Repositories;
 
-public class NotionRepository
+public class NotionRepository: IPublicationsSourceRepository
 {
     private readonly INotionClient _notionClient;
     private readonly NotionDatabaseOptions _databaseOptions;
@@ -17,7 +18,7 @@ public class NotionRepository
         _databaseOptions = databaseOptions.Value;
     }
 
-    public async Task<IReadOnlyCollection<Publication>> GetPublications()
+    public async Task<IReadOnlyCollection<Publication>> GetPublicationsAsync()
     {
         var authors = await GetAuthors();
         var publishers = await GetPublishers();

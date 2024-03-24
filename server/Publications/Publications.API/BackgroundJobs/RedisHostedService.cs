@@ -1,7 +1,7 @@
 ﻿using Publications.API.Models;
 using Redis.OM;
 
-namespace Publications.API;
+namespace Publications.API.BackgroundJobs;
 
 public class RedisHostedService: IHostedService
 {
