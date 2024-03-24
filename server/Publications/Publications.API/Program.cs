@@ -38,7 +38,7 @@ var builder = WebApplication.CreateBuilder(args);
         builder.Configuration.GetSection("Notion:Databases"));
     
     builder.Services.AddScoped<NotionClient>(provider => NotionClientFactory.Create(
-        new ClientOptions{AuthToken = builder.Configuration["Notion:Token"]}));
+        new ClientOptions{ AuthToken = builder.Configuration["Notion:Token"] }));
 
     builder.Services.AddScoped<IPublicationsSourceRepository, NotionRepository>();
     
@@ -57,7 +57,8 @@ var app = builder.Build();
     app.Services.UseScheduler(scheduler =>
     { 
         scheduler.Schedule<SyncWithNotionTask>()
-            .Cron("* */2 * * *");
+            .Cron("* */2 * * *")
+            .RunOnceAtStart();
     });
     
     app.UseCors("FrontEndClient");
