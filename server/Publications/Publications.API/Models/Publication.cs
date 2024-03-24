@@ -12,7 +12,7 @@ public class Publication
     [Indexed]
     public Guid Id { get; set; }
     
-    [Searchable]
+    [Searchable(Weight = 1.0)]
     public string Title { get; set; } = null!;
     
     [Indexed(Sortable = true)]
@@ -23,16 +23,19 @@ public class Publication
     
     public string Link { get; set; } = null!;
     
-    [Searchable]
+    [Searchable(Weight = 0.8)]
     public string[] Keywords { get; set; } = Array.Empty<string>();
 
-    [Searchable] 
+    [Searchable(Weight = 0.7)] 
     public string Abstract { get; set; } = string.Empty;
     
-    public ICollection<Author> Authors { get; set; } = new List<Author>();
+    [Indexed(JsonPath = "$.Id")]
+    [Searchable(JsonPath = "$.Name", Weight = 0.8, PhoneticMatcher = "dm:en")]
+    public Author[] Authors { get; set; } = Array.Empty<Author>();
     
-    [Indexed(CascadeDepth = 1)]
-    public Publisher? Publisher { get; set; }
+    [Indexed(JsonPath = "$.Id")]
+    [Indexed(JsonPath = "$.Name", CaseSensitive = false)]
+    public Publisher Publisher { get; set; } = null!;
     
     [Indexed(Sortable = true)]
     public DateTime LastModified { get; set; }

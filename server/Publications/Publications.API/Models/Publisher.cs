@@ -7,9 +7,7 @@ namespace Publications.API.Models;
 /// </summary>
 public class Publisher
 {
-    [Indexed]
     public Guid Id { get; set; }
     
-    [Searchable]
     public string Name { get; set; } = null!;
 }
