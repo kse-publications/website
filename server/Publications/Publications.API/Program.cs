@@ -1,6 +1,7 @@
 
 using Microsoft.OpenApi.Models;
 using Publications.API;
+using Publications.API.Notion;
 using Publications.API.Repositories;
 using Redis.OM;
 
@@ -31,6 +32,9 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddHostedService<RedisHostedService>();
     builder.Services.AddScoped<IPublicationsRepository, PublicationsRepository>();
+    
+    builder.Services.Configure<NotionDatabaseOptions>(
+        builder.Configuration.GetSection("Notion:Databases"));
 }
 
 var app = builder.Build();
