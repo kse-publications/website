@@ -9,6 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Coravel" Version="5.0.3" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0"/>
         <PackageReference Include="Notion.Net" Version="4.2.0" />
         <PackageReference Include="Redis.OM" Version="0.6.1" />
