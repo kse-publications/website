@@ -16,11 +16,10 @@ namespace Publications.API.Controllers
         {
             try
             {
-
-                // Отримати всі публікації з використанням пагінації та відповідного сортування
+                
                 var publications = await repository.GetAllAsync(pagination);
 
-                // Перевірка, чи є публікації
+                
                 if (publications.Count == 0)
                 {
                     return NotFound("No publications found.");
