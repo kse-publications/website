@@ -1,4 +1,3 @@
-using Coravel;
 using Microsoft.OpenApi.Models;
 using Notion.Client;
 using Publications.API.BackgroundJobs;
@@ -8,6 +7,7 @@ using Redis.OM;
 
 var builder = WebApplication.CreateBuilder(args);
 {
+    builder.Services.AddLogging();
     builder.Services.AddControllers();
     
     builder.Services.AddEndpointsApiExplorer();
@@ -41,9 +41,15 @@ var builder = WebApplication.CreateBuilder(args);
         new ClientOptions{ AuthToken = builder.Configuration["Notion:Token"] }));
 
     builder.Services.AddScoped<IPublicationsSourceRepository, NotionRepository>();
-    
-    builder.Services.AddTransient<SyncWithNotionTask>();
-    builder.Services.AddScheduler();
+
+    builder.Services.AddHostedService<SyncWithNotionBackgroundTask>(
+        provider => new SyncWithNotionBackgroundTask(
+            provider.GetRequiredService<ILogger<SyncWithNotionBackgroundTask>>(),
+            provider,
+            interval: TimeSpan.FromHours(2),
+            maxRetries: 3,
+            retryDelay: TimeSpan.FromSeconds(5),
+            runAtStartup: true));
 }
 
 var app = builder.Build();
@@ -53,13 +59,6 @@ var app = builder.Build();
         app.UseSwagger();
         app.UseSwaggerUI();
     }
-
-    app.Services.UseScheduler(scheduler =>
-    { 
-        scheduler.Schedule<SyncWithNotionTask>()
-            .Cron("* */2 * * *")
-            .RunOnceAtStart();
-    });
     
     app.UseCors("FrontEndClient");
     app.UseHttpsRedirection();
