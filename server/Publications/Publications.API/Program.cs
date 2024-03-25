@@ -1,6 +1,7 @@
 
 using Microsoft.OpenApi.Models;
 using Publications.API;
+using Publications.API.Middleware;
 using Publications.API.Repositories;
 using Redis.OM;
 
@@ -43,6 +44,7 @@ var app = builder.Build();
 
     app.UseCors("FrontEndClient");
     app.UseHttpsRedirection();
+    app.UseMiddleware<ExceptionHandlerMiddleware>();
 }
 
 app.MapGet("/test" , () => "CD github workflow test!");
