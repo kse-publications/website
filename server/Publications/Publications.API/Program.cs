@@ -8,6 +8,7 @@ using Redis.OM;
 var builder = WebApplication.CreateBuilder(args);
 {
     builder.Services.AddLogging();
+    
     builder.Services.AddControllers();
     
     builder.Services.AddEndpointsApiExplorer();
@@ -37,7 +38,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.Configure<NotionDatabaseOptions>(
         builder.Configuration.GetSection("Notion:Databases"));
     
-    builder.Services.AddScoped<NotionClient>(provider => NotionClientFactory.Create(
+    builder.Services.AddScoped<INotionClient>(provider => NotionClientFactory.Create(
         new ClientOptions{ AuthToken = builder.Configuration["Notion:Token"] }));
 
     builder.Services.AddScoped<IPublicationsSourceRepository, NotionRepository>();
@@ -46,9 +47,9 @@ var builder = WebApplication.CreateBuilder(args);
         provider => new SyncWithNotionBackgroundTask(
             provider.GetRequiredService<ILogger<SyncWithNotionBackgroundTask>>(),
             provider,
-            interval: TimeSpan.FromHours(2),
+            interval: TimeSpan.FromSeconds(10),
             maxRetries: 3,
-            retryDelay: TimeSpan.FromSeconds(5),
+            retryDelay: TimeSpan.FromSeconds(2),
             runAtStartup: true));
 }
 
@@ -64,6 +65,6 @@ var app = builder.Build();
     app.UseHttpsRedirection();
 }
 
-app.MapGet("/test" , () => "CD github workflow test!");
+app.MapGet("/test" , () => "CD github workflow test!!");
 
 app.Run();

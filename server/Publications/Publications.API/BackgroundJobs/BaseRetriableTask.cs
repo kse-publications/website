@@ -27,7 +27,8 @@ public abstract class BaseRetriableTask<TTask>: BaseBackgroundTask<BaseRetriable
         try
         {
             await DoBackgroundRetriableTaskAsync();
-            _taskLogger.LogInformation("{task} executed successfully.", nameof(TTask));
+            _currentRetries = 0;
+            _taskLogger.LogInformation("{task} executed successfully.", typeof(TTask).Name);
         }
         catch (Exception ex)
         {

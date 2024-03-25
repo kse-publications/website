@@ -5,6 +5,8 @@ namespace Publications.API.BackgroundJobs;
 
 public class SyncWithNotionBackgroundTask: BaseRetriableTask<SyncWithNotionBackgroundTask>
 {
+    private readonly ILogger<SyncWithNotionBackgroundTask> _taskLogger;
+    
     public SyncWithNotionBackgroundTask(
         ILogger<SyncWithNotionBackgroundTask> taskLogger,
         IServiceProvider serviceProvider,
@@ -14,6 +16,7 @@ public class SyncWithNotionBackgroundTask: BaseRetriableTask<SyncWithNotionBackg
         bool runAtStartup = true) 
         : base(taskLogger,serviceProvider, interval, maxRetries, retryDelay, runAtStartup)
     {
+        _taskLogger = taskLogger;
     }
 
     protected override async Task DoBackgroundRetriableTaskAsync()
