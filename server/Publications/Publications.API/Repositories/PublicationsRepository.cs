@@ -37,12 +37,13 @@ public class PublicationsRepository: IPublicationsRepository
         CancellationToken cancellationToken = default)
     {
         IRedisCollection<Publication> matchedPublications = _publications
-            .Where(p => p.Title == paginationSearchDto.SearchTerm ||
-                        p.Abstract == paginationSearchDto.SearchTerm ||
-                        p.Keywords.Contains(paginationSearchDto.SearchTerm));
+            .Where(p => 
+                p.Title == paginationSearchDto.SearchTerm || 
+                p.Abstract == paginationSearchDto.SearchTerm || 
+                p.Keywords.Any(k => k == paginationSearchDto.SearchTerm));
         
         IRedisCollection<Publication> paginatedPublications = ApplyPagination(
-            _publications, paginationSearchDto);
+            matchedPublications, paginationSearchDto);
         
         return new PaginatedCollection<Publication>(
             Items: paginatedPublications.ToList(),
@@ -57,7 +58,7 @@ public class PublicationsRepository: IPublicationsRepository
             .Where(p => p.Title.Contains(paginationSearchDto.SearchTerm));
         
         IRedisCollection<Publication> paginatedPublications = ApplyPagination(
-            _publications, paginationSearchDto);
+            matchedPublications, paginationSearchDto);
         
         return new PaginatedCollection<Publication>(
             Items: paginatedPublications.ToList(),
