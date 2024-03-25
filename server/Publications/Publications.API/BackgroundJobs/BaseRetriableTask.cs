@@ -20,14 +20,14 @@ public abstract class BaseRetriableTask<TTask>: IInvocable
     {
         try
         {
-            _taskLogger.LogInformation("Started executing {task}...", typeof(TTask).Name);
+            _taskLogger.LogInformation("Started executing {Task}...", typeof(TTask).Name);
             await DoBackgroundRetriableTaskAsync();
             _currentRetries = 0;
-            _taskLogger.LogInformation("{task} executed successfully.", typeof(TTask).Name);
+            _taskLogger.LogInformation("{Task} executed successfully.", typeof(TTask).Name);
         }
         catch (Exception ex)
         {
-            _taskLogger.LogError(ex, "An error occurred while executing the {task}.", typeof(TTask).Name);
+            _taskLogger.LogError(ex, "An error occurred while executing the {Task}.", typeof(TTask).Name);
 
             if (_currentRetries < _options.MaxRetries)
             {
