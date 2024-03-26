@@ -24,12 +24,14 @@ public class PublicationsRepository: IPublicationsRepository
         IRedisCollection<Publication> sortedPublications = ApplySorting(
             _publications, paginationDto);
         
-        IRedisCollection<Publication> paginatedPublications = ApplyPagination(
-            sortedPublications, paginationDto);
+        IReadOnlyCollection<Publication> paginatedPublications = (await ApplyPagination(
+            sortedPublications, paginationDto)
+            .ToListAsync())
+            .AsReadOnly();
         
         return new PaginatedCollection<Publication>(
-            Items: paginatedPublications.ToList(),
-            Count: paginatedPublications.Count());
+            Items: paginatedPublications,
+            Count: paginatedPublications.Count);
     }
 
     public async Task<PaginatedCollection<Publication>> GetByFullTextSearchAsync(
@@ -37,16 +39,19 @@ public class PublicationsRepository: IPublicationsRepository
         CancellationToken cancellationToken = default)
     {
         IRedisCollection<Publication> matchedPublications = _publications
-            .Where(p => p.Title == paginationSearchDto.SearchTerm ||
-                        p.Abstract == paginationSearchDto.SearchTerm ||
-                        p.Keywords.Contains(paginationSearchDto.SearchTerm));
+            .Where(p => 
+                p.Title == paginationSearchDto.SearchTerm || 
+                p.Abstract == paginationSearchDto.SearchTerm || 
+                p.Keywords.Any(k => k == paginationSearchDto.SearchTerm));
         
-        IRedisCollection<Publication> paginatedPublications = ApplyPagination(
-            _publications, paginationSearchDto);
+        IReadOnlyCollection<Publication> paginatedPublications = (await ApplyPagination(
+            matchedPublications, paginationSearchDto)
+            .ToListAsync())
+            .AsReadOnly();
         
         return new PaginatedCollection<Publication>(
-            Items: paginatedPublications.ToList(),
-            Count: paginatedPublications.Count());
+            Items: paginatedPublications,
+            Count: paginatedPublications.Count);
     }
 
     public async Task<PaginatedCollection<Publication>> GetByAutoCompleteAsync(
@@ -56,12 +61,14 @@ public class PublicationsRepository: IPublicationsRepository
         IRedisCollection<Publication> matchedPublications = _publications
             .Where(p => p.Title.Contains(paginationSearchDto.SearchTerm));
         
-        IRedisCollection<Publication> paginatedPublications = ApplyPagination(
-            _publications, paginationSearchDto);
+        IReadOnlyCollection<Publication> paginatedPublications = (await ApplyPagination(
+                matchedPublications, paginationSearchDto)
+            .ToListAsync())
+            .AsReadOnly();
         
         return new PaginatedCollection<Publication>(
-            Items: paginatedPublications.ToList(),
-            Count: paginatedPublications.Count());
+            Items: paginatedPublications,
+            Count: paginatedPublications.Count);
     }
 
     public async Task<Publication?> GetByIdAsync(
