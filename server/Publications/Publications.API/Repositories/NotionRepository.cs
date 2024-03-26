@@ -46,7 +46,8 @@ public class NotionRepository: IPublicationsSourceRepository
                     .RichText.Select(r => r.PlainText).ToArray(),
                 
                 Abstract = ((RichTextPropertyValue)page.Properties["Abstract"])
-                    .RichText.Select(r => r.PlainText).FirstOrDefault()!
+                    .RichText.Select(r => r.PlainText).FirstOrDefault()!,
+                LastModified = page.LastEditedTime
             })
             .ToList()
             .AsReadOnly();
