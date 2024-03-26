@@ -18,7 +18,7 @@ public class PublicationsController : ControllerBase
     }
     
     [HttpGet]
-    [ProducesResponseType(typeof(PaginatedCollection<Publication>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PaginatedCollection<PublicationSummary>), StatusCodes.Status200OK)]
     [SwaggerOperation(
         Summary = "Get all publications",
         Description = "By default, returns latest publications (Descending order by LastModified date time).")]
@@ -28,7 +28,16 @@ public class PublicationsController : ControllerBase
         PaginatedCollection<Publication> publications = await _publicationsRepository
             .GetAllAsync(paginationDto, cancellationToken);
         
-        return Ok(publications);
+        IReadOnlyCollection<PublicationSummary> summaries = publications.Items
+            .Select(PublicationSummary.FromPublication)
+            .ToList()
+            .AsReadOnly();
+        
+        PaginatedCollection<PublicationSummary> response = new(
+            Items: summaries,
+            Count: publications.Count);
+            
+        return Ok(response);
     } 
     
     [HttpGet("{id}")]
