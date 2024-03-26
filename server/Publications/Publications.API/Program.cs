@@ -44,7 +44,7 @@ var app = builder.Build();
 
     app.UseCors("FrontEndClient");
     app.UseHttpsRedirection();
-    app.UseMiddleware<ExceptionHandlerMiddleware>();
+    app.UseMiddleware<ErrorHandlingMiddleware>();
 }
 
 app.MapGet("/test" , () => "CD github workflow test!");
