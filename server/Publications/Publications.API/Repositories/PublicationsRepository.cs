@@ -1,6 +1,4 @@
-﻿using System.Linq.Expressions;
-using System.Reflection;
-using Publications.API.DTOs;
+﻿using Publications.API.DTOs;
 using Publications.API.Models;
 using Redis.OM;
 using Redis.OM.Searching;
@@ -42,7 +40,7 @@ public class PublicationsRepository: IPublicationsRepository
             .Where(p => 
                 p.Title == paginationSearchDto.SearchTerm || 
                 p.Abstract == paginationSearchDto.SearchTerm || 
-                p.Keywords.Any(k => k == paginationSearchDto.SearchTerm));
+                p.Keywords.Contains(paginationSearchDto.SearchTerm));
         
         IReadOnlyCollection<Publication> paginatedPublications = (await ApplyPagination(
             matchedPublications, paginationSearchDto)
@@ -95,29 +93,14 @@ public class PublicationsRepository: IPublicationsRepository
     private IRedisCollection<Publication> ApplySorting(
         IRedisCollection<Publication> publications, PaginationDTO paginationDto)
     {
-        PropertyInfo sortByProperty = (paginationDto.SortBy.ToLower() switch
+        return (paginationDto.SortBy.ToLower(), paginationDto.Ascending) switch
         {
-            "type" => typeof(Publication).GetProperty(nameof(Publication.Type)),
-            "year" => typeof(Publication).GetProperty(nameof(Publication.Year)),
-            "lastmodified" => typeof(Publication).GetProperty(nameof(Publication.LastModified)),
-            _ => typeof(Publication).GetProperty(nameof(Publication.LastModified))
-        })!;
-
-        IRedisCollection<Publication> sortedPublications = Sort(
-            publications,
-            sortByExpression: publication => sortByProperty.GetValue(publication),
-            paginationDto.Ascending);
-        
-        return sortedPublications;
-    }
-    
-    private IRedisCollection<Publication> Sort<TKey>(
-        IRedisCollection<Publication> publications,
-        Expression<Func<Publication, TKey>> sortByExpression,
-        bool ascending = false)
-    {
-        return ascending 
-            ? publications.OrderBy(sortByExpression) 
-            : publications.OrderByDescending(sortByExpression);
+            ("type", true) => publications.OrderBy(p => p.Type),
+            ("type", false) => publications.OrderByDescending(p => p.Year),
+            ("year", true) => publications.OrderBy(p => p.Year),
+            ("year", false) => publications.OrderByDescending(p => p.Year),
+            ("lastmodified", true) => publications.OrderBy(p => p.LastModified),
+            _ => publications.OrderByDescending(p => p.LastModified)
+        };
     }
 }
