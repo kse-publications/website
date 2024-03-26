@@ -27,6 +27,8 @@ var builder = WebApplication.CreateBuilder(args);
             });
     });
 
+    builder.Services.AddSingleton<ErrorHandlingMiddleware>();
+
     builder.Services.AddSingleton(new RedisConnectionProvider(
         connectionString: builder.Configuration.GetConnectionString("Redis")!));
 
@@ -41,12 +43,12 @@ var app = builder.Build();
         app.UseSwagger();
         app.UseSwaggerUI();
     }
-
+    
     app.UseCors("FrontEndClient");
     app.UseHttpsRedirection();
     app.UseMiddleware<ErrorHandlingMiddleware>();
 }
 
-app.MapGet("/test" , () => "CD github workflow test!");
+app.MapControllers();
 
 app.Run();

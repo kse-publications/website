@@ -26,7 +26,7 @@ public class PublicationsController : ControllerBase
         [FromQuery]PaginationDTO paginationDto, CancellationToken cancellationToken)
     {
         PaginatedCollection<Publication> publications = await _publicationsRepository
-            .GetAllAsync(paginationDto);
+            .GetAllAsync(paginationDto, cancellationToken);
         
         return Ok(publications);
     } 
@@ -61,13 +61,17 @@ public class PublicationsController : ControllerBase
         if (string.IsNullOrWhiteSpace(paginationSearch.SearchTerm))
         {
             return Ok(new PaginatedCollection<PublicationSummary>(
-                Array.Empty<PublicationSummary>(), 0));
+                new List<PublicationSummary>(){new PublicationSummary
+                {
+                    Id = Guid.Empty,
+                    Title = "Please provide a search term"
+                }}, Count: 1));
         }
         
         PaginatedCollection<Publication> publications = await _publicationsRepository
             .GetByFullTextSearchAsync(paginationSearch, cancellationToken);
 
-        IReadOnlyCollection<PublicationSummary> summaries = publications
+        IReadOnlyCollection<PublicationSummary> summaries = publications.Items
             .Select(PublicationSummary.FromPublication)
             .ToList()
             .AsReadOnly();
@@ -97,7 +101,7 @@ public class PublicationsController : ControllerBase
         PaginatedCollection<Publication> publications = await _publicationsRepository
             .GetByAutoCompleteAsync(paginationSearchDto, cancellationToken);
         
-        IReadOnlyCollection<PublicationSummary> summaries = publications
+        IReadOnlyCollection<PublicationSummary> summaries = publications.Items
             .Select(PublicationSummary.FromPublication)
             .ToList()
             .AsReadOnly();
