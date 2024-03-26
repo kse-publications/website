@@ -1,8 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Publications.API.Repositories;
 using Publications.API.Models;
 using Publications.API.DTOs;
@@ -11,88 +7,105 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Publications.API.Controllers;
 
 [ApiController]
-[Route("[controller]")]
-
-public class PublicationController(IPublicationsRepository repository) : ControllerBase
+[Route("publications")]
+public class PublicationsController : ControllerBase
 {
-    [HttpGet]
-    [SwaggerOperation(Summary = "Get all publications", Description = "Retrieves all publications with optional pagination.")]
-    [ProducesResponseType(typeof(IEnumerable<Publication>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<IEnumerable<Publication>>> GetAllPublications([FromQuery] PaginationDTO pagination)
+    private readonly IPublicationsRepository _publicationsRepository;
+
+    public PublicationsController(IPublicationsRepository publicationsRepository)
     {
-        var publications = await repository.GetAllAsync(pagination);
-
-        if (publications.Count == 0)
-        {
-            return NotFound("No publications found.");
-        }
-
+        _publicationsRepository = publicationsRepository;
+    }
+    
+    [HttpGet]
+    [ProducesResponseType(typeof(PaginatedCollection<Publication>), StatusCodes.Status200OK)]
+    [SwaggerOperation(
+        Summary = "Get all publications",
+        Description = "By default, returns latest publications (Descending order by LastModified date time).")]
+    public async Task<IActionResult> GetAll(
+        [FromQuery]PaginationDTO paginationDto, CancellationToken cancellationToken)
+    {
+        PaginatedCollection<Publication> publications = await _publicationsRepository
+            .GetAllAsync(paginationDto);
+        
         return Ok(publications);
-    }
-        [HttpGet("{id}")]
-        [ProducesResponseType(typeof(Publication), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [SwaggerOperation(
-            Summary = "Get publication by ID",
-            Description = "Retrieves a single publication based on its unique identifier."
-        )]
-        public async Task<ActionResult<Publication>> GetPublicationById(Guid id)
-        {
-            var publication = await repository.GetByIdAsync(id);
-
-            if (publication == null)
-            {
-                return NotFound($"Publication with ID {id} not found.");
-            }
-            return Ok(publication); 
-        }
-        [HttpGet("search")]
-        [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [SwaggerOperation(
-            Summary = "Search publications",
-            Description = "Searches for publications based on the provided criteria."
-        )]
+    } 
+    
+    [HttpGet("{id}")]
+    [ProducesResponseType(typeof(Publication), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [SwaggerOperation(
+        Summary = "Get publication by its ID",
+        Description = "Returns a single publication with the provided ID, if found."
+    )]
+    public async Task<IActionResult> GetById(
+        [FromRoute]Guid id, CancellationToken cancellationToken)
+    {
+        Publication? publication = await _publicationsRepository
+            .GetByIdAsync(id, cancellationToken);
         
-        public async Task<ActionResult<IEnumerable<object>>> SearchPublications([FromQuery] PaginationSearchDTO paginationSearch)
+        return publication is null
+            ? NotFound($"Publication with ID {id} not found.")
+            : Ok(publication); 
+    }
+    
+    [HttpGet("search")]
+    [ProducesResponseType(typeof(PaginatedCollection<PublicationSummary>),StatusCodes.Status200OK)]
+    [SwaggerOperation(
+        Summary = "FTS publications",
+        Description = "Searches for the SearchTerm in the publications' Title, Abstract, and Keywords."
+    )]
+    public async Task<IActionResult> GetBySearch(
+        [FromQuery]PaginationSearchDTO paginationSearch, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(paginationSearch.SearchTerm))
         {
-            var publications = await repository.GetByFullTextSearchAsync(paginationSearch);
-                
-            if (!publications.Any())
-            {
-                return NotFound("No publications found.");
-            }
-
-            var shortPublications = publications.Select(pub => new PublicationSummary());
-                
-            return Ok(shortPublications);
+            return Ok(new PaginatedCollection<PublicationSummary>(
+                Array.Empty<PublicationSummary>(), 0));
         }
         
-        [HttpGet("autocomplete")]
-        [ProducesResponseType(typeof(IEnumerable<PublicationSummary>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [SwaggerOperation(
-            Summary = "Search publications by autocomplete",
-            Description = "Performs an autocomplete search for publications based on a partial search term."
-        )]
-        public async Task<ActionResult<IEnumerable<Publication>>> GetByAutoCompleteAsync([FromQuery] PaginationSearchDTO paginationSearchDto, CancellationToken cancellationToken)
-        {
-            if (string.IsNullOrWhiteSpace(paginationSearchDto.SearchTerm))
-            {
-                return BadRequest("Search term is required.");
-            }
+        PaginatedCollection<Publication> publications = await _publicationsRepository
+            .GetByFullTextSearchAsync(paginationSearch, cancellationToken);
 
-            var publications = await repository.GetByAutoCompleteAsync(paginationSearchDto, cancellationToken);
-
-            if (!publications.Any())
-            {
-                return NotFound("No publications found.");
-            }
-
-            return Ok(publications.Select(p => new { p.Id, p.Title }));
-        }
+        IReadOnlyCollection<PublicationSummary> summaries = publications
+            .Select(PublicationSummary.FromPublication)
+            .ToList()
+            .AsReadOnly();
+        
+        PaginatedCollection<PublicationSummary> response = new(
+            Items: summaries,
+            Count: publications.Count);
+            
+        return Ok(response);
     }
+    
+    [HttpGet("auto-complete")]
+    [ProducesResponseType(typeof(PaginatedCollection<PublicationSummary>), StatusCodes.Status200OK)]
+    [SwaggerOperation(
+        Summary = "Endpoint for autocomplete search",
+        Description = "Performs Title.Contains() search on publications, sorts by relevance"
+    )]
+    public async Task<IActionResult> GetByAutoComplete(
+        [FromQuery]PaginationSearchDTO paginationSearchDto, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(paginationSearchDto.SearchTerm))
+        {
+            return Ok(new PaginatedCollection<PublicationSummary>(
+                Array.Empty<PublicationSummary>(), 0));
+        }
+
+        PaginatedCollection<Publication> publications = await _publicationsRepository
+            .GetByAutoCompleteAsync(paginationSearchDto, cancellationToken);
+        
+        IReadOnlyCollection<PublicationSummary> summaries = publications
+            .Select(PublicationSummary.FromPublication)
+            .ToList()
+            .AsReadOnly();
+        
+        PaginatedCollection<PublicationSummary> response = new(
+            Items: summaries,
+            Count: publications.Count);
+            
+        return Ok(response);
+    }
+}
