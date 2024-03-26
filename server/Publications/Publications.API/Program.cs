@@ -1,7 +1,6 @@
 using Coravel;
 using Coravel.Scheduling.Schedule.Interfaces;
 using Microsoft.OpenApi.Models;
-using Publications.API;
 using Publications.API.Middleware;
 using Notion.Client;
 using Publications.API.BackgroundJobs;
@@ -78,7 +77,7 @@ var app = builder.Build();
 app.MapControllers();
 
 app.MapPost("/EB292BF0-E995-491A-A98E-6121601E1069/sync", 
-    async (ILogger<Program> logger, IScheduler scheduler) =>
+    (ILogger<Program> logger, IScheduler scheduler) =>
 {
     logger.LogInformation("/sync endpoint hit");
     scheduler.Schedule<SyncWithNotionBackgroundTask>()

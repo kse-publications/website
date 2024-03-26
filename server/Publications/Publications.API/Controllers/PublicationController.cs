@@ -61,11 +61,7 @@ public class PublicationsController : ControllerBase
         if (string.IsNullOrWhiteSpace(paginationSearch.SearchTerm))
         {
             return Ok(new PaginatedCollection<PublicationSummary>(
-                new List<PublicationSummary>(){new PublicationSummary
-                {
-                    Id = Guid.Empty,
-                    Title = "Please provide a search term"
-                }}, Count: 1));
+                Array.Empty<PublicationSummary>(), 0));
         }
         
         PaginatedCollection<Publication> publications = await _publicationsRepository
