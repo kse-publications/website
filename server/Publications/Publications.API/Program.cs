@@ -1,6 +1,7 @@
 using Coravel;
 using Coravel.Scheduling.Schedule.Interfaces;
 using Microsoft.OpenApi.Models;
+using Publications.API.Middleware;
 using Notion.Client;
 using Publications.API.BackgroundJobs;
 using Publications.API.DTOs;
@@ -10,10 +11,8 @@ using Redis.OM;
 var builder = WebApplication.CreateBuilder(args);
 {
     builder.Services.AddLogging();
-    
     builder.Services.AddControllers();
     
-    builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options =>
     {
         options.SwaggerDoc("v1", new OpenApiInfo { Title = "Publications.API", Version = "v1" });
@@ -30,6 +29,8 @@ var builder = WebApplication.CreateBuilder(args);
                     .AllowAnyMethod();
             });
     });
+
+    builder.Services.AddSingleton<ErrorHandlingMiddleware>();
 
     builder.Services.AddSingleton(new RedisConnectionProvider(
         connectionString: builder.Configuration.GetConnectionString("Redis")!));
@@ -66,15 +67,17 @@ var app = builder.Build();
             .RunOnceAtStart()
             .PreventOverlapping(nameof(SyncWithNotionBackgroundTask));
     });
+
     
     app.UseCors("FrontEndClient");
     app.UseHttpsRedirection();
+    app.UseMiddleware<ErrorHandlingMiddleware>();
 }
 
-app.MapGet("/test" , () => "CD github workflow test!!");
+app.MapControllers();
 
 app.MapPost("/EB292BF0-E995-491A-A98E-6121601E1069/sync", 
-    async (ILogger<Program> logger, IScheduler scheduler) =>
+    (ILogger<Program> logger, IScheduler scheduler) =>
 {
     logger.LogInformation("/sync endpoint hit");
     scheduler.Schedule<SyncWithNotionBackgroundTask>()
