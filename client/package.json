@@ -18,6 +18,7 @@
     "@astrojs/check": "^0.5.9",
     "@astrojs/react": "^3.1.0",
     "@astrojs/tailwind": "^5.1.0",
+    "@astrojs/vercel": "^7.4.0",
     "@radix-ui/react-slot": "^1.0.2",
     "@types/react": "^18.2.67",
     "@types/react-dom": "^18.2.22",
@@ -25,7 +26,6 @@
     "axios": "^1.6.8",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
-    "cors": "^2.8.5",
     "lucide-react": "^0.359.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -45,8 +45,7 @@
     "lint-staged": "^15.2.2",
     "prettier": "^3.2.5",
     "prettier-plugin-astro": "^0.13.0",
-    "prettier-plugin-tailwindcss": "^0.5.12",
-    "rollup": "^4.13.0"
+    "prettier-plugin-tailwindcss": "^0.5.12"
   },
   "lint-staged": {
     "**/*": "npm run prettier:fix"

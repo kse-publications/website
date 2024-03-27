@@ -1,22 +1,10 @@
 ---
 import '@/styles/globals.css'
 import Layout from '../../layouts/Layout.astro'
-import PublicationPage from '../../components/ui/PublicationPage'
-import PublicationsApiService from '../../components/ui/publicationsApiServise'
+import PublicationPage from '../../components/ui/publications/publication-section'
+import PublicationsApiService from '../../services/publicationsApiService'
 
-export async function getStaticPaths() {
-  const paths = await PublicationsApiService.getPublications()
-    .then((response) => {
-      return response.data.items.slice(0, 100).map((item: any) => item.id)
-    })
-    .catch((error) => {
-      console.error(error)
-    })
-
-  return paths.map((id: string) => ({ params: { id } }))
-}
-
-const { id } = Astro.params
+const { id } = Astro.params as { id: string }
 
 let data = await PublicationsApiService.getPublication(id)
   .then((response) => {
@@ -27,6 +15,6 @@ let data = await PublicationsApiService.getPublication(id)
   })
 ---
 
-<Layout title="KSE docs | Research Paper">
-  <PublicationPage data={data} />
+<Layout title=`KSE docs | ${data.title}`>
+  <PublicationPage data={data} transition:persist client:load />
 </Layout>
