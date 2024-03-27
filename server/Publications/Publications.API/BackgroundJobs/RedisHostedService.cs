@@ -17,7 +17,7 @@ public class RedisHostedService: IHostedService
         var indexes = (await _redisConnectionProvider.Connection
             .ExecuteAsync("FT._LIST")).ToArray();
 
-        if (indexes.All(i => i != $"{nameof(Publication).ToLower()}-idx"))
+        if (indexes.All(i => i != "publication-idx"))
         {
             await _redisConnectionProvider.Connection.CreateIndexAsync(typeof(Publication));
         }

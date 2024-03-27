@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Publications.API.Repositories;
 using Publications.API.Models;
 using Publications.API.DTOs;
+using Publications.API.Repositories.Abstractions;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Publications.API.Controllers;
@@ -35,7 +36,8 @@ public class PublicationsController : ControllerBase
         
         PaginatedCollection<PublicationSummary> response = new(
             Items: summaries,
-            Count: publications.Count);
+            ResultCount: publications.ResultCount,
+            TotalCount: publications.TotalCount);
             
         return Ok(response);
     } 
@@ -67,12 +69,6 @@ public class PublicationsController : ControllerBase
     public async Task<IActionResult> GetBySearch(
         [FromQuery]PaginationSearchDTO paginationSearch, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(paginationSearch.SearchTerm))
-        {
-            return Ok(new PaginatedCollection<PublicationSummary>(
-                Array.Empty<PublicationSummary>(), 0));
-        }
-        
         PaginatedCollection<Publication> publications = await _publicationsRepository
             .GetByFullTextSearchAsync(paginationSearch, cancellationToken);
 
@@ -83,7 +79,8 @@ public class PublicationsController : ControllerBase
         
         PaginatedCollection<PublicationSummary> response = new(
             Items: summaries,
-            Count: publications.Count);
+            ResultCount: publications.ResultCount,
+            TotalCount: publications.TotalCount);
             
         return Ok(response);
     }
@@ -97,12 +94,6 @@ public class PublicationsController : ControllerBase
     public async Task<IActionResult> GetByAutoComplete(
         [FromQuery]PaginationSearchDTO paginationSearchDto, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(paginationSearchDto.SearchTerm))
-        {
-            return Ok(new PaginatedCollection<PublicationSummary>(
-                Array.Empty<PublicationSummary>(), 0));
-        }
-
         PaginatedCollection<Publication> publications = await _publicationsRepository
             .GetByAutoCompleteAsync(paginationSearchDto, cancellationToken);
         
@@ -113,7 +104,8 @@ public class PublicationsController : ControllerBase
         
         PaginatedCollection<PublicationSummary> response = new(
             Items: summaries,
-            Count: publications.Count);
+            ResultCount: publications.ResultCount,
+            TotalCount: publications.TotalCount);
             
         return Ok(response);
     }

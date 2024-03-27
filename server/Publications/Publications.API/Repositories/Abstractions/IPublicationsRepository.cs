@@ -1,7 +1,7 @@
 ﻿using Publications.API.DTOs;
 using Publications.API.Models;
 
-namespace Publications.API.Repositories;
+namespace Publications.API.Repositories.Abstractions;
 
 /// <summary>
 /// Contract for a repository that manages <see cref="Publication"/>s.
