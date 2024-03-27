@@ -6,27 +6,27 @@ import PublicationsApiService from '../../components/ui/publicationsApiServise'
 
 export async function getStaticPaths() {
   const paths = await PublicationsApiService.getPublications()
-  .then(response => {
-    return response.data.items.slice(0,100).map((item:any) => item.id);
-  })
-  .catch(error => {
-    console.error(error);
-  });
-
-  return paths.map((id:string) => ({ params: { id } }));  
-}
-
-const { id } = Astro.params;
-
-let data = await PublicationsApiService.getPublication(id)
     .then((response) => {
-      return response.data
+      return response.data.items.slice(0, 100).map((item: any) => item.id)
     })
     .catch((error) => {
-      console.log(error)
+      console.error(error)
     })
+
+  return paths.map((id: string) => ({ params: { id } }))
+}
+
+const { id } = Astro.params
+
+let data = await PublicationsApiService.getPublication(id)
+  .then((response) => {
+    return response.data
+  })
+  .catch((error) => {
+    console.log(error)
+  })
 ---
 
 <Layout title="KSE docs | Research Paper">
- <PublicationPage data={data} />
+  <PublicationPage data={data} />
 </Layout>
