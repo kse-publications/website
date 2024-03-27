@@ -6,6 +6,7 @@ using Notion.Client;
 using Publications.API.BackgroundJobs;
 using Publications.API.DTOs;
 using Publications.API.Repositories;
+using Publications.API.Repositories.Abstractions;
 using Redis.OM;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,6 +38,8 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddHostedService<RedisHostedService>();
     builder.Services.AddScoped<IPublicationsRepository, PublicationsRepository>();
+    builder.Services.AddScoped<IAuthorsRepository, AuthorsRepository>();
+    builder.Services.AddScoped<IPublishersRepository, PublishersRepository>();
     
     builder.Services.Configure<NotionDatabaseOptions>(
         builder.Configuration.GetSection("Notion:Databases"));

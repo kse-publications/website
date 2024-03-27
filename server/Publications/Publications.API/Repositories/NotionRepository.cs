@@ -2,6 +2,7 @@
 using Notion.Client;
 using Publications.API.DTOs;
 using Publications.API.Models;
+using Publications.API.Repositories.Abstractions;
 
 namespace Publications.API.Repositories;
 
@@ -20,8 +21,8 @@ public class NotionRepository: IPublicationsSourceRepository
 
     public async Task<IReadOnlyCollection<Publication>> GetPublicationsAsync()
     {
-        var authors = await GetAuthors();
-        var publishers = await GetPublishers();
+        var authors = await GetAuthorsAsync();
+        var publishers = await GetPublishersAsync();
         
         PaginatedList<Page> notionPublications = await _notionClient.Databases.QueryAsync(
             _databaseOptions.PublicationsDbId, new DatabasesQueryParameters());
@@ -37,10 +38,10 @@ public class NotionRepository: IPublicationsSourceRepository
                 
                 Authors = ((RelationPropertyValue)page.Properties["Authors"]).Relation
                     .Select(r => authors.FirstOrDefault(a => a.Id == Guid.Parse(r.Id)))
-                    .ToArray(),
+                    .ToArray()!,
                 
                 Publisher = publishers.FirstOrDefault(p => p.Id == Guid.Parse(
-                    ((RelationPropertyValue)page.Properties["Publisher"]).Relation[0].Id)),
+                    ((RelationPropertyValue)page.Properties["Publisher"]).Relation[0].Id))!,
                 
                 Keywords = ((RichTextPropertyValue)page.Properties["Keywords"])
                     .RichText.Select(r => r.PlainText).ToArray(),
@@ -53,7 +54,7 @@ public class NotionRepository: IPublicationsSourceRepository
             .AsReadOnly();
     }
     
-    private async Task<IReadOnlyCollection<Author>> GetAuthors()
+    public async Task<IReadOnlyCollection<Author>> GetAuthorsAsync()
     {
         PaginatedList<Page> notionAuthors = await _notionClient.Databases.QueryAsync(
             _databaseOptions.AuthorsDbId, new DatabasesQueryParameters());
@@ -69,7 +70,7 @@ public class NotionRepository: IPublicationsSourceRepository
             .AsReadOnly();
     }
     
-    private async Task<IReadOnlyCollection<Publisher>> GetPublishers()
+    public async Task<IReadOnlyCollection<Publisher>> GetPublishersAsync()
     {
         PaginatedList<Page> notionPublishers = await _notionClient.Databases.QueryAsync(
             _databaseOptions.PublishersDbId, new DatabasesQueryParameters());
