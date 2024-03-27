@@ -2,11 +2,10 @@
 using Notion.Client;
 using Publications.API.DTOs;
 using Publications.API.Models;
-using Publications.API.Repositories.Abstractions;
 
-namespace Publications.API.Repositories;
+namespace Publications.API.Repositories.Source;
 
-public class NotionRepository: IPublicationsSourceRepository
+public class NotionRepository: ISourceRepository
 {
     private readonly INotionClient _notionClient;
     private readonly NotionDatabaseOptions _databaseOptions;

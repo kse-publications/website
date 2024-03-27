@@ -1,6 +1,6 @@
 ﻿using Publications.API.Models;
 
-namespace Publications.API.Repositories.Abstractions;
+namespace Publications.API.Repositories.Authors;
 
 public interface IAuthorsRepository
 {

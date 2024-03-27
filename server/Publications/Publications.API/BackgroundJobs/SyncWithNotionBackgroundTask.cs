@@ -1,21 +1,24 @@
 ﻿using Microsoft.Extensions.Options;
 using Publications.API.Models;
 using Publications.API.Repositories;
-using Publications.API.Repositories.Abstractions;
+using Publications.API.Repositories.Authors;
+using Publications.API.Repositories.Publications;
+using Publications.API.Repositories.Publishers;
+using Publications.API.Repositories.Source;
 
 namespace Publications.API.BackgroundJobs;
 
 public class SyncWithNotionBackgroundTask : BaseRetriableTask<SyncWithNotionBackgroundTask>
 {
     private readonly ILogger<SyncWithNotionBackgroundTask> _taskLogger;
-    private readonly IPublicationsSourceRepository _sourceRepository;
+    private readonly ISourceRepository _sourceRepository;
     private readonly IPublicationsRepository _publicationsRepository;
     private readonly IAuthorsRepository _authorsRepository;
     private readonly IPublishersRepository _publishersRepository;
 
     public SyncWithNotionBackgroundTask(
         ILogger<SyncWithNotionBackgroundTask> taskLogger,
-        IPublicationsSourceRepository sourceRepository,
+        ISourceRepository sourceRepository,
         IOptions<RetriableTaskOptions> options, 
         IPublicationsRepository publicationsRepository,
         IAuthorsRepository authorsRepository, 
