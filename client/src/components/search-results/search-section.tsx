@@ -13,7 +13,7 @@ export default function SearchSection({ initialPublications }: SearchSectionProp
   return (
     <SearchContextProvider
       initialSearchResults={initialPublications.items}
-      initialTotalResults={initialPublications.count}
+      initialTotalResults={initialPublications.totalCount}
     >
       <section className="pb-4">
         <div className="mb-8">

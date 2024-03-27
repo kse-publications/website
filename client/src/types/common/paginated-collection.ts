@@ -1,4 +1,5 @@
 export interface PaginatedCollection<T> {
-  count: number
+  totalCount: number
+  resultCount: number
   items: T[]
 }

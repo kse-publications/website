@@ -9,25 +9,31 @@ import {
   useCallback,
   useMemo,
   useEffect,
+  useRef,
 } from 'react'
 import type { PublicationSummary } from '@/types/publication-summary/publication-summary'
-import { searchPublications } from '@/services/search/get-publications'
+import { getInitialPublications, searchPublications } from '@/services/search/get-publications'
 import {
+  DEFAULT_FILTER_TYPE,
   DEFAULT_PAGE,
   DEFAULT_PAGE_SIZE,
+  DEFAULT_SORT_ORDER,
   SEARCH_TEXT_DEBOUNCE_MS,
 } from 'public/config/search-params'
 import { useDebounce } from 'use-debounce'
+import { SortOrders } from '@/types/common/sort-orders'
+import type { FilterTypes } from '@/types/common/filter-types'
+import type { PaginatedCollection } from '@/types/common/paginated-collection'
 
 interface ISearchContext {
   searchText: string
   setSearchText: Dispatch<SetStateAction<string>>
 
-  filterType: string
-  setFilterType: Dispatch<SetStateAction<string>>
+  filterType: FilterTypes | null
+  setFilterType: Dispatch<SetStateAction<FilterTypes | null>>
 
-  sortOrder: string
-  setSortOrder: Dispatch<SetStateAction<string>>
+  sortOrder: SortOrders | null
+  setSortOrder: Dispatch<SetStateAction<SortOrders | null>>
 
   searchResults: PublicationSummary[]
   setSearchResults: Dispatch<SetStateAction<PublicationSummary[]>>
@@ -57,9 +63,11 @@ const SearchContextProvider = ({
   initialSearchResults,
   initialTotalResults,
 }: SearchContextProviderProps) => {
+  const isInitialPublications = useRef(true)
+
   const [searchText, setSearchText] = useState('')
-  const [filterType, setFilterType] = useState('')
-  const [sortOrder, setSortOrder] = useState('')
+  const [filterType, setFilterType] = useState<FilterTypes | null>(null)
+  const [sortOrder, setSortOrder] = useState<SortOrders | null>(null)
 
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -72,38 +80,70 @@ const SearchContextProvider = ({
 
   useEffect(() => {
     if (debouncedSearchText.trim()) {
-      fetchPublications(debouncedSearchText)
+      isInitialPublications.current = false
+      fetchPublications({ searchText: debouncedSearchText })
     }
   }, [debouncedSearchText])
+
+  useEffect(() => {
+    if (!filterType || !sortOrder) return
+    isInitialPublications.current = false
+    fetchPublications({ filterType, sortOrder, searchText })
+  }, [sortOrder, filterType])
 
   const currentPage = useMemo(
     () => Math.ceil(searchResults.length / DEFAULT_PAGE_SIZE),
     [searchResults]
   )
 
-  const fetchPublications = useCallback(async (searchText = '', page = DEFAULT_PAGE) => {
-    setIsLoading(true)
-    setError('')
+  const fetchPublications = useCallback(
+    async ({
+      searchText = '',
+      page = DEFAULT_PAGE,
+      filterType = DEFAULT_FILTER_TYPE,
+      sortOrder = DEFAULT_SORT_ORDER,
+    }) => {
+      setIsLoading(true)
+      setError('')
 
-    if (page === DEFAULT_PAGE) {
-      setSearchResults([])
-    }
+      if (page === DEFAULT_PAGE) {
+        setSearchResults([])
+      }
 
-    try {
-      const paginatedResponse = await searchPublications(searchText, page)
-      setSearchResults((prevResults) => [...prevResults, ...paginatedResponse.items])
-      setTotalResults(paginatedResponse.count)
-    } catch (error) {
-      console.error(error)
-      error instanceof Error && setError(error.message)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
+      try {
+        let paginatedResponse: PaginatedCollection<PublicationSummary>
+
+        if (isInitialPublications.current) {
+          paginatedResponse = await getInitialPublications(currentPage + 1)
+        } else {
+          paginatedResponse = await searchPublications({
+            searchText,
+            page,
+            filterType,
+            sortOrder,
+          })
+        }
+
+        setSearchResults((prevResults) => [...prevResults, ...paginatedResponse.items])
+        setTotalResults(paginatedResponse.totalCount)
+      } catch (error) {
+        console.error(error)
+        error instanceof Error && setError(error.message)
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [currentPage]
+  )
 
   const loadMoreHandler = useCallback(() => {
-    fetchPublications(searchText, currentPage + 1)
-  }, [searchText, currentPage])
+    fetchPublications({
+      searchText,
+      page: currentPage + 1,
+      filterType: filterType ?? undefined,
+      sortOrder: sortOrder ?? undefined,
+    })
+  }, [searchText, currentPage, filterType, sortOrder])
 
   const value: ISearchContext = {
     loadMoreHandler,

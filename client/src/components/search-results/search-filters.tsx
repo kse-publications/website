@@ -8,34 +8,57 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select'
+import { SortOrders } from '@/types/common/sort-orders'
+import { FilterTypes } from '@/types/common/filter-types'
+
+interface SelectItem {
+  value: string
+  label: string
+}
+
+const sortBySelectItems: SelectItem[] = [
+  { value: FilterTypes.LAST_MODIFIED, label: 'Last modified' },
+  { value: FilterTypes.YEAR, label: 'Year' },
+  { value: FilterTypes.TITLE, label: 'Title' },
+]
+
+const orderBySelectItems: SelectItem[] = [
+  { value: SortOrders.ASC, label: 'Ascending' },
+  { value: SortOrders.DESC, label: 'Descending' },
+]
 
 export const SearchFilters = () => {
   const { sortOrder, setSortOrder, filterType, setFilterType } = useSearchContext()
 
   return (
     <div className="flex gap-4">
-      <Select>
+      <Select onValueChange={setFilterType as (value: string) => void} value={filterType || ''}>
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Select sort by" />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
             <SelectLabel>Sort by</SelectLabel>
-            <SelectItem value="lastModified">Last modified</SelectItem>
-            <SelectItem value="year">Year</SelectItem>
-            <SelectItem value="title">Title</SelectItem>
+            {sortBySelectItems.map((item) => (
+              <SelectItem key={item.value} value={item.value}>
+                {item.label}
+              </SelectItem>
+            ))}
           </SelectGroup>
         </SelectContent>
       </Select>
-      <Select>
+      <Select onValueChange={setSortOrder as (value: string) => void} value={sortOrder || ''}>
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Select a order" />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
             <SelectLabel>Order</SelectLabel>
-            <SelectItem value="Ascending">Ascending</SelectItem>
-            <SelectItem value="Descending">Descending</SelectItem>
+            {orderBySelectItems.map((item) => (
+              <SelectItem key={item.value} value={item.value}>
+                {item.label}
+              </SelectItem>
+            ))}
           </SelectGroup>
         </SelectContent>
       </Select>
