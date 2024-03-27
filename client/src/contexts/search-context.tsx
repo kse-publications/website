@@ -19,7 +19,7 @@ import {
   DEFAULT_PAGE_SIZE,
   DEFAULT_SORT_ORDER,
   SEARCH_TEXT_DEBOUNCE_MS,
-} from 'public/config/search-params'
+} from '@/config/search-params'
 import { useDebounce } from 'use-debounce'
 import { SortOrders } from '@/types/common/sort-orders'
 import type { FilterTypes } from '@/types/common/filter-types'
