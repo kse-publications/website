@@ -1,8 +1,8 @@
 ﻿using Publications.API.Models;
 
-namespace Publications.API.Repositories.Abstractions;
+namespace Publications.API.Repositories.Source;
 
-public interface IPublicationsSourceRepository
+public interface ISourceRepository
 {
     Task<IReadOnlyCollection<Publication>> GetPublicationsAsync();
     Task<IReadOnlyCollection<Author>> GetAuthorsAsync();

@@ -1,7 +1,7 @@
 ﻿using Publications.API.DTOs;
 using Publications.API.Models;
 
-namespace Publications.API.Repositories.Abstractions;
+namespace Publications.API.Repositories.Publications;
 
 /// <summary>
 /// Contract for a repository that manages <see cref="Publication"/>s.
@@ -9,15 +9,12 @@ namespace Publications.API.Repositories.Abstractions;
 public interface IPublicationsRepository
 {
     Task<PaginatedCollection<Publication>> GetAllAsync(
-        PaginationDTO paginationDto,
+        PaginationFilterDTO paginationFilterDTO,
         CancellationToken cancellationToken = default);
     
-    Task<PaginatedCollection<Publication>> GetByFullTextSearchAsync(
-        PaginationSearchDTO paginationSearchDto,
-        CancellationToken cancellationToken = default);
-    
-    Task<PaginatedCollection<Publication>> GetByAutoCompleteAsync(
-        PaginationSearchDTO paginationSearchDto,
+    Task<PaginatedCollection<Publication>> GetBySearchAsync(
+        PaginationSearchDTO paginationSearchDTO,
+        bool allowFuzzyMatch,
         CancellationToken cancellationToken = default);
     
     Task<Publication?> GetByIdAsync(
