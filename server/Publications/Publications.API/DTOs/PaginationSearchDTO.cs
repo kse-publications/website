@@ -11,10 +11,8 @@ public record PaginationSearchDTO(string SearchTerm = "") : PaginationFilterDTO
     public bool CanFuzzyMatch()
     {
         const int minFuzzyMatchLength = 4;
-        const string forbiddenChars = "0123456789!@#$%^&*()_+{}|:\"<>?`~-=\\\\\\[\\\\];',./";
         
-        return SearchTerm.Length >= minFuzzyMatchLength && 
-               !SearchTerm.All(c => forbiddenChars.Contains(c));
+        return SearchTerm.Length >= minFuzzyMatchLength;
     }
     
     /// <summary>
