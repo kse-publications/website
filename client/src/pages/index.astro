@@ -6,7 +6,7 @@ import { getInitialPublications } from '../services/search/get-publications'
 
 const initialPublications = await getInitialPublications()
 ---
-      
+
 <Layout title="KSE docs | Search">
   <SearchSection initialPublications={initialPublications} client:load />
 </Layout>
