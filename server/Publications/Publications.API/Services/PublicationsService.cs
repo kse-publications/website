@@ -1,7 +1,7 @@
 ﻿using Publications.API.DTOs;
 using Publications.API.Models;
 using Publications.API.Repositories;
-using Publications.API.Repositories.Abstractions;
+using Publications.API.Repositories.Publications;
 
 namespace Publications.API.Services;
 
@@ -15,27 +15,27 @@ public class PublicationsService: IPublicationsService
     }
 
     public async Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
-        PaginationDTO paginationDto, CancellationToken cancellationToken = default)
+        PaginationFilterDTO paginationFilterDTO, CancellationToken cancellationToken = default)
     {
         PaginatedCollection<Publication> publications = await _publicationsRepository
-            .GetAllAsync(paginationDto, cancellationToken);
+            .GetAllAsync(paginationFilterDTO, cancellationToken);
         
         return GetPublicationsSummaries(publications);
     }
 
     public async Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
-        PaginationSearchDTO paginationSearchDto, 
+        PaginationSearchDTO paginationSearchDTO, 
         CancellationToken cancellationToken = default)
     {
         const int minSearchTermLength = 2;
         
-        if (paginationSearchDto.SearchTerm.Length < minSearchTermLength)
+        if (paginationSearchDTO.SearchTerm.Length < minSearchTermLength)
             return EmptyResponse;
         
         PaginatedCollection<Publication> matchedPublications = await _publicationsRepository
             .GetBySearchAsync(
-                paginationSearchDto,
-                paginationSearchDto.CanFuzzyMatch(),
+                paginationSearchDTO,
+                paginationSearchDTO.CanFuzzyMatch(),
                 cancellationToken);
         
         return GetPublicationsSummaries(matchedPublications);

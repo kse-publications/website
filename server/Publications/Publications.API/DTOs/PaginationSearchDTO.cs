@@ -2,7 +2,7 @@
 
 namespace Publications.API.DTOs;
 
-public record PaginationSearchDTO(string SearchTerm = "") : PaginationDTO
+public record PaginationSearchDTO(string SearchTerm = "") : PaginationFilterDTO
 {
     /// <summary>
     /// Checks if the search term is long enough and doesn't contain forbidden characters.

@@ -1,12 +1,16 @@
+using System.Text.Json.Serialization;
 using Coravel;
 using Coravel.Scheduling.Schedule.Interfaces;
+using Microsoft.AspNetCore.Http.Json;
 using Microsoft.OpenApi.Models;
 using Publications.API.Middleware;
 using Notion.Client;
 using Publications.API.BackgroundJobs;
 using Publications.API.DTOs;
-using Publications.API.Repositories;
-using Publications.API.Repositories.Abstractions;
+using Publications.API.Repositories.Authors;
+using Publications.API.Repositories.Publications;
+using Publications.API.Repositories.Publishers;
+using Publications.API.Repositories.Source;
 using Publications.API.Services;
 using Redis.OM;
 
@@ -50,7 +54,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddScoped<INotionClient>(provider => NotionClientFactory.Create(
         new ClientOptions{ AuthToken = builder.Configuration["Notion:AuthToken"] }));
 
-    builder.Services.AddScoped<IPublicationsSourceRepository, NotionRepository>();
+    builder.Services.AddScoped<ISourceRepository, NotionRepository>();
 
     builder.Services.Configure<RetriableTaskOptions>(
         builder.Configuration.GetSection("BackgroundTasks:SyncWithNotion"));

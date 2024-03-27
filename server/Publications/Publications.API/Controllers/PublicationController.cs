@@ -25,10 +25,10 @@ public class PublicationsController : ControllerBase
         Summary = "Get all publications",
         Description = "By default, returns latest publications (Descending order by LastModified date time).")]
     public async Task<IActionResult> GetAll(
-        [FromQuery]PaginationDTO paginationDto, CancellationToken cancellationToken)
+        [FromQuery]PaginationFilterDTO paginationFilterDTO, CancellationToken cancellationToken)
     {
         PaginatedCollection<PublicationSummary> publications = await _publicationsService
-            .GetAllAsync(paginationDto, cancellationToken);
+            .GetAllAsync(paginationFilterDTO, cancellationToken);
             
         return Ok(publications);
     } 
@@ -60,10 +60,10 @@ public class PublicationsController : ControllerBase
                       "Title, Abstract, and Keywords, Publisher.Name, Author.Name."
     )]
     public async Task<IActionResult> GetBySearch(
-        [FromQuery]PaginationSearchDTO paginationSearchDto, CancellationToken cancellationToken)
+        [FromQuery]PaginationSearchDTO paginationSearchDTO, CancellationToken cancellationToken)
     {
         PaginatedCollection<PublicationSummary> publications = await _publicationsService
-            .GetBySearchAsync(paginationSearchDto, cancellationToken);
+            .GetBySearchAsync(paginationSearchDTO, cancellationToken);
             
         return Ok(publications);
     }

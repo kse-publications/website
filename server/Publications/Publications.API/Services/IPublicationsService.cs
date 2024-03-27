@@ -7,11 +7,11 @@ namespace Publications.API.Services;
 public interface IPublicationsService
 {
     Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
-        PaginationDTO paginationDto,
+        PaginationFilterDTO paginationFilterDTO,
         CancellationToken cancellationToken = default);
     
     Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
-        PaginationSearchDTO paginationSearchDto,
+        PaginationSearchDTO paginationSearchDTO,
         CancellationToken cancellationToken = default);
     
     Task<Publication?> GetByIdAsync(

@@ -1,9 +1,8 @@
 ﻿using Publications.API.Models;
-using Publications.API.Repositories.Abstractions;
 using Redis.OM;
 using Redis.OM.Searching;
 
-namespace Publications.API.Repositories;
+namespace Publications.API.Repositories.Publishers;
 
 public class PublishersRepository: IPublishersRepository
 {
