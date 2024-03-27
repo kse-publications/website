@@ -12,11 +12,7 @@ public interface IPublicationsRepository
         PaginationDTO paginationDto,
         CancellationToken cancellationToken = default);
     
-    Task<PaginatedCollection<Publication>> GetByFullTextSearchAsync(
-        PaginationSearchDTO paginationSearchDto,
-        CancellationToken cancellationToken = default);
-    
-    Task<PaginatedCollection<Publication>> GetByAutoCompleteAsync(
+    Task<PaginatedCollection<Publication>> GetBySearchAsync(
         PaginationSearchDTO paginationSearchDto,
         bool allowFuzzyMatch,
         CancellationToken cancellationToken = default);

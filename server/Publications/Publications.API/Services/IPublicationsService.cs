@@ -6,15 +6,11 @@ namespace Publications.API.Services;
 
 public interface IPublicationsService
 {
-    Task<PaginatedCollection<Publication>> GetAllAsync(
+    Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
         PaginationDTO paginationDto,
         CancellationToken cancellationToken = default);
     
-    Task<PaginatedCollection<Publication>> GetByFullTextSearchAsync(
-        PaginationSearchDTO paginationSearchDto,
-        CancellationToken cancellationToken = default);
-    
-    Task<PaginatedCollection<Publication>> GetByAutoCompleteAsync(
+    Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
         PaginationSearchDTO paginationSearchDto,
         CancellationToken cancellationToken = default);
     

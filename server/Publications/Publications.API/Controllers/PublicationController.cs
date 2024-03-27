@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Publications.API.Repositories;
 using Publications.API.Models;
 using Publications.API.DTOs;
+using Publications.API.Middleware;
 using Publications.API.Services;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -26,20 +27,10 @@ public class PublicationsController : ControllerBase
     public async Task<IActionResult> GetAll(
         [FromQuery]PaginationDTO paginationDto, CancellationToken cancellationToken)
     {
-        PaginatedCollection<Publication> publications = await _publicationsService
+        PaginatedCollection<PublicationSummary> publications = await _publicationsService
             .GetAllAsync(paginationDto, cancellationToken);
-        
-        IReadOnlyCollection<PublicationSummary> summaries = publications.Items
-            .Select(PublicationSummary.FromPublication)
-            .ToList()
-            .AsReadOnly();
-        
-        PaginatedCollection<PublicationSummary> response = new(
-            Items: summaries,
-            ResultCount: publications.ResultCount,
-            TotalCount: publications.TotalCount);
             
-        return Ok(response);
+        return Ok(publications);
     } 
     
     [HttpGet("{id}")]
@@ -61,52 +52,19 @@ public class PublicationsController : ControllerBase
     }
     
     [HttpGet("search")]
+    [SearchValidationFilter]
     [ProducesResponseType(typeof(PaginatedCollection<PublicationSummary>),StatusCodes.Status200OK)]
     [SwaggerOperation(
-        Summary = "FTS publications",
-        Description = "Searches for the SearchTerm in the publications' Title, Abstract, and Keywords."
+        Summary = "FTS, prefix match, fuzzy search publications",
+        Description = "Searches for the SearchTerm in the publications' " +
+                      "Title, Abstract, and Keywords, Publisher.Name, Author.Name."
     )]
     public async Task<IActionResult> GetBySearch(
-        [FromQuery]PaginationSearchDTO paginationSearch, CancellationToken cancellationToken)
-    {
-        PaginatedCollection<Publication> publications = await _publicationsService
-            .GetByFullTextSearchAsync(paginationSearch, cancellationToken);
-
-        IReadOnlyCollection<PublicationSummary> summaries = publications.Items
-            .Select(PublicationSummary.FromPublication)
-            .ToList()
-            .AsReadOnly();
-        
-        PaginatedCollection<PublicationSummary> response = new(
-            Items: summaries,
-            ResultCount: publications.ResultCount,
-            TotalCount: publications.TotalCount);
-            
-        return Ok(response);
-    }
-    
-    [HttpGet("auto-complete")]
-    [ProducesResponseType(typeof(PaginatedCollection<PublicationSummary>), StatusCodes.Status200OK)]
-    [SwaggerOperation(
-        Summary = "Endpoint for autocomplete search",
-        Description = "Performs Title.Contains() search on publications, sorts by relevance"
-    )]
-    public async Task<IActionResult> GetByAutoComplete(
         [FromQuery]PaginationSearchDTO paginationSearchDto, CancellationToken cancellationToken)
     {
-        PaginatedCollection<Publication> publications = await _publicationsService
-            .GetByAutoCompleteAsync(paginationSearchDto, cancellationToken);
-        
-        IReadOnlyCollection<PublicationSummary> summaries = publications.Items
-            .Select(PublicationSummary.FromPublication)
-            .ToList()
-            .AsReadOnly();
-        
-        PaginatedCollection<PublicationSummary> response = new(
-            Items: summaries,
-            ResultCount: publications.ResultCount,
-            TotalCount: publications.TotalCount);
+        PaginatedCollection<PublicationSummary> publications = await _publicationsService
+            .GetBySearchAsync(paginationSearchDto, cancellationToken);
             
-        return Ok(response);
+        return Ok(publications);
     }
 }

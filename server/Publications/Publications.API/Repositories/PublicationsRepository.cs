@@ -34,52 +34,40 @@ public class PublicationsRepository: IPublicationsRepository
             TotalCount: await sortedPublications.CountAsync());
     }
 
-    public async Task<PaginatedCollection<Publication>> GetByFullTextSearchAsync(
-        PaginationSearchDTO paginationSearchDto,
-        CancellationToken cancellationToken = default)
-    {
-        IRedisCollection<Publication> matchedPublications = _publications
-            .Where(p =>
-                p.Title.Contains(paginationSearchDto.SearchTerm) ||
-                p.Abstract.Contains(paginationSearchDto.SearchTerm) || 
-                p.Keywords.Contains(paginationSearchDto.SearchTerm) ||
-                p.Publisher.Name.Contains(paginationSearchDto.SearchTerm));
-        
-        
-        IReadOnlyCollection<Publication> paginatedPublications = (await ApplyPagination(
-            matchedPublications, paginationSearchDto)
-            .ToListAsync())
-            .AsReadOnly();
-        
-        return new PaginatedCollection<Publication>(
-            Items: paginatedPublications,
-            ResultCount: paginatedPublications.Count,
-            TotalCount: await matchedPublications.CountAsync());
-    }
-
-    public async Task<PaginatedCollection<Publication>> GetByAutoCompleteAsync(
+    public async Task<PaginatedCollection<Publication>> GetBySearchAsync(
         PaginationSearchDTO paginationSearchDto,
         bool allowFuzzyMatch,
         CancellationToken cancellationToken = default)
     {
         const int fuzzyMatchDistance = 1;
         IRedisCollection<Publication> matchedPublications;
-        
+
         if (!allowFuzzyMatch)
         {
-            matchedPublications = _publications.Where(p => 
-                p.Title.StartsWith(paginationSearchDto.SearchTerm));
+            matchedPublications = _publications
+                .Where(p =>
+                    p.Title.Contains(paginationSearchDto.SearchTerm) ||
+                    p.Title.StartsWith(paginationSearchDto.SearchTerm) ||
+                    p.Abstract.Contains(paginationSearchDto.SearchTerm) || 
+                    p.Keywords.Contains(paginationSearchDto.SearchTerm) ||
+                    p.Publisher.Name.Contains(paginationSearchDto.SearchTerm));
         }
         else
-        {
+        { 
             matchedPublications = _publications
-                .Where(p => 
+                .Where(p =>
+                    p.Title.Contains(paginationSearchDto.SearchTerm) ||
                     p.Title.StartsWith(paginationSearchDto.SearchTerm) ||
-                    p.Title.FuzzyMatch(paginationSearchDto.SearchTerm, fuzzyMatchDistance));
+                    p.Title.FuzzyMatch(paginationSearchDto.SearchTerm, fuzzyMatchDistance) ||
+                    p.Abstract.Contains(paginationSearchDto.SearchTerm) || 
+                    p.Abstract.FuzzyMatch(paginationSearchDto.SearchTerm, fuzzyMatchDistance) ||
+                    p.Keywords.Contains(paginationSearchDto.SearchTerm) ||
+                    p.Publisher.Name.Contains(paginationSearchDto.SearchTerm));
         }
         
+        
         IReadOnlyCollection<Publication> paginatedPublications = (await ApplyPagination(
-                matchedPublications, paginationSearchDto)
+            matchedPublications, paginationSearchDto)
             .ToListAsync())
             .AsReadOnly();
         

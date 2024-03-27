@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using Publications.API.DTOs;
+﻿using Publications.API.DTOs;
 using Publications.API.Models;
 using Publications.API.Repositories;
 using Publications.API.Repositories.Abstractions;
@@ -15,49 +14,31 @@ public class PublicationsService: IPublicationsService
         _publicationsRepository = publicationsRepository;
     }
 
-    public async Task<PaginatedCollection<Publication>> GetAllAsync(
+    public async Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
         PaginationDTO paginationDto, CancellationToken cancellationToken = default)
     {
-        return await _publicationsRepository.GetAllAsync(paginationDto, cancellationToken);
+        PaginatedCollection<Publication> publications = await _publicationsRepository
+            .GetAllAsync(paginationDto, cancellationToken);
+        
+        return GetPublicationsSummaries(publications);
     }
 
-    public async Task<PaginatedCollection<Publication>> GetByFullTextSearchAsync(
+    public async Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
         PaginationSearchDTO paginationSearchDto, 
         CancellationToken cancellationToken = default)
     {
         const int minSearchTermLength = 2;
-        string sanitizeSearchTerm = SanitizeSearchTerm(paginationSearchDto.SearchTerm);
         
-        if (sanitizeSearchTerm.Length < minSearchTermLength)
-        {
-            return new PaginatedCollection<Publication>(
-                Items: new List<Publication>(),
-                ResultCount: 0,
-                TotalCount: 0);
-        }
+        if (paginationSearchDto.SearchTerm.Length < minSearchTermLength)
+            return EmptyResponse;
         
-        return await _publicationsRepository.GetByFullTextSearchAsync(
-            paginationSearchDto with { SearchTerm = sanitizeSearchTerm },
-            cancellationToken);
-    }
-
-    public async Task<PaginatedCollection<Publication>> GetByAutoCompleteAsync(
-        PaginationSearchDTO paginationSearchDto, 
-        CancellationToken cancellationToken = default)
-    {
-        string sanitizeSearchTerm = SanitizeSearchTerm(paginationSearchDto.SearchTerm);
-        if (string.IsNullOrWhiteSpace(sanitizeSearchTerm))
-        {
-            return new PaginatedCollection<Publication>(
-                Items: new List<Publication>(),
-                ResultCount: 0,
-                TotalCount: 0);
-        }
+        PaginatedCollection<Publication> matchedPublications = await _publicationsRepository
+            .GetBySearchAsync(
+                paginationSearchDto,
+                paginationSearchDto.CanFuzzyMatch(),
+                cancellationToken);
         
-        return await _publicationsRepository.GetByAutoCompleteAsync(
-            paginationSearchDto with { SearchTerm = sanitizeSearchTerm },
-            AllowingFuzzyMatch(sanitizeSearchTerm),
-            cancellationToken);
+        return GetPublicationsSummaries(matchedPublications);
     }
 
     public async Task<Publication?> GetByIdAsync(
@@ -73,20 +54,22 @@ public class PublicationsService: IPublicationsService
         await _publicationsRepository.InsertOrUpdateAsync(
             publications, cancellationToken);
     }
-    
-    private static bool AllowingFuzzyMatch(string searchTerm)
+
+    private static PaginatedCollection<PublicationSummary> GetPublicationsSummaries(
+        PaginatedCollection<Publication> publications)
     {
-        const int minFuzzyMatchLength = 4;
-        const string forbiddenChars = "0123456789!@#$%^&*()_+{}|:\"<>?`~-=\\\\\\[\\\\];',./";
-        return searchTerm.Length >= minFuzzyMatchLength && 
-               !searchTerm.All(c => forbiddenChars.Contains(c));
+        IReadOnlyCollection<PublicationSummary> summaries = publications.Items
+            .Select(PublicationSummary.FromPublication)
+            .ToList()
+            .AsReadOnly();
+        
+        return new PaginatedCollection<PublicationSummary>(
+            Items: summaries,
+            ResultCount: publications.ResultCount,
+            TotalCount: publications.TotalCount);
     }
     
-    private static string SanitizeSearchTerm(string searchTerm)
-    {
-        string sanitizedTerm = Regex.Replace(searchTerm, "[\\~#%&*{}/:<>|\"-\\\\[\\\\]]", "");
-        Console.WriteLine(sanitizedTerm);
-        sanitizedTerm = Regex.Replace(sanitizedTerm, @"\s+", " ").Trim();
-        return sanitizedTerm.Substring(0, Math.Min(50, sanitizedTerm.Length));
-    }
+    private static PaginatedCollection<PublicationSummary> EmptyResponse => 
+        new PaginatedCollection<PublicationSummary>(
+            Items: new List<PublicationSummary>(), ResultCount: 0, TotalCount: 0);
 }

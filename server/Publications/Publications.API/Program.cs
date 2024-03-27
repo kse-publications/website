@@ -66,13 +66,13 @@ var app = builder.Build();
         app.UseSwaggerUI();
     }
 
-    // app.Services.UseScheduler(scheduler =>
-    // {
-    //     scheduler.Schedule<SyncWithNotionBackgroundTask>()
-    //         .Hourly()
-    //         .RunOnceAtStart()
-    //         .PreventOverlapping(nameof(SyncWithNotionBackgroundTask));
-    // });
+    app.Services.UseScheduler(scheduler =>
+    {
+        scheduler.Schedule<SyncWithNotionBackgroundTask>()
+            .Hourly()
+            .RunOnceAtStart()
+            .PreventOverlapping(nameof(SyncWithNotionBackgroundTask));
+    });
 
     
     app.UseCors("FrontEndClient");
