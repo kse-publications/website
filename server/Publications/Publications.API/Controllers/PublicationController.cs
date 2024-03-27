@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Publications.API.Repositories;
 using Publications.API.Models;
 using Publications.API.DTOs;
-using Publications.API.Repositories.Abstractions;
+using Publications.API.Services;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Publications.API.Controllers;
@@ -11,11 +11,11 @@ namespace Publications.API.Controllers;
 [Route("publications")]
 public class PublicationsController : ControllerBase
 {
-    private readonly IPublicationsRepository _publicationsRepository;
+    private readonly IPublicationsService _publicationsService;
 
-    public PublicationsController(IPublicationsRepository publicationsRepository)
+    public PublicationsController(IPublicationsService publicationsService)
     {
-        _publicationsRepository = publicationsRepository;
+        _publicationsService = publicationsService;
     }
     
     [HttpGet]
@@ -26,7 +26,7 @@ public class PublicationsController : ControllerBase
     public async Task<IActionResult> GetAll(
         [FromQuery]PaginationDTO paginationDto, CancellationToken cancellationToken)
     {
-        PaginatedCollection<Publication> publications = await _publicationsRepository
+        PaginatedCollection<Publication> publications = await _publicationsService
             .GetAllAsync(paginationDto, cancellationToken);
         
         IReadOnlyCollection<PublicationSummary> summaries = publications.Items
@@ -52,7 +52,7 @@ public class PublicationsController : ControllerBase
     public async Task<IActionResult> GetById(
         [FromRoute]Guid id, CancellationToken cancellationToken)
     {
-        Publication? publication = await _publicationsRepository
+        Publication? publication = await _publicationsService
             .GetByIdAsync(id, cancellationToken);
         
         return publication is null
@@ -69,7 +69,7 @@ public class PublicationsController : ControllerBase
     public async Task<IActionResult> GetBySearch(
         [FromQuery]PaginationSearchDTO paginationSearch, CancellationToken cancellationToken)
     {
-        PaginatedCollection<Publication> publications = await _publicationsRepository
+        PaginatedCollection<Publication> publications = await _publicationsService
             .GetByFullTextSearchAsync(paginationSearch, cancellationToken);
 
         IReadOnlyCollection<PublicationSummary> summaries = publications.Items
@@ -94,7 +94,7 @@ public class PublicationsController : ControllerBase
     public async Task<IActionResult> GetByAutoComplete(
         [FromQuery]PaginationSearchDTO paginationSearchDto, CancellationToken cancellationToken)
     {
-        PaginatedCollection<Publication> publications = await _publicationsRepository
+        PaginatedCollection<Publication> publications = await _publicationsService
             .GetByAutoCompleteAsync(paginationSearchDto, cancellationToken);
         
         IReadOnlyCollection<PublicationSummary> summaries = publications.Items

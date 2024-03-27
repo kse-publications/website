@@ -7,6 +7,7 @@ using Publications.API.BackgroundJobs;
 using Publications.API.DTOs;
 using Publications.API.Repositories;
 using Publications.API.Repositories.Abstractions;
+using Publications.API.Services;
 using Redis.OM;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,6 +39,8 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddHostedService<RedisHostedService>();
     builder.Services.AddScoped<IPublicationsRepository, PublicationsRepository>();
+    builder.Services.AddScoped<IPublicationsService, PublicationsService>();
+    
     builder.Services.AddScoped<IAuthorsRepository, AuthorsRepository>();
     builder.Services.AddScoped<IPublishersRepository, PublishersRepository>();
     
@@ -63,13 +66,13 @@ var app = builder.Build();
         app.UseSwaggerUI();
     }
 
-    app.Services.UseScheduler(scheduler =>
-    {
-        scheduler.Schedule<SyncWithNotionBackgroundTask>()
-            .Hourly()
-            .RunOnceAtStart()
-            .PreventOverlapping(nameof(SyncWithNotionBackgroundTask));
-    });
+    // app.Services.UseScheduler(scheduler =>
+    // {
+    //     scheduler.Schedule<SyncWithNotionBackgroundTask>()
+    //         .Hourly()
+    //         .RunOnceAtStart()
+    //         .PreventOverlapping(nameof(SyncWithNotionBackgroundTask));
+    // });
 
     
     app.UseCors("FrontEndClient");
