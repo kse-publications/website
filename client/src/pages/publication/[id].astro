@@ -1,0 +1,25 @@
+---
+import '@/styles/globals.css'
+import Layout from '../../layouts/Layout.astro'
+import PublicationPage from '../../components/ui/PublicationPage'
+import PublicationsApiService from '../../components/ui/publicationsApiServise'
+
+export async function getStaticPaths() {
+  const paths = ["0a08feba-73bf-4d3c-86a0-d3f0f425a54d"]
+  return paths.map(id => ({ params: { id } }));
+}
+
+const { id } = Astro.params;
+
+let data = await PublicationsApiService.getPublication(id)
+    .then((response) => {
+      return response.data
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+---
+
+<Layout title="KSE docs | Research Paper">
+ <PublicationPage data={data} />
+</Layout>
