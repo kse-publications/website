@@ -11,9 +11,14 @@ function PublicationPage({ data }: { data: any /* FIXME: Replace 'any' with smth
 
   return (
     <>
-      <div className="max-w-4xl mx-auto mb-10 mt-10 rounded-lg bg-white p-6 shadow-lg">
-        <Button variant="link" className="flex items-center" name="/" onClick={handleNavigate}>
-          <ChevronLeftIcon className="h-4 w-4 pt-1" /> Go back
+      <div className="max-w-4xl mx-auto mb-10 rounded-lg bg-white p-6 shadow-lg">
+        <Button
+          variant="link"
+          className="-ml-4.5 flex items-center text-base"
+          name="/"
+          onClick={handleNavigate}
+        >
+          <ChevronLeftIcon className="h-5 w-5" /> Go back
         </Button>
 
         <h1 className="mb-5 text-4xl font-bold text-gray-800">{data.title}</h1>
