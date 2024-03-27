@@ -10,7 +10,7 @@ function PublicationPage({ data }: { data: any /* FIXME: Replace 'any' with smth
 
   return (
     <>
-      <div className="mx-auto mt-10 max-w-4xl rounded-lg bg-white p-6 shadow-lg">
+      <div className="max-w-4xl mx-auto mt-10 rounded-lg bg-white p-6 shadow-lg">
         <Button variant="link" name="/" onClick={handleNavigate}>
           Go back
         </Button>
