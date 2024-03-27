@@ -5,7 +5,7 @@ namespace Publications.API.Models;
 /// <summary>
 /// Aggregate root that represents a publication.
 /// </summary>
-[Document(StorageType = StorageType.Json, Prefixes = new[] { "publication" })]
+[Document(IndexName = "publication-idx", StorageType = StorageType.Json, Prefixes = ["publication"])]
 public class Publication
 {
     [RedisIdField]
@@ -31,11 +31,11 @@ public class Publication
     
     [Indexed(JsonPath = "$.Id")]
     [Searchable(JsonPath = "$.Name", Weight = 0.8, PhoneticMatcher = "dm:en")]
-    public Author?[] Authors { get; set; } = Array.Empty<Author>();
+    public Author[] Authors { get; set; } = Array.Empty<Author>();
     
     [Indexed(JsonPath = "$.Id")]
-    [Indexed(JsonPath = "$.Name", CaseSensitive = false)]
-    public Publisher? Publisher { get; set; } = null!;
+    [Searchable(JsonPath = "$.Name", Weight = 0.8, PhoneticMatcher = "dm:en")]
+    public Publisher Publisher { get; set; } = null!;
     
     [Indexed(Sortable = true)]
     public DateTime LastModified { get; set; }
