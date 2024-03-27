@@ -5,15 +5,24 @@ import { SearchSkeleton } from './search-skeleton'
 import { useMemo } from 'react'
 
 export const SearchResults = () => {
-  const { error, isLoading, searchResults, totalResults, loadMoreHandler } = useSearchContext()
+  const { debouncedSearchText, error, isLoading, searchResults, totalResults, loadMoreHandler } =
+    useSearchContext()
 
   const isLoadMoreShowed: boolean = useMemo(
     () => !!(searchResults.length && totalResults > searchResults.length && !isLoading),
     [searchResults, totalResults, isLoading]
   )
 
+  const isRecent: boolean = useMemo(
+    () => !!(searchResults.length && debouncedSearchText === ''),
+    [searchResults, debouncedSearchText]
+  )
+
   return (
     <div>
+      {isRecent && (
+        <h2 className="mb-4 text-3xl font-semibold leading-none tracking-tight">Recent</h2>
+      )}
       {error ? (
         <div className="text-red-500">Error: {error}</div>
       ) : (

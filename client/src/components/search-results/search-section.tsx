@@ -12,8 +12,8 @@ interface SearchSectionProps {
 export default function SearchSection({ initialPublications }: SearchSectionProps) {
   return (
     <SearchContextProvider
-      initialSearchResults={initialPublications.items}
-      initialTotalResults={initialPublications.totalCount}
+      initialSearchResults={initialPublications?.items || []}
+      initialTotalResults={initialPublications?.totalCount || 0}
     >
       <section className="pb-4">
         <div className="mb-8">

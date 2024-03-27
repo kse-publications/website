@@ -6,4 +6,4 @@ export const DEFAULT_PAGE = 1
 export const DEFAULT_SORT_ORDER = SortOrders.ASC
 export const DEFAULT_FILTER_TYPE = FilterTypes.LAST_MODIFIED
 
-export const SEARCH_TEXT_DEBOUNCE_MS = 400
+export const SEARCH_TEXT_DEBOUNCE_MS = 200

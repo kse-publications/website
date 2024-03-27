@@ -27,6 +27,7 @@ import type { PaginatedCollection } from '@/types/common/paginated-collection'
 
 interface ISearchContext {
   searchText: string
+  debouncedSearchText: string
   setSearchText: Dispatch<SetStateAction<string>>
 
   filterType: FilterTypes | null
@@ -79,15 +80,15 @@ const SearchContextProvider = ({
   const [debouncedSearchText] = useDebounce(searchText, SEARCH_TEXT_DEBOUNCE_MS)
 
   useEffect(() => {
-    if (debouncedSearchText.trim()) {
+    if (isInitialPublications.current) {
       isInitialPublications.current = false
-      fetchPublications({ searchText: debouncedSearchText })
+      return
     }
+    fetchPublications({ searchText: debouncedSearchText })
   }, [debouncedSearchText])
 
   useEffect(() => {
     if (!filterType || !sortOrder) return
-    isInitialPublications.current = false
     fetchPublications({ filterType, sortOrder, searchText })
   }, [sortOrder, filterType])
 
@@ -113,7 +114,7 @@ const SearchContextProvider = ({
       try {
         let paginatedResponse: PaginatedCollection<PublicationSummary>
 
-        if (isInitialPublications.current) {
+        if (searchText === '') {
           paginatedResponse = await getInitialPublications(currentPage + 1)
         } else {
           paginatedResponse = await searchPublications({
@@ -149,6 +150,7 @@ const SearchContextProvider = ({
     loadMoreHandler,
 
     searchText,
+    debouncedSearchText,
     setSearchText,
 
     filterType,
