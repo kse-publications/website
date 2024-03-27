@@ -2,6 +2,7 @@ export const prerender = true
 import { navigate } from 'astro:transitions/client'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { ChevronLeftIcon } from '@radix-ui/react-icons'
 
 function PublicationPage({ data }: { data: any /* FIXME: Replace 'any' with smth useful */ }) {
   const handleNavigate = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -10,9 +11,14 @@ function PublicationPage({ data }: { data: any /* FIXME: Replace 'any' with smth
 
   return (
     <>
-      <div className="max-w-4xl mx-auto mt-10 rounded-lg bg-white p-6 shadow-lg">
-        <Button variant="link" name="/" onClick={handleNavigate}>
-          Go back
+      <div className="max-w-4xl mx-auto mb-10 rounded-lg bg-white p-6 shadow-lg">
+        <Button
+          variant="link"
+          className="-ml-4.5 flex items-center text-base"
+          name="/"
+          onClick={handleNavigate}
+        >
+          <ChevronLeftIcon className="h-5 w-5" /> Go back
         </Button>
 
         <h1 className="mb-5 text-4xl font-bold text-gray-800">{data.title}</h1>
