@@ -1,0 +1,20 @@
+---
+import '@/styles/globals.css'
+import Layout from '../../layouts/Layout.astro'
+import PublicationPage from '../../components/ui/publications/publication-section'
+import PublicationsApiService from '../../services/publicationsApiService'
+
+const { id } = Astro.params as { id: string }
+
+let data = await PublicationsApiService.getPublication(id)
+  .then((response) => {
+    return response.data
+  })
+  .catch((error) => {
+    console.log(error)
+  })
+---
+
+<Layout title=`KSE docs | ${data.title}`>
+  <PublicationPage data={data} transition:persist client:load />
+</Layout>
