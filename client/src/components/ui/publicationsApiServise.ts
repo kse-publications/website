@@ -12,4 +12,8 @@ export default class PublicationsApiService {
   static getPublication(id: string) {
     return axios.get(BASE_URL + `publications/${id}`)
   }
+
+  static getPublications() {
+    return axios.get(BASE_URL + 'publications')
+  }
 }

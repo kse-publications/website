@@ -5,8 +5,15 @@ import PublicationPage from '../../components/ui/PublicationPage'
 import PublicationsApiService from '../../components/ui/publicationsApiServise'
 
 export async function getStaticPaths() {
-  const paths = ["0a08feba-73bf-4d3c-86a0-d3f0f425a54d"]
-  return paths.map(id => ({ params: { id } }));
+  const paths = await PublicationsApiService.getPublications()
+  .then(response => {
+    return response.data.items.slice(0,100).map((item:any) => item.id);
+  })
+  .catch(error => {
+    console.error(error);
+  });
+
+  return paths.map((id:string) => ({ params: { id } }));  
 }
 
 const { id } = Astro.params;
