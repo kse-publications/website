@@ -1,4 +1,4 @@
-import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from 'public/config/search-params'
+import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '@/config/search-params'
 import type { PaginatedCollection } from '@/types/common/paginated-collection'
 import type { PublicationSummary } from '@/types/publication-summary/publication-summary'
 import type { FilterTypes } from '@/types/common/filter-types'
