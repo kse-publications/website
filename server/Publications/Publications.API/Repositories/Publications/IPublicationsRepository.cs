@@ -14,7 +14,6 @@ public interface IPublicationsRepository
     
     Task<PaginatedCollection<Publication>> GetBySearchAsync(
         PaginationSearchDTO paginationSearchDTO,
-        bool allowFuzzyMatch,
         CancellationToken cancellationToken = default);
     
     Task<Publication?> GetByIdAsync(

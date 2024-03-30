@@ -33,10 +33,7 @@ public class PublicationsService: IPublicationsService
             return EmptyResponse;
         
         PaginatedCollection<Publication> matchedPublications = await _publicationsRepository
-            .GetBySearchAsync(
-                paginationSearchDTO,
-                paginationSearchDTO.CanFuzzyMatch(),
-                cancellationToken);
+            .GetBySearchAsync(paginationSearchDTO, cancellationToken);
         
         return GetPublicationsSummaries(matchedPublications);
     }
