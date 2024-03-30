@@ -31,34 +31,15 @@ public class PublicationsRepository: IPublicationsRepository
 
     public async Task<PaginatedCollection<Publication>> GetBySearchAsync(
         PaginationSearchDTO paginationSearchDTO,
-        bool allowFuzzyMatch,
         CancellationToken cancellationToken = default)
     {
-        const int fuzzyMatchDistance = 1;
-        IRedisCollection<Publication> matchedPublications;
-
-        if (!allowFuzzyMatch)
-        {
-            matchedPublications = _publications
-                .Where(p =>
-                    p.Title.Contains(paginationSearchDTO.SearchTerm) ||
-                    p.Title.StartsWith(paginationSearchDTO.SearchTerm) ||
-                    p.Abstract.Contains(paginationSearchDTO.SearchTerm) || 
-                    p.Keywords.Contains(paginationSearchDTO.SearchTerm) ||
-                    p.Publisher.Name.Contains(paginationSearchDTO.SearchTerm));
-        }
-        else
-        { 
-            matchedPublications = _publications
-                .Where(p =>
-                    p.Title.Contains(paginationSearchDTO.SearchTerm) ||
-                    p.Title.StartsWith(paginationSearchDTO.SearchTerm) ||
-                    p.Title.FuzzyMatch(paginationSearchDTO.SearchTerm, fuzzyMatchDistance) ||
-                    p.Abstract.Contains(paginationSearchDTO.SearchTerm) || 
-                    p.Abstract.FuzzyMatch(paginationSearchDTO.SearchTerm, fuzzyMatchDistance) ||
-                    p.Keywords.Contains(paginationSearchDTO.SearchTerm) ||
-                    p.Publisher.Name.Contains(paginationSearchDTO.SearchTerm));
-        }
+        IRedisCollection<Publication> matchedPublications = _publications.Where(p => 
+            p.Title.StartsWith(paginationSearchDTO.SearchTerm) ||
+            p.Title.Contains(paginationSearchDTO.SearchTerm) ||
+            p.Abstract.StartsWith(paginationSearchDTO.SearchTerm) ||
+            p.Abstract.Contains(paginationSearchDTO.SearchTerm) ||
+            p.Publisher.Name.Contains(paginationSearchDTO.SearchTerm) ||
+            p.Authors.Any(author => author.Name == paginationSearchDTO.SearchTerm));
         
         return await matchedPublications.ApplyPagination(
             paginationSearchDTO.Page,
