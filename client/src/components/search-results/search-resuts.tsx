@@ -3,15 +3,10 @@ import { SearchResultItem } from './search-result-item'
 import { Button } from '../ui/button'
 import { SearchSkeleton } from './search-skeleton'
 import { useMemo } from 'react'
+import { LoadingTrigger } from './search-loading-trigger'
 
 export const SearchResults = () => {
-  const { debouncedSearchText, error, isLoading, searchResults, totalResults, loadMoreHandler } =
-    useSearchContext()
-
-  const isLoadMoreShowed: boolean = useMemo(
-    () => !!(searchResults.length && totalResults > searchResults.length && !isLoading),
-    [searchResults, totalResults, isLoading]
-  )
+  const { debouncedSearchText, error, isLoading, searchResults } = useSearchContext()
 
   const isRecent: boolean = useMemo(
     () => !!(searchResults.length && debouncedSearchText === ''),
@@ -34,11 +29,7 @@ export const SearchResults = () => {
             ))}
           </div>
           {isLoading && <SearchSkeleton />}
-          {isLoadMoreShowed && (
-            <Button aria-label="Load more" onClick={loadMoreHandler}>
-              Load more
-            </Button>
-          )}
+          <LoadingTrigger />
         </>
       )}
     </div>
