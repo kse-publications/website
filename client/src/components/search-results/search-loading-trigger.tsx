@@ -28,7 +28,7 @@ export const LoadingTrigger = () => {
         observer.current.unobserve(triggerRef.current)
       }
     }
-  }, [isLoading, loadMoreHandler, searchResults.length, totalResults])
+  }, [loadMoreHandler])
 
-  return <div ref={triggerRef} style={{ height: '10px' }} />
+  return <div ref={triggerRef} className="h-2" />
 }
