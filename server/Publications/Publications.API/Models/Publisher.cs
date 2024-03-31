@@ -1,4 +1,5 @@
-﻿using Redis.OM.Modeling;
+﻿using Publications.API.Services;
+using Redis.OM.Modeling;
 
 namespace Publications.API.Models;
 
@@ -10,8 +11,17 @@ public class Publisher
 {
     [RedisIdField]
     [Indexed]
-    public Guid Id { get; set; }
+    public int Id { get; set; }
+    
+    public Guid NotionId { get; set; }
+    public string Slug { get; set; } = null!;
     
     [Searchable(Weight = 1.0, PhoneticMatcher = "dm:en")]
     public string Name { get; set; } = null!;
+    
+    public Publisher UpdateSlug()
+    {
+        Slug = SlugService.GenerateSlug(Name, Id.ToString());
+        return this;
+    }   
 }

@@ -17,7 +17,7 @@ public interface IPublicationsRepository
         CancellationToken cancellationToken = default);
     
     Task<Publication?> GetByIdAsync(
-        Guid id, CancellationToken cancellationToken = default);
+        int id, CancellationToken cancellationToken = default);
     
     Task InsertOrUpdateAsync(
         IEnumerable<Publication> publications,

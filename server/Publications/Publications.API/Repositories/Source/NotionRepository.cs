@@ -25,21 +25,22 @@ public class NotionRepository: ISourceRepository
         
         PaginatedList<Page> notionPublications = await _notionClient.Databases.QueryAsync(
             _databaseOptions.PublicationsDbId, new DatabasesQueryParameters());
-
+        
         return notionPublications.Results
             .Select(page => new Publication
             {
-                Id = Guid.Parse(page.Id),
+                Id = (int)((UniqueIdPropertyValue)page.Properties["ID"]).UniqueId.Number!.Value,
+                NotionId = Guid.Parse(page.Id),
                 Title = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText,
                 Type = ((SelectPropertyValue)page.Properties["Type"]).Select.Name,
                 Year = (int)((NumberPropertyValue)page.Properties["Year"]).Number!.Value,
                 Link = ((UrlPropertyValue)page.Properties["Link"]).Url,
                 
                 Authors = ((RelationPropertyValue)page.Properties["Authors"]).Relation
-                    .Select(r => authors.FirstOrDefault(a => a.Id == Guid.Parse(r.Id)))
+                    .Select(r => authors.FirstOrDefault(a => a.NotionId == Guid.Parse(r.Id)))
                     .ToArray()!,
                 
-                Publisher = publishers.FirstOrDefault(p => p.Id == Guid.Parse(
+                Publisher = publishers.FirstOrDefault(p => p.NotionId == Guid.Parse(
                     ((RelationPropertyValue)page.Properties["Publisher"]).Relation[0].Id))!,
                 
                 Keywords = ((RichTextPropertyValue)page.Properties["Keywords"])
@@ -48,7 +49,7 @@ public class NotionRepository: ISourceRepository
                 Abstract = ((RichTextPropertyValue)page.Properties["Abstract"])
                     .RichText.Select(r => r.PlainText).FirstOrDefault()!,
                 LastModified = page.LastEditedTime
-            })
+            }.UpdateSlug())
             .ToList()
             .AsReadOnly();
     }
@@ -61,10 +62,11 @@ public class NotionRepository: ISourceRepository
         return notionAuthors.Results
             .Select(page => new Author 
             { 
-                Id = Guid.Parse(page.Id),
+                Id = (int)((UniqueIdPropertyValue)page.Properties["ID"]).UniqueId.Number!.Value,
+                NotionId = Guid.Parse(page.Id),
                 Name = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText,
                 ProfileLink = ((UrlPropertyValue)page.Properties["Profile link"]).Url 
-            })
+            }.UpdateSlug())
             .ToList()
             .AsReadOnly();
     }
@@ -77,9 +79,10 @@ public class NotionRepository: ISourceRepository
         return notionPublishers.Results
             .Select(page => new Publisher 
             { 
-                Id = Guid.Parse(page.Id),
+                Id = (int)((UniqueIdPropertyValue)page.Properties["ID"]).UniqueId.Number!.Value,
+                NotionId = Guid.Parse(page.Id),
                 Name = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText
-            })
+            }.UpdateSlug())
             .ToList()
             .AsReadOnly();
     }
