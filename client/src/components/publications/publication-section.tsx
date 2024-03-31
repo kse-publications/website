@@ -2,6 +2,7 @@ export const prerender = true
 import { navigate } from 'astro:transitions/client'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import { ChevronLeftIcon } from '@radix-ui/react-icons'
 
 function PublicationPage({ data }: { data: any /* FIXME: Replace 'any' with smth useful */ }) {
@@ -11,15 +12,12 @@ function PublicationPage({ data }: { data: any /* FIXME: Replace 'any' with smth
 
   return (
     <>
-      <div className="max-w-4xl mx-auto mb-10 rounded-lg bg-white p-6 shadow-lg">
-        <Button
-          variant="link"
-          className="-ml-4.5 flex items-center text-base"
-          name="/"
-          onClick={handleNavigate}
-        >
-          <ChevronLeftIcon className="h-5 w-5" /> Go back
-        </Button>
+      <div className="max-w-4xl mx-auto mb-10 overflow-auto rounded-lg border border-gray-300 bg-white p-6">
+        <div className="-ml-4.5 flex items-center text-base">
+          <a className={buttonVariants({ variant: 'link' })} href="/">
+            <ChevronLeftIcon className="h-5 w-5" /> Go back
+          </a>
+        </div>
 
         <h1 className="mb-5 text-4xl font-bold text-gray-800">{data.title}</h1>
 
@@ -35,11 +33,14 @@ function PublicationPage({ data }: { data: any /* FIXME: Replace 'any' with smth
 
         <div className="author mb-4 ">
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">Authors:</h4>{' '}
-          {data.authors.map((author: any) => (
-            <span key={author.id}>{author.name} </span>
+          {data.authors.map((author: any, index: number) => (
+            <span key={author.id}>
+              {author.name}
+              {index < data.authors.length - 1 ? ', ' : ''}{' '}
+            </span>
           ))}
         </div>
-        <div className="link mb-4 ">
+        <div className="link mb-4 break-words">
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">Link:</h4>
           <a href={data.link}>{data.link}</a>
         </div>
