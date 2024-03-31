@@ -43,8 +43,10 @@ public class NotionRepository: ISourceRepository
                 Publisher = publishers.FirstOrDefault(p => p.NotionId == Guid.Parse(
                     ((RelationPropertyValue)page.Properties["Publisher"]).Relation[0].Id))!,
                 
-                Keywords = ((RichTextPropertyValue)page.Properties["Keywords"])
-                    .RichText.Select(r => r.PlainText).ToArray(),
+                Keywords = ((RichTextPropertyValue)page.Properties["Keywords"]).RichText
+                    .SelectMany(r => r.PlainText.Split(',', 
+                        StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+                    .ToArray(),
                 
                 Abstract = ((RichTextPropertyValue)page.Properties["Abstract"])
                     .RichText.Select(r => r.PlainText).FirstOrDefault()!,
