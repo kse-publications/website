@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using Publications.API.Services;
+﻿using Publications.API.Services;
 using Redis.OM.Modeling;
 
 namespace Publications.API.Models;
@@ -8,17 +7,8 @@ namespace Publications.API.Models;
 /// Aggregate root that represents a publication.
 /// </summary>
 [Document(IndexName = "publication-idx", StorageType = StorageType.Json, Prefixes = ["publication"])]
-public class Publication
+public class Publication: Entity<Publication>
 {
-    [JsonIgnore]
-    [RedisIdField]
-    [Indexed]
-    public int Id { get; set; }
-    
-    [JsonIgnore]
-    public Guid NotionId { get; set; }
-    public string Slug { get; set; } = string.Empty;
-    
     [Searchable(Weight = 1.0)]
     public string Title { get; set; } = null!;
     
@@ -47,7 +37,7 @@ public class Publication
     [Indexed(Sortable = true)]
     public DateTime LastModified { get; set; }
     
-    public Publication UpdateSlug()
+    public override Publication UpdateSlug()
     {
         Slug = SlugService.GenerateSlug(Title, Id.ToString());
         return this;
