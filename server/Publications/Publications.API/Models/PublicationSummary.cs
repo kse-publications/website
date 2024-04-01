@@ -6,7 +6,7 @@
 /// </summary>
 public class PublicationSummary
 { 
-    public Guid Id { get; set; }
+    public string Slug { get; set; } = null!;
     public string Title { get; set; } = null!;
     public string Link { get; set; } = null!;
     public string[] Keywords { get; set; } = Array.Empty<string>();
@@ -15,7 +15,7 @@ public class PublicationSummary
     {
         return new PublicationSummary
         {
-            Id = publication.Id,
+            Slug = publication.Slug,
             Title = publication.Title,
             Link = publication.Link,
             Keywords = publication.Keywords

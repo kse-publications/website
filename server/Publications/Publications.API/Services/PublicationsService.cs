@@ -39,7 +39,7 @@ public class PublicationsService: IPublicationsService
     }
 
     public async Task<Publication?> GetByIdAsync(
-        Guid id, CancellationToken cancellationToken = default)
+        int id, CancellationToken cancellationToken = default)
     {
         return await _publicationsRepository.GetByIdAsync(id, cancellationToken);
     }

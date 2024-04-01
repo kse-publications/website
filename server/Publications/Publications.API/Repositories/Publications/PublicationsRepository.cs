@@ -38,8 +38,7 @@ public class PublicationsRepository: IPublicationsRepository
             p.Title.Contains(paginationSearchDTO.SearchTerm) ||
             p.Abstract.StartsWith(paginationSearchDTO.SearchTerm) ||
             p.Abstract.Contains(paginationSearchDTO.SearchTerm) ||
-            p.Publisher.Name.Contains(paginationSearchDTO.SearchTerm) ||
-            p.Authors.Any(author => author.Name == paginationSearchDTO.SearchTerm));
+            p.Publisher.Name.Contains(paginationSearchDTO.SearchTerm));
         
         return await matchedPublications.ApplyPagination(
             paginationSearchDTO.Page,
@@ -48,7 +47,7 @@ public class PublicationsRepository: IPublicationsRepository
     }
 
     public async Task<Publication?> GetByIdAsync(
-        Guid id, CancellationToken cancellationToken = default)
+        int id, CancellationToken cancellationToken = default)
     {
         return await _publications.FindByIdAsync(id.ToString());
     }

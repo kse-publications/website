@@ -34,6 +34,7 @@ public class PublicationsController : ControllerBase
     } 
     
     [HttpGet("{id}")]
+    [IdExtractionFilter]
     [ProducesResponseType(typeof(Publication), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(
@@ -41,10 +42,11 @@ public class PublicationsController : ControllerBase
         Description = "Returns a single publication with the provided ID, if found."
     )]
     public async Task<IActionResult> GetById(
-        [FromRoute]Guid id, CancellationToken cancellationToken)
+        [FromRoute]string id, CancellationToken cancellationToken)
     {
+        int parsedId = int.Parse(id);
         Publication? publication = await _publicationsService
-            .GetByIdAsync(id, cancellationToken);
+            .GetByIdAsync(parsedId, cancellationToken);
         
         return publication is null
             ? NotFound($"Publication with ID {id} not found.")

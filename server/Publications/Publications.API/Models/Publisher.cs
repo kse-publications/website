@@ -1,4 +1,5 @@
-﻿using Redis.OM.Modeling;
+﻿using Publications.API.Services;
+using Redis.OM.Modeling;
 
 namespace Publications.API.Models;
 
@@ -6,12 +7,14 @@ namespace Publications.API.Models;
 /// Represents a publisher of a <see cref="Publication"/>. 
 /// </summary>
 [Document(IndexName = "publication-idx",StorageType = StorageType.Json, Prefixes = ["publisher"])]
-public class Publisher
+public class Publisher: Entity<Publisher>
 {
-    [RedisIdField]
-    [Indexed]
-    public Guid Id { get; set; }
-    
     [Searchable(Weight = 1.0, PhoneticMatcher = "dm:en")]
     public string Name { get; set; } = null!;
+    
+    public override Publisher UpdateSlug()
+    {
+        Slug = SlugService.GenerateSlug(Name, Id.ToString());
+        return this;
+    }   
 }
