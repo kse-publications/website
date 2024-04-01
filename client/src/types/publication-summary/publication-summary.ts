@@ -1,5 +1,5 @@
 export interface PublicationSummary {
-  id: string
+  slug: string
   title: string
   link: string
   keywords: string[]

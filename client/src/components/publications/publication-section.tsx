@@ -1,15 +1,10 @@
 export const prerender = true
 import { navigate } from 'astro:transitions/client'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { buttonVariants } from '@/components/ui/button'
 import { ChevronLeftIcon } from '@radix-ui/react-icons'
 
 function PublicationPage({ data }: { data: any /* FIXME: Replace 'any' with smth useful */ }) {
-  const handleNavigate = (e: React.MouseEvent<HTMLButtonElement>) => {
-    navigate((e.target as HTMLButtonElement).name)
-  }
-
   return (
     <>
       <div className="max-w-4xl mx-auto mb-10 overflow-auto rounded-lg border border-gray-300 bg-white p-6">
