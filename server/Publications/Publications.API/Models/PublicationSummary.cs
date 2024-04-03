@@ -8,8 +8,10 @@ public class PublicationSummary
 { 
     public string Slug { get; set; } = null!;
     public string Title { get; set; } = null!;
-    public string Link { get; set; } = null!;
-    public string[] Keywords { get; set; } = Array.Empty<string>();
+    public string Type { get; set; } = string.Empty;
+    public int Year { get; set; }
+    public string[] Authors { get; set; } = Array.Empty<string>();
+    public string Publisher { get; set; } = string.Empty;
     
     public static PublicationSummary FromPublication(Publication publication)
     {
@@ -17,8 +19,10 @@ public class PublicationSummary
         {
             Slug = publication.Slug,
             Title = publication.Title,
-            Link = publication.Link,
-            Keywords = publication.Keywords
+            Type = publication.Type,
+            Year = publication.Year,
+            Authors = publication.Authors.Select(a => a.Name).ToArray(),
+            Publisher = publication.Publisher.Name
         };
     }
 }
