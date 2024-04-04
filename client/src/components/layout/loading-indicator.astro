@@ -27,8 +27,9 @@ const { color, height = '2px' } = Astro.props
   const plugin = new SwupProgressPlugin({ className: 'astro-loading-indicator' })
 
   document.addEventListener(TRANSITION_BEFORE_PREPARATION, () => {
-    ;(plugin.progressBar as any).installStyleElement()
-    ;(plugin.progressBar as any).installProgressElement()
+    ;(plugin.progressBar as any)
+      .installStyleElement()(plugin.progressBar as any)
+      .installProgressElement()
     plugin.startShowingProgress()
   })
 
