@@ -9,6 +9,7 @@ using Publications.API.Repositories.Authors;
 using Publications.API.Repositories.Publications;
 using Publications.API.Repositories.Publishers;
 using Publications.API.Repositories.Source;
+using Publications.API.Serialization;
 using Publications.API.Services;
 using Redis.OM;
 
