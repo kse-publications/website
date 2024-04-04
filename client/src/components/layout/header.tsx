@@ -8,7 +8,7 @@ function Header() {
         <img width={160} height={40} src={logo.src} alt="KSE logo" />
       </a>
 
-      <div className="flex items-center justify-center rounded-full border border-gray-300 p-2 text-[17px]">
+      <div className="flex items-center justify-center rounded-full border border-gray-300 p-1 text-[17px]">
         <Button variant="ghost" className="rounded-full">
           About
         </Button>
