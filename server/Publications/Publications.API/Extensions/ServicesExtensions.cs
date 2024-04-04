@@ -3,6 +3,8 @@ using Microsoft.OpenApi.Models;
 using Notion.Client;
 using Publications.API.BackgroundJobs;
 using Publications.API.DTOs;
+using Publications.API.Middleware;
+using Publications.API.Models;
 using Publications.API.Repositories.Authors;
 using Publications.API.Repositories.Publications;
 using Publications.API.Repositories.Publishers;
@@ -14,12 +16,27 @@ namespace Publications.API.Extensions;
 
 public static class ServicesExtensions
 {
+    public static IMvcBuilder ConfigureJsonOptions(this IMvcBuilder builder)
+    {
+        return builder.AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new IgnoreJsonConverter<Publication>());
+            options.JsonSerializerOptions.Converters.Add(new IgnoreJsonConverter<Publisher>());
+            options.JsonSerializerOptions.Converters.Add(new IgnoreJsonConverter<Author>());
+        });
+    }
+    
     public static void AddSwagger(this IServiceCollection services)
     {
         services.AddSwaggerGen(options =>
         {
             options.SwaggerDoc("v1", new OpenApiInfo { Title = "Publications.API", Version = "v1" });
         });
+    }
+    
+    public static void AddErrorHandlerMiddleware(this IServiceCollection services)
+    {
+        services.AddSingleton<ErrorHandlingMiddleware>();
     }
     
     public static void AddCorsPolicies(this IServiceCollection services, IConfiguration configuration)
@@ -40,6 +57,11 @@ public static class ServicesExtensions
     public static void UseCorsPolicies(this WebApplication app)
     {
         app.UseCors("FrontEndClient");
+    }
+    
+    public static void UseErrorHandlerMiddleware(this WebApplication app)
+    {
+        app.UseMiddleware<ErrorHandlingMiddleware>();
     }
     
     public static void AddRedis(this IServiceCollection services, IConfiguration configuration)

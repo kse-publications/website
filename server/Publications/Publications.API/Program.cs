@@ -1,14 +1,13 @@
-using Publications.API.Middleware;
 using Publications.API.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 {
     builder.Services.AddLogging();
-    builder.Services.AddControllers();
+    builder.Services.AddControllers().ConfigureJsonOptions();
     builder.Services.AddSwagger();
     
     builder.Services.AddCorsPolicies(builder.Configuration);
-    builder.Services.AddSingleton<ErrorHandlingMiddleware>();
+    builder.Services.AddErrorHandlerMiddleware();
 
     builder.Services.AddRedis(builder.Configuration);
     builder.Services.AddNotionClient(builder.Configuration);
@@ -30,7 +29,7 @@ var app = builder.Build();
     
     app.UseCorsPolicies();
     app.UseHttpsRedirection();
-    app.UseMiddleware<ErrorHandlingMiddleware>();
+    app.UseErrorHandlerMiddleware();
 }
 
 app.MapControllers();
