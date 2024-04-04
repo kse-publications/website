@@ -2,6 +2,7 @@
 using Publications.API.Models;
 using Redis.OM;
 using Redis.OM.Searching;
+using Redis.OM.Searching.Query;
 
 namespace Publications.API.Repositories.Publications;
 
@@ -33,17 +34,33 @@ public class PublicationsRepository: IPublicationsRepository
         PaginationSearchDTO paginationSearchDTO,
         CancellationToken cancellationToken = default)
     {
-        IRedisCollection<Publication> matchedPublications = _publications.Where(p => 
-            p.Title.StartsWith(paginationSearchDTO.SearchTerm) ||
-            p.Title.Contains(paginationSearchDTO.SearchTerm) ||
-            p.Abstract.StartsWith(paginationSearchDTO.SearchTerm) ||
-            p.Abstract.Contains(paginationSearchDTO.SearchTerm) ||
-            p.Publisher.Name.Contains(paginationSearchDTO.SearchTerm));
+        string searchTerm = paginationSearchDTO.SearchTerm;
         
-        return await matchedPublications.ApplyPagination(
-            paginationSearchDTO.Page,
-            paginationSearchDTO.PageSize, 
-            totalMatches: await matchedPublications.CountAsync());
+        var query = new RedisQuery("publication-idx")
+            .Where(nameof(Publication.Title).Prefix(searchTerm))
+            .Or(nameof(Publication.Title).Search(searchTerm))
+            .Or(nameof(Publication.Abstract).Prefix(searchTerm))
+            .Or(nameof(Publication.Abstract).Search(searchTerm))
+            .Or($"{nameof(Publication.Publisher)}_{nameof(Publisher.Name)}".Search(searchTerm))
+            .Or($"{nameof(Publication.Authors)}_{nameof(Author.Name)}".Search(searchTerm))
+            .ApplyTypeFiltering(paginationSearchDTO.Filter);
+        
+        Task<SearchResponse<Publication>> matchedCountTask = _redisConnectionProvider.Connection
+            .SearchAsync<Publication>(query);
+
+        query.Limit(paginationSearchDTO.PageSize, paginationSearchDTO.Page);
+        Task<SearchResponse<Publication>> paginatedPublicationsTask = _redisConnectionProvider.Connection
+            .SearchAsync<Publication>(query);
+        
+        await Task.WhenAll(matchedCountTask, paginatedPublicationsTask);
+        
+        IReadOnlyCollection<Publication> publications = (await paginatedPublicationsTask)
+            .Documents.Values.ToList().AsReadOnly();
+        
+        return new PaginatedCollection<Publication>(
+            Items: publications,
+            ResultCount: publications.Count,
+            TotalCount: (int)(await matchedCountTask).DocumentCount);
     }
 
     public async Task<Publication?> GetByIdAsync(
