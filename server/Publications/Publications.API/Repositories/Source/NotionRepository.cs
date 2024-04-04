@@ -34,6 +34,7 @@ public class NotionRepository: ISourceRepository
                 NotionId = Guid.Parse(page.Id),
                 Title = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText,
                 Type = ((SelectPropertyValue)page.Properties["Type"]).Select.Name,
+                Visible = ((CheckboxPropertyValue)page.Properties["Visible"]).Checkbox ? "true" : "false",
                 Language = ((SelectPropertyValue)page.Properties["Language"]).Select?.Name ?? string.Empty,
                 Year = (int)((NumberPropertyValue)page.Properties["Year"]).Number!.Value,
                 Link = ((UrlPropertyValue)page.Properties["Link"]).Url,
@@ -103,7 +104,8 @@ public class NotionRepository: ISourceRepository
             publicationPage.Properties["Name"] is not TitlePropertyValue title ||
             publicationPage.Properties["Type"] is not SelectPropertyValue type ||
             publicationPage.Properties["Year"] is not NumberPropertyValue year ||
-            publicationPage.Properties["Abstract"] is not RichTextPropertyValue abstractValue)
+            publicationPage.Properties["Abstract"] is not RichTextPropertyValue abstractValue ||
+            publicationPage.Properties["Visible"] is not CheckboxPropertyValue visible)
             return false;
     
         return id.UniqueId.Number.HasValue &&
