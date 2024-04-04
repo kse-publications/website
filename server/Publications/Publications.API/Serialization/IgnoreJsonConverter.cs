@@ -1,9 +1,9 @@
 ﻿using System.Reflection;
 using System.Text.Json;
-using Publications.API.Models;
 using System.Text.Json.Serialization;
+using Publications.API.Models;
 
-namespace Publications.API;
+namespace Publications.API.Serialization;
 
 public class IgnoreJsonConverter<T> : JsonConverter<T> where T : Entity<T>
 {
