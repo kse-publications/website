@@ -20,14 +20,12 @@ import {
   DEFAULT_SORT_ORDER,
   SEARCH_TEXT_DEBOUNCE_MS,
 } from '@/config/search-params'
-import { useDebounce } from 'use-debounce'
 import { SortOrders } from '@/types/common/sort-orders'
 import type { FilterTypes } from '@/types/common/filter-types'
 import type { PaginatedCollection } from '@/types/common/paginated-collection'
 
 interface ISearchContext {
   searchText: string
-  debouncedSearchText: string
   setSearchText: Dispatch<SetStateAction<string>>
 
   filterType: FilterTypes | null
@@ -78,15 +76,13 @@ const SearchContextProvider = ({
     initialSearchResults || []
   )
 
-  const [debouncedSearchText] = useDebounce(searchText, SEARCH_TEXT_DEBOUNCE_MS)
-
   useEffect(() => {
     if (isInitialPublications.current) {
       isInitialPublications.current = false
       return
     }
-    fetchPublications({ searchText: debouncedSearchText })
-  }, [debouncedSearchText])
+    fetchPublications({ searchText })
+  }, [searchText])
 
   useEffect(() => {
     if (!filterType || !sortOrder) return
@@ -156,7 +152,6 @@ const SearchContextProvider = ({
     loadMoreHandler,
 
     searchText,
-    debouncedSearchText,
     setSearchText,
 
     filterType,
