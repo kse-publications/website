@@ -97,12 +97,21 @@ const SearchContextProvider = ({
   }, [sortOrder, filterType])
 
   useEffect(() => {
-    if (![searchText, filterType, sortOrder].some((item) => item) || !window) return
     const urlSearchParams = new URLSearchParams()
 
     if (searchText) urlSearchParams.append('searchText', searchText)
+    else urlSearchParams.delete('searchText')
+
     if (filterType) urlSearchParams.append('filterType', filterType)
+    else urlSearchParams.delete('filterType')
+
     if (sortOrder) urlSearchParams.append('sortOrder', sortOrder)
+    else urlSearchParams.delete('sortOrder')
+
+    if (![searchText, filterType, sortOrder].some((item) => item)) {
+      window.history.replaceState({}, '', window.location.origin)
+      return
+    }
 
     const queryString = urlSearchParams.toString()
     const newUrl = window.location.pathname + '?' + queryString
