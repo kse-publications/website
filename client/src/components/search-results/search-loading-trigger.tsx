@@ -1,5 +1,5 @@
 import { useSearchContext } from '@/contexts/search-context'
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 
 export const LoadingTrigger = () => {
   const { isLoading, searchResults, totalResults, loadMoreHandler } = useSearchContext()
@@ -29,6 +29,19 @@ export const LoadingTrigger = () => {
       }
     }
   }, [loadMoreHandler])
+
+  const isTriggerHidden = useMemo(
+    () => searchResults.length && searchResults.length >= totalResults,
+    [searchResults, totalResults]
+  )
+
+  if (isTriggerHidden) {
+    return (
+      <p className="text-center text-sm text-muted-foreground">
+        You have reached the end of the list
+      </p>
+    )
+  }
 
   return <div ref={triggerRef} className="h-2" />
 }

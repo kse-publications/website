@@ -1,0 +1,69 @@
+---
+export interface Props {
+  /**
+   * The indicator background color. Can be any valid CSS property.
+   */
+  color: string
+  /**
+   * The indicator height. Can be any valid CSS property.
+   *
+   * @default "2px"
+   */
+  height?: string
+}
+
+const { color, height = '2px' } = Astro.props
+---
+
+<script define:vars={{ color, height }}>
+  document.documentElement.style.setProperty('--astro-loading-indicator-color', color)
+  document.documentElement.style.setProperty('--astro-loading-indicator-height', height)
+</script>
+
+<script>
+  import SwupProgressPlugin from '@swup/progress-plugin'
+  import { TRANSITION_BEFORE_PREPARATION, TRANSITION_BEFORE_SWAP } from 'astro:transitions/client'
+
+  const plugin = new SwupProgressPlugin({ className: 'astro-loading-indicator' })
+
+  document.addEventListener(TRANSITION_BEFORE_PREPARATION, () => {
+    ;(plugin.progressBar as any)
+      .installStyleElement()(plugin.progressBar as any)
+      .installProgressElement()
+    plugin.startShowingProgress()
+  })
+
+  document.addEventListener(TRANSITION_BEFORE_SWAP, (event) => {
+    plugin.stopShowingProgress()
+    setTimeout(() => {
+      ;(plugin.progressBar as any).fadeProgressElement()
+    }, plugin.options.delay)
+
+    const newDocument = (event as any).newDocument as Document
+    const rootStyles = getComputedStyle(document.documentElement)
+
+    newDocument.documentElement.style.setProperty(
+      '--astro-loading-indicator-color',
+      rootStyles.getPropertyValue('--astro-loading-indicator-color')
+    )
+    newDocument.documentElement.style.setProperty(
+      '--astro-loading-indicator-height',
+      rootStyles.getPropertyValue('--astro-loading-indicator-height')
+    )
+  })
+</script>
+
+<style is:global>
+  .astro-loading-indicator {
+    pointer-events: none;
+    background-color: var(--astro-loading-indicator-color);
+    position: fixed;
+    z-index: 1031;
+    top: 0;
+    left: 0;
+    height: var(--astro-loading-indicator-height);
+    transition-property: opacity;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+</style>

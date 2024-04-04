@@ -65,6 +65,7 @@ const SearchContextProvider = ({
   initialTotalResults,
 }: SearchContextProviderProps) => {
   const isInitialPublications = useRef(true)
+  const isLoadingMoreStarted = useRef(false)
 
   const [searchText, setSearchText] = useState('')
   const [filterType, setFilterType] = useState<FilterTypes | null>(null)
@@ -132,12 +133,17 @@ const SearchContextProvider = ({
         error instanceof Error && setError(error.message)
       } finally {
         setIsLoading(false)
+        isLoadingMoreStarted.current = false
       }
     },
     [currentPage]
   )
 
   const loadMoreHandler = useCallback(() => {
+    if (isLoadingMoreStarted.current) return
+
+    isLoadingMoreStarted.current = true
+
     fetchPublications({
       searchText,
       page: currentPage + 1,
