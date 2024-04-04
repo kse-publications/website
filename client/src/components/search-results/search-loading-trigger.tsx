@@ -31,8 +31,8 @@ export const LoadingTrigger = () => {
   }, [loadMoreHandler])
 
   const isTriggerHidden = useMemo(
-    () => searchResults.length && searchResults.length >= totalResults,
-    [searchResults, totalResults]
+    () => searchResults.length && searchResults.length >= totalResults && !isLoading,
+    [searchResults, totalResults, isLoading]
   )
 
   if (isTriggerHidden) {
