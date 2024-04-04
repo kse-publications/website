@@ -77,6 +77,13 @@ const SearchContextProvider = ({
   )
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search)
+    setFilterType((searchParams.get('filterType') as FilterTypes) || null)
+    setSortOrder((searchParams.get('sortOrder') as SortOrders) || null)
+    setSearchText(searchParams.get('searchText') || '')
+  }, [])
+
+  useEffect(() => {
     if (isInitialPublications.current) {
       isInitialPublications.current = false
       return
@@ -88,6 +95,20 @@ const SearchContextProvider = ({
     if (!filterType || !sortOrder) return
     fetchPublications({ filterType, sortOrder, searchText })
   }, [sortOrder, filterType])
+
+  useEffect(() => {
+    if (![searchText, filterType, sortOrder].some((item) => item) || !window) return
+    const urlSearchParams = new URLSearchParams()
+
+    if (searchText) urlSearchParams.append('searchText', searchText)
+    if (filterType) urlSearchParams.append('filterType', filterType)
+    if (sortOrder) urlSearchParams.append('sortOrder', sortOrder)
+
+    const queryString = urlSearchParams.toString()
+    const newUrl = window.location.pathname + '?' + queryString
+
+    window.history.replaceState({}, '', newUrl)
+  }, [searchText, filterType, sortOrder])
 
   const currentPage = useMemo(
     () => Math.ceil(searchResults.length / DEFAULT_PAGE_SIZE),
