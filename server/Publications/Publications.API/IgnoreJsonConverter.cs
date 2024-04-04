@@ -25,7 +25,7 @@ public class IgnoreJsonConverter<T> : JsonConverter<T> where T : Entity<T>
                 continue;
             }
 
-            writer.WritePropertyName(property.Name);
+            writer.WritePropertyName(property.Name.ToLower());
             JsonSerializer.Serialize(writer, property.GetValue(value), property.PropertyType, options);
         }
 
