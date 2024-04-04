@@ -27,6 +27,7 @@ public class NotionRepository: ISourceRepository
             _databaseOptions.PublicationsDbId, new DatabasesQueryParameters());
         
         return notionPublications.Results
+            .Where(IsNotionPublicationValid)
             .Select(page => new Publication
             {
                 Id = (int)((UniqueIdPropertyValue)page.Properties["ID"]).UniqueId.Number!.Value,
@@ -38,10 +39,13 @@ public class NotionRepository: ISourceRepository
                 
                 Authors = ((RelationPropertyValue)page.Properties["Authors"]).Relation
                     .Select(r => authors.FirstOrDefault(a => a.NotionId == Guid.Parse(r.Id)))
+                    .Where(a => a is not null)
                     .ToArray()!,
                 
-                Publisher = publishers.FirstOrDefault(p => p.NotionId == Guid.Parse(
-                    ((RelationPropertyValue)page.Properties["Publisher"]).Relation[0].Id))!,
+                Publisher = ((RelationPropertyValue)page.Properties["Publisher"])?.Relation?.FirstOrDefault()?.Id is not null 
+                    ? publishers.FirstOrDefault(p => p.NotionId == Guid.Parse(
+                        ((RelationPropertyValue)page.Properties["Publisher"]).Relation[0].Id))! 
+                    : null,
                 
                 Keywords = ((RichTextPropertyValue)page.Properties["Keywords"]).RichText
                     .SelectMany(r => r.PlainText.Split(',', 
@@ -50,6 +54,7 @@ public class NotionRepository: ISourceRepository
                 
                 Abstract = ((RichTextPropertyValue)page.Properties["Abstract"])
                     .RichText.Select(r => r.PlainText).FirstOrDefault()!,
+                
                 LastModified = page.LastEditedTime
             }.UpdateSlug())
             .ToList()
@@ -62,6 +67,7 @@ public class NotionRepository: ISourceRepository
             _databaseOptions.AuthorsDbId, new DatabasesQueryParameters());
         
         return notionAuthors.Results
+            .Where(IsNotionAuthorValid)
             .Select(page => new Author 
             { 
                 Id = (int)((UniqueIdPropertyValue)page.Properties["ID"]).UniqueId.Number!.Value,
@@ -79,6 +85,7 @@ public class NotionRepository: ISourceRepository
             _databaseOptions.PublishersDbId, new DatabasesQueryParameters());
         
         return notionPublishers.Results
+            .Where(IsNotionPublisherValid)
             .Select(page => new Publisher 
             { 
                 Id = (int)((UniqueIdPropertyValue)page.Properties["ID"]).UniqueId.Number!.Value,
@@ -87,5 +94,45 @@ public class NotionRepository: ISourceRepository
             }.UpdateSlug())
             .ToList()
             .AsReadOnly();
+    }
+
+    private static bool IsNotionPublicationValid(Page publicationPage)
+    {
+        if (publicationPage.Properties["ID"] is not UniqueIdPropertyValue id ||
+            publicationPage.Properties["Name"] is not TitlePropertyValue title ||
+            publicationPage.Properties["Type"] is not SelectPropertyValue type ||
+            publicationPage.Properties["Year"] is not NumberPropertyValue year ||
+            publicationPage.Properties["Abstract"] is not RichTextPropertyValue abstractValue)
+            return false;
+    
+        return id.UniqueId.Number.HasValue &&
+               title.Title.Count > 0 &&
+               title.Title[0].PlainText.Length > 0 &&
+               type.Select?.Name.Length > 0 &&
+               year.Number.HasValue &&
+               abstractValue.RichText.Count > 0 &&
+               abstractValue.RichText[0].PlainText.Length > 0;
+    }
+    
+    private static bool IsNotionAuthorValid(Page authorPage)
+    {
+        if (authorPage.Properties["ID"] is not UniqueIdPropertyValue id ||
+            authorPage.Properties["Name"] is not TitlePropertyValue name)
+            return false;
+    
+        return id.UniqueId.Number.HasValue && 
+               name.Title.Count > 0 &&
+               name.Title[0].PlainText.Length > 0;
+    }
+    
+    private static bool IsNotionPublisherValid(Page publisherPage)
+    {
+        if (publisherPage.Properties["ID"] is not UniqueIdPropertyValue id ||
+            publisherPage.Properties["Name"] is not TitlePropertyValue name)
+            return false;
+    
+        return id.UniqueId.Number.HasValue && 
+               name.Title.Count > 0 &&
+               name.Title[0].PlainText.Length > 0;
     }
 }
