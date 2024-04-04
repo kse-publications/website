@@ -34,6 +34,7 @@ public class NotionRepository: ISourceRepository
                 NotionId = Guid.Parse(page.Id),
                 Title = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText,
                 Type = ((SelectPropertyValue)page.Properties["Type"]).Select.Name,
+                Language = ((SelectPropertyValue)page.Properties["Language"]).Select?.Name ?? string.Empty,
                 Year = (int)((NumberPropertyValue)page.Properties["Year"]).Number!.Value,
                 Link = ((UrlPropertyValue)page.Properties["Link"]).Url,
                 
