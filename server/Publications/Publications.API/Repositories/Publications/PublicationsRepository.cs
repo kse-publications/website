@@ -22,7 +22,6 @@ public class PublicationsRepository: IPublicationsRepository
         PaginationFilterDTO paginationFilterDTO, CancellationToken cancellationToken = default)
     {
         IRedisCollection<Publication> sortedFilteredPublications = _publications
-            .OnlyVisible()
             .ApplyFiltering(paginationFilterDTO)
             .ApplySorting(paginationFilterDTO.SortBy, paginationFilterDTO.Ascending);
         
@@ -47,7 +46,6 @@ public class PublicationsRepository: IPublicationsRepository
             .Or($"{nameof(Publication.Publisher)}_{nameof(Publisher.Name)}".Search(searchTerm))
             .Or($"{nameof(Publication.Authors)}_{nameof(Author.Name)}".Prefix(searchTerm))
             .Or($"{nameof(Publication.Authors)}_{nameof(Author.Name)}".Search(searchTerm))
-            .OnlyVisible()
             .Filter(paginationSearchDTO.Filter)
             .Build();
         
@@ -72,8 +70,7 @@ public class PublicationsRepository: IPublicationsRepository
     public async Task<Publication?> GetByIdAsync(
         int id, CancellationToken cancellationToken = default)
     {
-        Publication? publication = await _publications.FindByIdAsync(id.ToString());
-        return publication?.Visible == "true" ? publication : null;
+        return await _publications.FindByIdAsync(id.ToString());
     }
 
     public async Task InsertOrUpdateAsync(

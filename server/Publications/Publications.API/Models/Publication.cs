@@ -1,5 +1,4 @@
-﻿using Publications.API.Serialization;
-using Publications.API.Services;
+﻿using Publications.API.Services;
 using Redis.OM.Modeling;
 
 namespace Publications.API.Models;
@@ -15,10 +14,6 @@ public class Publication: Entity<Publication>
     
     [Indexed(Sortable = true)]
     public string Type { get; set;} = null!;
-
-    [Indexed] 
-    [IgnoreInResponse] 
-    public string Visible { get; set; } = "false";
     
     [Indexed]
     public string Language { get; set; } = string.Empty;

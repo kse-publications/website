@@ -34,7 +34,6 @@ public class NotionRepository: ISourceRepository
                 NotionId = Guid.Parse(page.Id),
                 Title = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText,
                 Type = ((SelectPropertyValue)page.Properties["Type"]).Select.Name,
-                Visible = ((CheckboxPropertyValue)page.Properties["Visible"]).Checkbox ? "true" : "false",
                 Language = ((SelectPropertyValue)page.Properties["Language"]).Select?.Name ?? string.Empty,
                 Year = (int)((NumberPropertyValue)page.Properties["Year"]).Number!.Value,
                 Link = ((UrlPropertyValue)page.Properties["Link"]).Url,
@@ -114,7 +113,8 @@ public class NotionRepository: ISourceRepository
                type.Select?.Name.Length > 0 &&
                year.Number.HasValue &&
                abstractValue.RichText.Count > 0 &&
-               abstractValue.RichText[0].PlainText.Length > 0;
+               abstractValue.RichText[0].PlainText.Length > 0 &&
+               visible.Checkbox;
     }
     
     private static bool IsNotionAuthorValid(Page authorPage)

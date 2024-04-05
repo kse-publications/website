@@ -33,12 +33,6 @@ public static class PublicationsRepositoryExtensions
             : publications.Where(p => p.Type == paginationFilterDTO.Filter);
     }
     
-    public static IRedisCollection<Publication> OnlyVisible(
-        this IRedisCollection<Publication> publications)
-    {
-        return publications.Where(p => p.Visible == "true");
-    }
-    
     public static IRedisCollection<Publication> ApplySorting(
         this IRedisCollection<Publication> publications, string sortBy, bool isAscending)
     {

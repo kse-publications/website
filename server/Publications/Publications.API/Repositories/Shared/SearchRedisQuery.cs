@@ -33,12 +33,6 @@ public class SearchRedisQuery
         return this;
     }
     
-    public SearchRedisQuery OnlyVisible()
-    {
-        And($"{nameof(Publication.Visible)}".EqualTo("true"));
-        return this;
-    }
-    
     public RedisQuery Build()
     {
         return Expression;
