@@ -1,5 +1,6 @@
 ﻿using Publications.API.DTOs;
 using Publications.API.Models;
+using Publications.API.Repositories.Shared;
 using Redis.OM;
 using Redis.OM.Searching;
 using Redis.OM.Searching.Query;
@@ -41,9 +42,12 @@ public class PublicationsRepository: IPublicationsRepository
             .Or(nameof(Publication.Title).Search(searchTerm))
             .Or(nameof(Publication.Abstract).Prefix(searchTerm))
             .Or(nameof(Publication.Abstract).Search(searchTerm))
+            .Or($"{nameof(Publication.Publisher)}_{nameof(Publisher.Name)}".Prefix(searchTerm))
             .Or($"{nameof(Publication.Publisher)}_{nameof(Publisher.Name)}".Search(searchTerm))
+            .Or($"{nameof(Publication.Authors)}_{nameof(Author.Name)}".Prefix(searchTerm))
             .Or($"{nameof(Publication.Authors)}_{nameof(Author.Name)}".Search(searchTerm))
-            .ApplyTypeFiltering(paginationSearchDTO.Filter);
+            .Filter(paginationSearchDTO.Filter)
+            .Build();
         
         Task<SearchResponse<Publication>> matchedCountTask = _redisConnectionProvider.Connection
             .SearchAsync<Publication>(query);

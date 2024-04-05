@@ -1,4 +1,5 @@
-﻿using Redis.OM.Modeling;
+﻿using Publications.API.Serialization;
+using Redis.OM.Modeling;
 
 namespace Publications.API.Models;
 

@@ -15,6 +15,9 @@ public class Publication: Entity<Publication>
     [Indexed(Sortable = true)]
     public string Type { get; set;} = null!;
     
+    [Indexed]
+    public string Language { get; set; } = string.Empty;
+    
     [Indexed(Sortable = true)]
     public int Year { get; set; }
     
@@ -32,7 +35,7 @@ public class Publication: Entity<Publication>
     
     [Indexed(JsonPath = "$.Id")]
     [Searchable(JsonPath = "$.Name", Weight = 0.8, PhoneticMatcher = "dm:en")]
-    public Publisher Publisher { get; set; } = null!;
+    public Publisher? Publisher { get; set; }
     
     [Indexed(Sortable = true)]
     public DateTime LastModified { get; set; }
