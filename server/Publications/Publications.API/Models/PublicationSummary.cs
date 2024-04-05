@@ -22,7 +22,7 @@ public class PublicationSummary
             Type = publication.Type,
             Year = publication.Year,
             Authors = publication.Authors.Select(a => a.Name).ToArray(),
-            Publisher = publication.Publisher.Name
+            Publisher = publication.Publisher?.Name ?? string.Empty
         };
     }
 }
