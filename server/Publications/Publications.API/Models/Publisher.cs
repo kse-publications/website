@@ -1,4 +1,4 @@
-﻿using Publications.API.Services;
+﻿using Publications.API.Slugs;
 using Redis.OM.Modeling;
 
 namespace Publications.API.Models;
@@ -14,7 +14,9 @@ public class Publisher: Entity<Publisher>
     
     public override Publisher UpdateSlug()
     {
-        Slug = SlugService.GenerateSlug(Name, Id.ToString());
+        Slug = SlugGenerator.GenerateSlug(
+            Name, Id.ToString(), LanguageService.English);
+        
         return this;
     }   
 }
