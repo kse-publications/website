@@ -10,6 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddErrorHandlerMiddleware();
 
     builder.Services.AddRedis(builder.Configuration);
+    builder.Services.AddSqliteDb(builder.Configuration);
+    
     builder.Services.AddNotionClient(builder.Configuration);
     
     builder.Services.AddRepositories();
@@ -24,7 +26,9 @@ var app = builder.Build();
         app.UseSwagger();
         app.UseSwaggerUI();
     }
-
+    
+    // app.Services.UpdateDatabase();
+    
     app.Services.UseBackgroundJobs();
     
     app.UseCorsPolicies();

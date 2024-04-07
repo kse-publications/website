@@ -2,22 +2,23 @@
 
 public class Request
 {
-    public string IpAddress { get; set; }
-    public string UserAgent { get; set; } 
+    public int Id { get; set; }
+    public string SessionId { get; init; }
+    public string ResourceName { get; init;}
+    public string ResourceId { get; init; }
+    public DateTime RequestedAt { get; init;}
     
-    public string ResourceName { get; set; }
-    public string ResourceId { get; set; }
-    
-    public DateTime RequestedAt { get; set; }
+    // EF Core constructor
+    private Request()
+    {
+    }
 
     public Request(
-        string ipAddress, 
-        string userAgent,
+        string sessionId,
         string resourceName,
         string resourceId)
     {
-        IpAddress = ipAddress;
-        UserAgent = userAgent;
+        SessionId = sessionId;
         ResourceName = resourceName;
         ResourceId = resourceId;
         RequestedAt = DateTime.UtcNow;
