@@ -104,6 +104,9 @@ public static class ServicesExtensions
         
         services.AddTransient<SyncWithNotionBackgroundTask>();
         services.AddScheduler();
+        
+        services.AddTransient<StoreRequestAnalyticsTask>();
+        services.AddQueue();
     }
     
     public static void UseBackgroundJobs(this IServiceProvider serviceProvider)

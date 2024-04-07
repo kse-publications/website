@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
-using Publications.API.Services;
 using Publications.API.Slugs;
 
 namespace Publications.API.Middleware;
