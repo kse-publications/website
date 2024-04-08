@@ -27,7 +27,7 @@ var app = builder.Build();
         app.UseSwaggerUI();
     }
     
-    // app.Services.UpdateDatabase();
+    app.Services.UpdateDatabase();
     
     app.Services.UseBackgroundJobs();
     

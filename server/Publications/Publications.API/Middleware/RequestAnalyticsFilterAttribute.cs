@@ -24,27 +24,19 @@ public class RequestAnalyticsFilterAttribute : TypeFilterAttribute
         public async Task OnActionExecutionAsync(
             ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            const string unknown = "Unknown";
-        
-            string sessionIdValue = context.HttpContext.Request.Cookies
-                .TryGetValue("sessionId", out string? sessionId) 
-                ? sessionId 
-                : unknown;
-        
-            string[] pathSegments = context.HttpContext.Request.Path.Value?.Split(
-                separator: '/', StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
-        
-            // if the RequestAnalyticsFilter is used after the IdExtractionFilter in the filters pipeline
-            // then the numeric id will be already extracted from the slug
-        
-            int resourceId = int.Parse(context.ActionArguments["id"]!.ToString()!);
-
-            Request request = new(
-                sessionIdValue,
-                resourceName: pathSegments.First(),
-                resourceId);
+            if (context.HttpContext.Request.Cookies.TryGetValue("client-uuid", out string? sessionId))
+            {
+                string resourceName = (context.HttpContext.Request.Path.Value?.Split(
+                        separator: '/', StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>())
+                    .First().ToLower(); 
             
-            _queue.QueueInvocableWithPayload<StoreRequestAnalyticsTask, Request>(request);
+                // if the RequestAnalyticsFilter is used after the IdExtractionFilter in the filters pipeline
+                // then the numeric id will be already extracted from the slug
+                int resourceId = int.Parse(context.ActionArguments["id"]!.ToString()!);
+
+                Request request = new(sessionId, resourceName, resourceId);
+                _queue.QueueInvocableWithPayload<StoreRequestAnalyticsTask, Request>(request);
+            }
             
             await next();
         }

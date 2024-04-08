@@ -16,14 +16,15 @@ public class RequestsRepository: IRequestsRepository
 
     public async Task AddAsync(Request request)
     {
-        _logger.LogInformation("Adding request to the database: {SessionId}, {ResourceName}, {ResourceId}",
-            request.SessionId, request.ResourceName, request.ResourceId);
-        
-        // await _dbContext.Requests.AddAsync(request);
-        // await _dbContext.SaveChangesAsync();
+        await _dbContext.Requests.AddAsync(request);
+        await _dbContext.SaveChangesAsync();
     }
-    public async Task<Dictionary<int, int>> GetResourceViews(string resourceName)
+    
+    public async Task<Dictionary<int, int>> GetResourceViews<TResource>() 
+        where TResource : Entity<TResource>
     {
+        string resourceName = typeof(TResource).Name.ToLower() + "s";
+        
         return await _dbContext.Requests
             .Where(r => r.ResourceName == resourceName)
             .GroupBy(r => r.ResourceId)

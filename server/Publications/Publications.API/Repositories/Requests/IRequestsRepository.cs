@@ -5,5 +5,7 @@ namespace Publications.API.Repositories.Requests;
 public interface IRequestsRepository
 {
     Task AddAsync(Request request);
-    Task<Dictionary<int, int>> GetResourceViews(string resourceName);
+    
+    Task<Dictionary<int, int>> GetResourceViews<TResource>() 
+        where TResource : Entity<TResource>;
 }

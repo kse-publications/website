@@ -3,8 +3,8 @@
 public class Request
 {
     public int Id { get; set; }
-    public string SessionId { get; init; }
-    public string ResourceName { get; init;}
+    public string SessionId { get; init; } = string.Empty;
+    public string ResourceName { get; init; } = string.Empty;
     public int ResourceId { get; init; }
     public DateTime RequestedAt { get; init;}
     
