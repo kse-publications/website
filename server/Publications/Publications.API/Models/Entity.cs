@@ -16,7 +16,7 @@ public abstract class Entity<T> where T: Entity<T>
     
     public string Slug { get; set; } = string.Empty;
     
-    public int Views { get; set; } = 0;
+    public int Views { get; set; } 
     
     public abstract T UpdateSlug();
 }
