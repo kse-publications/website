@@ -1,4 +1,5 @@
-﻿using Publications.API.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using Publications.API.Models;
 
 namespace Publications.API.Repositories.Requests;
 
@@ -20,5 +21,13 @@ public class RequestsRepository: IRequestsRepository
         
         // await _dbContext.Requests.AddAsync(request);
         // await _dbContext.SaveChangesAsync();
+    }
+    public async Task<Dictionary<int, int>> GetResourceViews(string resourceName)
+    {
+        return await _dbContext.Requests
+            .Where(r => r.ResourceName == resourceName)
+            .GroupBy(r => r.ResourceId)
+            .Select(group => new { ResourceId = group.Key, Views = group.Count() })
+            .ToDictionaryAsync(k => k.ResourceId, v => v.Views);
     }
 }

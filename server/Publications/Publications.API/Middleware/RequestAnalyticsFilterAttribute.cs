@@ -37,9 +37,9 @@ public class RequestAnalyticsFilterAttribute : TypeFilterAttribute
             // if the RequestAnalyticsFilter is used after the IdExtractionFilter in the filters pipeline
             // then the numeric id will be already extracted from the slug
         
-            string resourceId = context.ActionArguments.TryGetValue("id", out var argument)
-                ? argument?.ToString() ?? pathSegments.Last()
-                : unknown;
+            int resourceId = context.ActionArguments.TryGetValue("id", out var argument)
+                ? Convert.ToInt32(argument?.ToString() ?? pathSegments.Last())
+                : 0;
 
             Request request = new(
                 sessionIdValue,
