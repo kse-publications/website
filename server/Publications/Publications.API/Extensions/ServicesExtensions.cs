@@ -1,4 +1,5 @@
 ﻿using Coravel;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Notion.Client;
 using Publications.API.BackgroundJobs;
@@ -8,6 +9,7 @@ using Publications.API.Models;
 using Publications.API.Repositories.Authors;
 using Publications.API.Repositories.Publications;
 using Publications.API.Repositories.Publishers;
+using Publications.API.Repositories.Requests;
 using Publications.API.Repositories.Source;
 using Publications.API.Serialization;
 using Publications.API.Services;
@@ -91,6 +93,8 @@ public static class ServicesExtensions
         services.AddScoped<IPublishersRepository, PublishersRepository>();
         
         services.AddScoped<ISourceRepository, NotionRepository>();
+        
+        services.AddScoped<IRequestsRepository, RequestsRepository>();
     }
     
     public static void AddBackgroundJobs(this IServiceCollection services, IConfiguration configuration)
@@ -100,6 +104,9 @@ public static class ServicesExtensions
         
         services.AddTransient<SyncWithNotionBackgroundTask>();
         services.AddScheduler();
+        
+        services.AddTransient<StoreRequestAnalyticsTask>();
+        services.AddQueue();
     }
     
     public static void UseBackgroundJobs(this IServiceProvider serviceProvider)
@@ -111,5 +118,20 @@ public static class ServicesExtensions
                 .RunOnceAtStart()
                 .PreventOverlapping(nameof(SyncWithNotionBackgroundTask));
         });
+    }
+    
+    public static void AddSqliteDb(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddDbContext<RequestsHistoryDbContext>(options =>
+        {
+            options.UseSqlite(configuration.GetConnectionString("Sqlite"));
+        });
+    }
+    
+    public static void UpdateDatabase(this IServiceProvider serviceProvider)
+    {
+        using var scope = serviceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<RequestsHistoryDbContext>();
+        dbContext.Database.Migrate();
     }
 }

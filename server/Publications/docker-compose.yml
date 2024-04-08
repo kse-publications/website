@@ -13,6 +13,8 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+    volumes:
+      - ./Publications.API/sqlite_db:/app/sqlite_db
 
   redis:
     image: redis/redis-stack
