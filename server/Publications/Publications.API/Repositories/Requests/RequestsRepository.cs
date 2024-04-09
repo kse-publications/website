@@ -6,12 +6,10 @@ namespace Publications.API.Repositories.Requests;
 public class RequestsRepository: IRequestsRepository
 {
     private readonly RequestsHistoryDbContext _dbContext;
-    private readonly ILogger<RequestsRepository> _logger;
 
-    public RequestsRepository(RequestsHistoryDbContext dbContext, ILogger<RequestsRepository> logger)
+    public RequestsRepository(RequestsHistoryDbContext dbContext)
     {
         _dbContext = dbContext;
-        _logger = logger;
     }
 
     public async Task AddAsync(Request request)
@@ -23,12 +21,40 @@ public class RequestsRepository: IRequestsRepository
     public async Task<Dictionary<int, int>> GetResourceViews<TResource>() 
         where TResource : Entity<TResource>
     {
-        string resourceName = typeof(TResource).Name.ToLower() + "s";
+        string resourceName = GetResourceName<TResource>();
         
         return await _dbContext.Requests
             .Where(r => r.ResourceName == resourceName)
             .GroupBy(r => r.ResourceId)
-            .Select(group => new { ResourceId = group.Key, Views = group.Count() })
+            .Select(group => new
+            {
+                ResourceId = group.Key,
+                Views = group.Count()
+            })
             .ToDictionaryAsync(k => k.ResourceId, v => v.Views);
+    }
+    
+    public async Task<Dictionary<int, int>> GetResourceDistinctViews<TResource>() 
+        where TResource : Entity<TResource>
+    {
+        string resourceName = GetResourceName<TResource>();
+        
+        return await _dbContext.Requests
+            .Where(r => r.ResourceName == resourceName)
+            .GroupBy(r => r.ResourceId)
+            .Select(group => new
+            {
+                ResourceId = group.Key, 
+                Views = group
+                    .Select(r => r.SessionId)
+                    .Distinct()
+                    .Count()
+            })
+            .ToDictionaryAsync(k => k.ResourceId, v => v.Views);
+    }
+    
+    private static string GetResourceName<TResource>()
+    {
+        return typeof(TResource).Name.ToLower() + "s";
     }
 }
