@@ -1,5 +1,8 @@
 ﻿using Coravel.Scheduling.Schedule.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 using Publications.API.BackgroundJobs;
+using Publications.API.Models;
+using Publications.API.Repositories.Requests;
 
 namespace Publications.API.Extensions;
 
@@ -16,6 +19,14 @@ public static class EndpointsExtensions
                     .Once()
                     .PreventOverlapping(nameof(SyncWithNotionBackgroundTask));
             });
+
+        endpoints.MapGet("/views", async ([FromServices] IRequestsRepository requestsRepository) =>
+        {
+            Dictionary<int, int> views = await requestsRepository
+                .GetResourceDistinctViews<Publication>();
+            
+            return views;
+        });
         
         return endpoints;
     }

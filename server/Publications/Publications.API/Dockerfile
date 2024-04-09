@@ -20,4 +20,6 @@ RUN dotnet publish "Publications.API.csproj" -c $BUILD_CONFIGURATION -o /app/pub
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+RUN mkdir ./sqlite_db
+RUN chmod -R 777 ./sqlite_db
 ENTRYPOINT ["dotnet", "Publications.API.dll"]

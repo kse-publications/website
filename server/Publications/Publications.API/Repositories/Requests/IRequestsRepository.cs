@@ -8,4 +8,7 @@ public interface IRequestsRepository
     
     Task<Dictionary<int, int>> GetResourceViews<TResource>() 
         where TResource : Entity<TResource>;
+    
+    Task<Dictionary<int, int>> GetResourceDistinctViews<TResource>() 
+        where TResource : Entity<TResource>;
 }
