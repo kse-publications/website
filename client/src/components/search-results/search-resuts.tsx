@@ -18,7 +18,7 @@ export const SearchResults = () => {
       ) : (
         <>
           {searchResults.length === 0 && !isLoading && <div>No publications found</div>}
-          <div className="mb-4 grid gap-4 md:grid-cols-2">
+          <div id="publications">
             {searchResults.map((publication) => (
               <SearchResultItem key={publication.slug} publication={publication} />
             ))}
