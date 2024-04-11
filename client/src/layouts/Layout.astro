@@ -30,7 +30,7 @@ const { title } = Astro.props
     <LoadingIndicator color="#0f172a" height="4px" />
   </head>
   <body>
-    <Header />
+    <Header client:only />
     <main class="mx-auto max-w-[1160px] px-4">
       <slot />
     </main>

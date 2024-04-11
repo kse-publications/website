@@ -13,7 +13,7 @@ export const SearchInput = () => {
     <Input
       className="my-4 w-full"
       aria-label="Search docs input"
-      placeholder="I'm searching for..."
+      placeholder="Enter your search here"
       value={searchText}
       onChange={onChangeHandler}
     />

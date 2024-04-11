@@ -15,14 +15,16 @@ export const SearchResults = () => {
   return (
     <div>
       {isRecent && (
-        <h2 className="mb-4 text-3xl font-semibold leading-none tracking-tight">Recent</h2>
+        <h2 className="mb-4 text-3xl font-semibold leading-none tracking-tight">
+          Latest Publications
+        </h2>
       )}
       {error ? (
         <div className="text-red-500">Error: {error}</div>
       ) : (
         <>
           {searchResults.length === 0 && !isLoading && <div>No publications found</div>}
-          <div className="mb-4 grid gap-4 md:grid-cols-2">
+          <div id="publications">
             {searchResults.map((publication) => (
               <SearchResultItem key={publication.slug} publication={publication} />
             ))}

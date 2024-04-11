@@ -78,3 +78,32 @@
 body {
   background-color: #f8f8f8;
 }
+
+#publications {
+  line-height: 0;
+
+  -webkit-column-count: 2;
+  -webkit-column-gap: 15px;
+  -moz-column-count: 2;
+  -moz-column-gap: 15px;
+  column-count: 2;
+  column-gap: 15px;
+}
+
+#publications a {
+  width: 100% !important;
+  height: auto !important;
+  display: inline-block;
+
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+@media (max-width: 480px) {
+  #publications {
+    -moz-column-count: 1;
+    -webkit-column-count: 1;
+    column-count: 1;
+  }
+}

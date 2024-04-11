@@ -1,17 +1,20 @@
 export const prerender = true
-import { navigate } from 'astro:transitions/client'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { buttonVariants } from '@/components/ui/button'
 import { ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons'
 
 function PublicationPage({ data }: { data: any /* FIXME: Replace 'any' with smth useful */ }) {
+  const goBack = () => {
+    window.history.back()
+  }
+
   return (
     <>
       <div className="-ml-4.5 mb-4 flex items-center text-base">
-        <a className={buttonVariants({ variant: 'link' })} href="/">
+        <Button variant="link" onClick={goBack}>
           <ChevronLeftIcon className="h-5 w-5" /> Go back
-        </a>
+        </Button>
       </div>
 
       <div className="max-w-4xl mx-auto mb-10 overflow-auto rounded-lg border border-gray-300 bg-white p-6">
@@ -48,7 +51,7 @@ function PublicationPage({ data }: { data: any /* FIXME: Replace 'any' with smth
         <p className="mt-4 leading-7">{data.abstract}</p>
         {data.link && (
           <div className="mt-6 flex items-center justify-center text-base">
-            <a className={buttonVariants({ variant: 'default' })} href={data.link}>
+            <a className={buttonVariants({ variant: 'default' })} href={data.link} target="_blank">
               <span className="flex w-40 items-center justify-center pb-1 align-middle leading-none">
                 Go to Source
               </span>
