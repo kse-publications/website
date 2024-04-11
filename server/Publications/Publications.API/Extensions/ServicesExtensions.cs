@@ -52,7 +52,8 @@ public static class ServicesExtensions
                     corsBuilder.WithOrigins(configuration
                             .GetSection("AllowedCorsOrigins").Get<string[]>()!)
                         .AllowAnyHeader()
-                        .AllowAnyMethod();
+                        .AllowAnyMethod()
+                        .AllowCredentials();
                 });
         });
     }
