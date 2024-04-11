@@ -1,11 +1,14 @@
 export const prerender = true
-import { navigate } from 'astro:transitions/client'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
+import type { Publication } from '@/types/publication/publication'
 import { ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons'
 
-function PublicationPage({ data }: { data: any /* FIXME: Replace 'any' with smth useful */ }) {
+interface PublicationPageProps {
+  data: Publication
+}
+
+function PublicationPage({ data }: PublicationPageProps) {
   return (
     <>
       <div className="-ml-4.5 mb-4 flex items-center text-base">

@@ -1,5 +1,6 @@
 export enum FilterTypes {
-  LAST_MODIFIED = 'lastModified',
-  YEAR = 'year',
-  TITLE = 'title',
+  JOURNAL_ARTICLE = 'Journal article',
+  ANALYTICAL_ARTICLE = 'Analytical article',
+  BOOK = 'Book',
+  WORKING_PAPER = 'Working paper',
 }
