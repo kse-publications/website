@@ -1,18 +1,14 @@
 ---
 import '@/styles/globals.css'
-import Layout from '../../layouts/Layout.astro'
-import PublicationPage from '../../components/publications/publication-section'
-import PublicationsApiService from '../../services/publicationsApiService'
+import { getPublication } from '@/services/search/get-publications'
+import PublicationPage from '@/components/publications/publication-section'
+import Layout from '@/layouts/Layout.astro'
 
 const { id } = Astro.params as { id: string }
 
-let data = await PublicationsApiService.getPublication(id)
-  .then((response) => {
-    return response.data
-  })
-  .catch((error) => {
-    console.log(error)
-  })
+const data = await getPublication(id).catch((error) => {
+  console.log(error)
+})
 ---
 
 <Layout title=`KSE docs | ${data.title}`>

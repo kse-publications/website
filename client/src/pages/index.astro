@@ -4,31 +4,30 @@ import Layout from '../layouts/Layout.astro'
 import SearchSection from '@/components/search-results/search-section'
 import { getInitialPublications, searchPublications } from '../services/search/get-publications'
 import type { FilterTypes } from '@/types/common/filter-types'
-import type { SortOrders } from '@/types/common/sort-orders'
 import type { PaginatedCollection } from '@/types/common/paginated-collection'
 import type { PublicationSummary } from '@/types/publication-summary/publication-summary'
-import { DEFAULT_SORT_ORDER, DEFAULT_FILTER_TYPE, DEFAULT_PAGE } from '@/config/search-params'
+import { DEFAULT_PAGE } from '@/config/search-params'
 
 let initialPublications: PaginatedCollection<PublicationSummary>
 const searchParams = Astro.url.searchParams
 
 const searchText = searchParams.get('searchText')
 const filterType = searchParams.get('filterType') as FilterTypes
-const sortOrder = searchParams.get('sortOrder') as SortOrders
+
+const isRecent = !searchText && !filterType
 
 if (!searchText) {
-  initialPublications = await getInitialPublications()
+  initialPublications = await getInitialPublications({ page: DEFAULT_PAGE, filterType })
 } else {
   const searchData = {
     searchText: searchText || '',
     page: DEFAULT_PAGE,
-    filterType: filterType || DEFAULT_FILTER_TYPE,
-    sortOrder: sortOrder || DEFAULT_SORT_ORDER,
+    filterType: filterType,
   }
   initialPublications = await searchPublications(searchData)
 }
 ---
 
 <Layout title="KSE docs | Search">
-  <SearchSection initialPublications={initialPublications} client:load />
+  <SearchSection initialPublications={initialPublications} isRecent={isRecent} client:load />
 </Layout>

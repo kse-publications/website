@@ -13,16 +13,10 @@ import {
 } from 'react'
 import type { PublicationSummary } from '@/types/publication-summary/publication-summary'
 import { getInitialPublications, searchPublications } from '@/services/search/get-publications'
-import {
-  DEFAULT_FILTER_TYPE,
-  DEFAULT_PAGE,
-  DEFAULT_PAGE_SIZE,
-  DEFAULT_SORT_ORDER,
-  SEARCH_TEXT_DEBOUNCE_MS,
-} from '@/config/search-params'
-import { SortOrders } from '@/types/common/sort-orders'
+import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '@/config/search-params'
 import type { FilterTypes } from '@/types/common/filter-types'
 import type { PaginatedCollection } from '@/types/common/paginated-collection'
+import type { SearchPublicationsQueryParams } from '@/types/common/query-params'
 
 interface ISearchContext {
   searchText: string
@@ -30,9 +24,6 @@ interface ISearchContext {
 
   filterType: FilterTypes | null
   setFilterType: Dispatch<SetStateAction<FilterTypes | null>>
-
-  sortOrder: SortOrders | null
-  setSortOrder: Dispatch<SetStateAction<SortOrders | null>>
 
   searchResults: PublicationSummary[]
   setSearchResults: Dispatch<SetStateAction<PublicationSummary[]>>
@@ -47,6 +38,8 @@ interface ISearchContext {
   setError: Dispatch<SetStateAction<string>>
 
   loadMoreHandler: () => void
+
+  isRecent?: boolean
 }
 
 export const SearchContext = createContext<ISearchContext | null>(null) as Context<ISearchContext>
@@ -55,19 +48,22 @@ interface SearchContextProviderProps {
   children: ReactNode
   initialSearchResults: PublicationSummary[]
   initialTotalResults: number
+  initialIsRecent: boolean
 }
 
 const SearchContextProvider = ({
   children,
   initialSearchResults,
   initialTotalResults,
+  initialIsRecent,
 }: SearchContextProviderProps) => {
   const isInitialPublications = useRef(true)
   const isLoadingMoreStarted = useRef(false)
 
+  const [isRecent, setIsRecent] = useState<boolean>(initialIsRecent)
+
   const [searchText, setSearchText] = useState('')
   const [filterType, setFilterType] = useState<FilterTypes | null>(null)
-  const [sortOrder, setSortOrder] = useState<SortOrders | null>(null)
 
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -79,24 +75,26 @@ const SearchContextProvider = ({
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search)
     setFilterType((searchParams.get('filterType') as FilterTypes) || null)
-    setSortOrder((searchParams.get('sortOrder') as SortOrders) || null)
     setSearchText(searchParams.get('searchText') || '')
+
+    const rehydrateTimeout = setTimeout(() => {
+      isInitialPublications.current = false
+    }, 500)
+
+    return () => clearTimeout(rehydrateTimeout)
   }, [])
 
   useEffect(() => {
-    if (isInitialPublications.current) {
-      isInitialPublications.current = false
-      return
-    }
-    fetchPublications({ searchText })
-  }, [searchText])
+    if (isInitialPublications.current) return
 
-  useEffect(() => {
-    if (!filterType || !sortOrder) return
-    fetchPublications({ filterType, sortOrder, searchText })
-  }, [sortOrder, filterType])
+    setSearchResults([])
+    fetchPublications({ searchText, filterType })
 
-  useEffect(() => {
+    updateQuery()
+    setIsRecent(!searchText && !filterType)
+  }, [searchText, filterType])
+
+  const updateQuery = useCallback(() => {
     const urlSearchParams = new URLSearchParams()
 
     if (searchText) urlSearchParams.append('searchText', searchText)
@@ -105,10 +103,7 @@ const SearchContextProvider = ({
     if (filterType) urlSearchParams.append('filterType', filterType)
     else urlSearchParams.delete('filterType')
 
-    if (sortOrder) urlSearchParams.append('sortOrder', sortOrder)
-    else urlSearchParams.delete('sortOrder')
-
-    if (![searchText, filterType, sortOrder].some((item) => item)) {
+    if (!searchText && !filterType) {
       window.history.replaceState({}, '', window.location.origin)
       return
     }
@@ -117,7 +112,7 @@ const SearchContextProvider = ({
     const newUrl = window.location.pathname + '?' + queryString
 
     window.history.replaceState({}, '', newUrl)
-  }, [searchText, filterType, sortOrder])
+  }, [searchText, filterType])
 
   const currentPage = useMemo(
     () => Math.ceil(searchResults.length / DEFAULT_PAGE_SIZE),
@@ -125,12 +120,7 @@ const SearchContextProvider = ({
   )
 
   const fetchPublications = useCallback(
-    async ({
-      searchText = '',
-      page = DEFAULT_PAGE,
-      filterType = DEFAULT_FILTER_TYPE,
-      sortOrder = DEFAULT_SORT_ORDER,
-    }) => {
+    async ({ searchText = '', page = DEFAULT_PAGE, filterType }: SearchPublicationsQueryParams) => {
       setIsLoading(true)
       setError('')
 
@@ -142,13 +132,12 @@ const SearchContextProvider = ({
         let paginatedResponse: PaginatedCollection<PublicationSummary>
 
         if (searchText === '') {
-          paginatedResponse = await getInitialPublications(currentPage + 1)
+          paginatedResponse = await getInitialPublications({ page, filterType })
         } else {
           paginatedResponse = await searchPublications({
             searchText,
             page,
             filterType,
-            sortOrder,
           })
         }
 
@@ -162,7 +151,7 @@ const SearchContextProvider = ({
         isLoadingMoreStarted.current = false
       }
     },
-    [currentPage]
+    []
   )
 
   const loadMoreHandler = useCallback(() => {
@@ -174,9 +163,8 @@ const SearchContextProvider = ({
       searchText,
       page: currentPage + 1,
       filterType: filterType ?? undefined,
-      sortOrder: sortOrder ?? undefined,
     })
-  }, [searchText, currentPage, filterType, sortOrder])
+  }, [searchText, currentPage, filterType])
 
   const value: ISearchContext = {
     loadMoreHandler,
@@ -186,9 +174,6 @@ const SearchContextProvider = ({
 
     filterType,
     setFilterType,
-
-    sortOrder,
-    setSortOrder,
 
     searchResults,
     setSearchResults,
@@ -201,6 +186,8 @@ const SearchContextProvider = ({
 
     error,
     setError,
+
+    isRecent,
   }
 
   return <SearchContext.Provider value={value}>{children}</SearchContext.Provider>

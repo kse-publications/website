@@ -1,35 +1,39 @@
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '@/config/search-params'
 import type { PaginatedCollection } from '@/types/common/paginated-collection'
 import type { PublicationSummary } from '@/types/publication-summary/publication-summary'
-import type { FilterTypes } from '@/types/common/filter-types'
-import { SortOrders } from '@/types/common/sort-orders'
+import type { QueryParams, SearchPublicationsQueryParams } from '@/types/common/query-params'
 
-export const getInitialPublications = async (
-  page = DEFAULT_PAGE
-): Promise<PaginatedCollection<PublicationSummary>> => {
-  return fetch(
-    `${import.meta.env.PUBLIC_API_URL}/publications?Page=${page}&PageSize=${DEFAULT_PAGE_SIZE}`
-  )
+const BASE_URL = import.meta.env.PUBLIC_API_URL
+
+export const getInitialPublications = async ({
+  page = DEFAULT_PAGE,
+  filterType,
+}: QueryParams): Promise<PaginatedCollection<PublicationSummary>> => {
+  let url = `${BASE_URL}/publications?Page=${page}&PageSize=${DEFAULT_PAGE_SIZE}`
+
+  if (filterType) {
+    url += `&Filter=${filterType}`
+  }
+
+  return fetch(url)
     .then((response) => response.json())
     .catch((error) => console.log(error))
 }
 
-interface SearchPublications {
-  searchText: string
-  page: number
-  filterType: FilterTypes
-  sortOrder: SortOrders
+export const searchPublications = async ({
+  page,
+  searchText,
+  filterType,
+}: SearchPublicationsQueryParams): Promise<PaginatedCollection<PublicationSummary>> => {
+  let url = `${BASE_URL}/publications/search?Page=${page}&SearchTerm=${searchText}&PageSize=${DEFAULT_PAGE_SIZE}`
+
+  if (filterType) {
+    url += `&Filter=${filterType}`
+  }
+
+  return fetch(url).then((response) => response.json())
 }
 
-export const searchPublications = async ({
-  searchText,
-  page,
-  filterType,
-  sortOrder,
-}: SearchPublications): Promise<PaginatedCollection<PublicationSummary>> => {
-  const isAscending = sortOrder === SortOrders.ASC
-
-  return fetch(
-    `${import.meta.env.PUBLIC_API_URL}/publications/search?Page=${page}&SearchTerm=${searchText}&PageSize=${DEFAULT_PAGE_SIZE}&SortBy=${filterType}&Ascending=${isAscending}`
-  ).then((response) => response.json())
+export const getPublication = async (id: string): Promise<any> => {
+  return fetch(`${BASE_URL}/publications/${id}`).then((response) => response.json())
 }

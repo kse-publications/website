@@ -1,16 +1,10 @@
 import { useSearchContext } from '@/contexts/search-context'
 import { SearchResultItem } from './search-result-item'
 import { SearchSkeleton } from './search-skeleton'
-import { useMemo } from 'react'
 import { LoadingTrigger } from './search-loading-trigger'
 
 export const SearchResults = () => {
-  const { searchText, error, isLoading, searchResults } = useSearchContext()
-
-  const isRecent: boolean = useMemo(
-    () => !!(searchResults.length && searchText === ''),
-    [searchResults, searchText]
-  )
+  const { isRecent, error, isLoading, searchResults } = useSearchContext()
 
   return (
     <div>

@@ -1,8 +1,6 @@
-export interface PublicationSummary {
-  slug: string
-  title: string
-  type: string
-  year: number
-  publisher: string
+import type { Publication } from '../publication/publication'
+
+export type PublicationSummary = Pick<Publication, 'slug' | 'title' | 'type' | 'year'> & {
   authors: string[]
+  publisher: string
 }

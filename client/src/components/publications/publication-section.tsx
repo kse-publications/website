@@ -2,10 +2,15 @@ export const prerender = true
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { buttonVariants } from '@/components/ui/button'
+import type { Publication } from '@/types/publication/publication'
 import { ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons'
 
-function PublicationPage({ data }: { data: any /* FIXME: Replace 'any' with smth useful */ }) {
-  const goBack = () => {
+interface PublicationPageProps {
+  data: Publication
+}
+
+function PublicationPage({ data }: PublicationPageProps) {
+    const goBack = () => {
     window.history.back()
   }
 

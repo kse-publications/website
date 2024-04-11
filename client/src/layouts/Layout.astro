@@ -2,12 +2,22 @@
 import { ViewTransitions } from 'astro:transitions'
 import Header from '@/components/layout/header'
 import LoadingIndicator from '@/components/layout/loading-indicator.astro'
+import { v4 as uuidv4 } from 'uuid'
 
 interface Props {
   title: string
 }
 
 const { title } = Astro.props
+
+const clientUuid = Astro.cookies.get('client-uuid')
+
+if (!clientUuid) {
+  const id = uuidv4()
+  Astro.cookies.set('client-uuid', id, {
+    path: '/',
+  })
+}
 ---
 
 <!doctype html>
@@ -34,5 +44,6 @@ const { title } = Astro.props
     <main class="mx-auto max-w-[1160px] px-4">
       <slot />
     </main>
+    <!-- <CookiesSetter/> -->
   </body>
 </html>
