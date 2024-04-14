@@ -1,10 +1,9 @@
 ﻿using Publications.API.Models;
+using Publications.API.Repositories.Shared;
 
 namespace Publications.API.Repositories.Authors;
 
-public interface IAuthorsRepository
+public interface IAuthorsRepository: IEntityRepository<Author>
 {
-    Task InsertOrUpdateAsync(
-        IEnumerable<Author> authors, 
-        CancellationToken cancellationToken = default);
+    
 }
