@@ -37,7 +37,7 @@ public class PublicationsRepository: IPublicationsRepository
     {
         string searchTerm = paginationSearchDTO.SearchTerm;
         
-        var query = new RedisQuery("publication-idx")
+        RedisQuery query = new RedisQuery("publication-idx")
             .Where(nameof(Publication.Title).Prefix(searchTerm))
             .Or(nameof(Publication.Title).Search(searchTerm))
             .Or(nameof(Publication.Abstract).Prefix(searchTerm))

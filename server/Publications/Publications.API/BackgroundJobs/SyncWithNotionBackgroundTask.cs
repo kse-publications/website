@@ -36,6 +36,7 @@ public class SyncWithNotionBackgroundTask : BaseRetriableTask<SyncWithNotionBack
         IReadOnlyCollection<Publication> publications = await _sourceRepository.GetPublicationsAsync();
         IReadOnlyCollection<Author> authors = await _sourceRepository.GetAuthorsAsync();
         IReadOnlyCollection<Publisher> publishers = await _sourceRepository.GetPublishersAsync();
+        
         await _publicationsRepository.InsertOrUpdateAsync(publications);
         await _authorsRepository.InsertOrUpdateAsync(authors);
         await _publishersRepository.InsertOrUpdateAsync(publishers);
