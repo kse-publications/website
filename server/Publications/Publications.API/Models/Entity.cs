@@ -16,6 +16,7 @@ public abstract class Entity<T> where T: Entity<T>
     
     public string Slug { get; set; } = string.Empty;
     
+    [Indexed(Sortable = true)]
     public int Views { get; set; } 
     
     public abstract T UpdateSlug();

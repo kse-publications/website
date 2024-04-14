@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Notion.Client;
 using Publications.API.BackgroundJobs;
+using Publications.API.BackgroundJobs.Abstractions;
 using Publications.API.DTOs;
 using Publications.API.Middleware;
 using Publications.API.Models;
