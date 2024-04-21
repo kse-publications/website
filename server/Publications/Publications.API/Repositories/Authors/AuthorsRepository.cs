@@ -1,21 +1,17 @@
 ﻿using Publications.API.Models;
-using Redis.OM;
+using Publications.API.Repositories.Shared;
+using Redis.OM.Contracts;
 using Redis.OM.Searching;
 
 namespace Publications.API.Repositories.Authors;
 
-public class AuthorsRepository: IAuthorsRepository
+public class AuthorsRepository: EntityRepository<Author>, IAuthorsRepository
 {
     private readonly IRedisCollection<Author> _authors;
 
-    public AuthorsRepository(RedisConnectionProvider provider)
+    public AuthorsRepository(IRedisConnectionProvider provider)
+        : base(provider)
     {
         _authors = provider.RedisCollection<Author>();
-    }
-
-    public async Task InsertOrUpdateAsync(
-        IEnumerable<Author> authors, CancellationToken cancellationToken = default)
-    {
-        await _authors.InsertAsync(authors);
     }
 }

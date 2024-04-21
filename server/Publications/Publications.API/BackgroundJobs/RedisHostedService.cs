@@ -1,13 +1,14 @@
 ﻿using Publications.API.Models;
 using Redis.OM;
+using Redis.OM.Contracts;
 
 namespace Publications.API.BackgroundJobs;
 
 public class RedisHostedService: IHostedService
 {
-    private readonly RedisConnectionProvider _redisConnectionProvider;
+    private readonly IRedisConnectionProvider _redisConnectionProvider;
 
-    public RedisHostedService(RedisConnectionProvider redisConnectionProvider)
+    public RedisHostedService(IRedisConnectionProvider redisConnectionProvider)
     {
         _redisConnectionProvider = redisConnectionProvider;
     }

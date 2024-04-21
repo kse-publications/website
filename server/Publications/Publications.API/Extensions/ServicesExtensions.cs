@@ -1,8 +1,9 @@
 ﻿using Coravel;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi.Models; 
 using Notion.Client;
 using Publications.API.BackgroundJobs;
+using Publications.API.BackgroundJobs.Abstractions;
 using Publications.API.DTOs;
 using Publications.API.Middleware;
 using Publications.API.Models;
@@ -10,10 +11,12 @@ using Publications.API.Repositories.Authors;
 using Publications.API.Repositories.Publications;
 using Publications.API.Repositories.Publishers;
 using Publications.API.Repositories.Requests;
+using Publications.API.Repositories.Shared;
 using Publications.API.Repositories.Source;
 using Publications.API.Serialization;
 using Publications.API.Services;
 using Redis.OM;
+using Redis.OM.Contracts;
 
 namespace Publications.API.Extensions;
 
@@ -23,9 +26,9 @@ public static class ServicesExtensions
     {
         return builder.AddJsonOptions(options =>
         {
-            options.JsonSerializerOptions.Converters.Add(new IgnoreJsonConverter<Publication>());
-            options.JsonSerializerOptions.Converters.Add(new IgnoreJsonConverter<Publisher>());
-            options.JsonSerializerOptions.Converters.Add(new IgnoreJsonConverter<Author>());
+            options.JsonSerializerOptions.Converters.Add(new ResponseJsonConverter<Publication>());
+            options.JsonSerializerOptions.Converters.Add(new ResponseJsonConverter<Publisher>());
+            options.JsonSerializerOptions.Converters.Add(new ResponseJsonConverter<Author>());
         });
     }
     
@@ -70,7 +73,7 @@ public static class ServicesExtensions
     
     public static void AddRedis(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton(new RedisConnectionProvider(
+        services.AddSingleton<IRedisConnectionProvider>(new RedisConnectionProvider(
             connectionString: configuration.GetConnectionString("Redis")!));
 
         services.AddHostedService<RedisHostedService>();
@@ -89,13 +92,16 @@ public static class ServicesExtensions
     {
         services.AddScoped<IPublicationsRepository, PublicationsRepository>();
         services.AddScoped<IPublicationsService, PublicationsService>();
-        
         services.AddScoped<IAuthorsRepository, AuthorsRepository>();
         services.AddScoped<IPublishersRepository, PublishersRepository>();
         
         services.AddScoped<ISourceRepository, NotionRepository>();
         
         services.AddScoped<IRequestsRepository, RequestsRepository>();
+
+        services.AddScoped<IEntityRepository<Publication>, EntityRepository<Publication>>();
+        services.AddScoped<IEntityRepository<Publisher>, EntityRepository<Publisher>>();
+        services.AddScoped<IEntityRepository<Author>, EntityRepository<Author>>();
     }
     
     public static void AddBackgroundJobs(this IServiceCollection services, IConfiguration configuration)
@@ -107,6 +113,7 @@ public static class ServicesExtensions
         services.AddScheduler();
         
         services.AddTransient<StoreRequestAnalyticsTask>();
+        services.AddTransient<UpdateResourceViewsTask>();
         services.AddQueue();
     }
     
@@ -118,6 +125,11 @@ public static class ServicesExtensions
                 .Hourly()
                 .RunOnceAtStart()
                 .PreventOverlapping(nameof(SyncWithNotionBackgroundTask));
+
+            scheduler.Schedule<UpdateResourceViewsTask>()
+                .Cron("0 */2 * * *") // Every 2 hours
+                .RunOnceAtStart()
+                .PreventOverlapping(nameof(UpdateResourceViewsTask));
         });
     }
     

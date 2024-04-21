@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
+using Publications.API.BackgroundJobs.Abstractions;
 using Publications.API.Models;
-using Publications.API.Repositories;
 using Publications.API.Repositories.Authors;
 using Publications.API.Repositories.Publications;
 using Publications.API.Repositories.Publishers;
@@ -31,11 +31,12 @@ public class SyncWithNotionBackgroundTask : BaseRetriableTask<SyncWithNotionBack
         _publishersRepository = publishersRepository;
     }
 
-    protected override async Task DoBackgroundRetriableTaskAsync()
+    protected override async Task DoRetriableTaskAsync()
     {
         IReadOnlyCollection<Publication> publications = await _sourceRepository.GetPublicationsAsync();
         IReadOnlyCollection<Author> authors = await _sourceRepository.GetAuthorsAsync();
         IReadOnlyCollection<Publisher> publishers = await _sourceRepository.GetPublishersAsync();
+        
         await _publicationsRepository.InsertOrUpdateAsync(publications);
         await _authorsRepository.InsertOrUpdateAsync(authors);
         await _publishersRepository.InsertOrUpdateAsync(publishers);

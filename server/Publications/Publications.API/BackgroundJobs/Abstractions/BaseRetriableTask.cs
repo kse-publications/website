@@ -1,29 +1,24 @@
 ﻿
-using Coravel.Invocable;
+namespace Publications.API.BackgroundJobs.Abstractions;
 
-namespace Publications.API.BackgroundJobs;
-
-public abstract class BaseRetriableTask<TTask>: IInvocable
+public abstract class BaseRetriableTask<TTask>: BaseLoggableTask<TTask> 
     where TTask: BaseRetriableTask<TTask>
 {
     private int _currentRetries;
     private readonly ILogger<TTask> _taskLogger;
     private readonly RetriableTaskOptions _options;
     
-    protected BaseRetriableTask(ILogger<TTask> logger, RetriableTaskOptions options)
+    protected BaseRetriableTask(ILogger<TTask> logger, RetriableTaskOptions options) : base(logger)
     {
         _taskLogger = logger;
         _options = options;
     }
-    
-    public async Task Invoke()
+
+    protected override async Task DoLoggedTaskAsync()
     {
         try
         {
-            _taskLogger.LogInformation("Started executing {Task}...", typeof(TTask).Name);
-            await DoBackgroundRetriableTaskAsync();
-            _currentRetries = 0;
-            _taskLogger.LogInformation("{Task} executed successfully.", typeof(TTask).Name);
+            await DoRetriableTaskAsync();
         }
         catch (Exception ex)
         {
@@ -36,7 +31,7 @@ public abstract class BaseRetriableTask<TTask>: IInvocable
                     _options.RetryDelay, _currentRetries, _options.MaxRetries);
                 
                 await Task.Delay(_options.RetryDelay);
-                await Invoke();
+                await DoLoggedTaskAsync();
             }
             else
             {
@@ -44,12 +39,6 @@ public abstract class BaseRetriableTask<TTask>: IInvocable
             }
         }
     }
-    
-    protected abstract Task DoBackgroundRetriableTaskAsync();
-}
 
-public class RetriableTaskOptions
-{
-    public int MaxRetries { get; set; } = 3;
-    public TimeSpan RetryDelay { get; set; } = TimeSpan.FromSeconds(5);
+    protected abstract Task DoRetriableTaskAsync();
 }

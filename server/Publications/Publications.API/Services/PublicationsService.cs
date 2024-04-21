@@ -44,14 +44,6 @@ public class PublicationsService: IPublicationsService
         return await _publicationsRepository.GetByIdAsync(id, cancellationToken);
     }
 
-    public async Task InsertOrUpdateAsync(
-        IEnumerable<Publication> publications,
-        CancellationToken cancellationToken = default)
-    {
-        await _publicationsRepository.InsertOrUpdateAsync(
-            publications, cancellationToken);
-    }
-
     private static PaginatedCollection<PublicationSummary> GetPublicationsSummaries(
         PaginatedCollection<Publication> publications)
     {
