@@ -113,6 +113,7 @@ public static class ServicesExtensions
         services.AddScheduler();
         
         services.AddTransient<StoreRequestAnalyticsTask>();
+        services.AddTransient<UpdateResourceViewsTask>();
         services.AddQueue();
     }
     
@@ -124,6 +125,11 @@ public static class ServicesExtensions
                 .Hourly()
                 .RunOnceAtStart()
                 .PreventOverlapping(nameof(SyncWithNotionBackgroundTask));
+
+            scheduler.Schedule<UpdateResourceViewsTask>()
+                .Cron("0 */2 * * *") // Every 2 hours
+                .RunOnceAtStart()
+                .PreventOverlapping(nameof(UpdateResourceViewsTask));
         });
     }
     
