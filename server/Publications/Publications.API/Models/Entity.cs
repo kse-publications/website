@@ -5,7 +5,6 @@ namespace Publications.API.Models;
 
 public abstract class Entity<T> where T: Entity<T>
 {
-    
     [RedisIdField]
     [Indexed]
     [IgnoreInResponse]
@@ -20,4 +19,15 @@ public abstract class Entity<T> where T: Entity<T>
     public int Views { get; set; } 
     
     public abstract T UpdateSlug();
+
+    public T UpdateViews(int views = 1)
+    {
+        if (views < 0)
+        {
+            throw new ArgumentException("Views cannot be negative");
+        }
+        
+        Views = views;
+        return (T)this;
+    }
 }

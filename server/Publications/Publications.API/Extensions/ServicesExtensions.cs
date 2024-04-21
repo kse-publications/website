@@ -1,6 +1,6 @@
 ﻿using Coravel;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi.Models; 
 using Notion.Client;
 using Publications.API.BackgroundJobs;
 using Publications.API.BackgroundJobs.Abstractions;
@@ -11,10 +11,12 @@ using Publications.API.Repositories.Authors;
 using Publications.API.Repositories.Publications;
 using Publications.API.Repositories.Publishers;
 using Publications.API.Repositories.Requests;
+using Publications.API.Repositories.Shared;
 using Publications.API.Repositories.Source;
 using Publications.API.Serialization;
 using Publications.API.Services;
 using Redis.OM;
+using Redis.OM.Contracts;
 
 namespace Publications.API.Extensions;
 
@@ -24,9 +26,9 @@ public static class ServicesExtensions
     {
         return builder.AddJsonOptions(options =>
         {
-            options.JsonSerializerOptions.Converters.Add(new IgnoreJsonConverter<Publication>());
-            options.JsonSerializerOptions.Converters.Add(new IgnoreJsonConverter<Publisher>());
-            options.JsonSerializerOptions.Converters.Add(new IgnoreJsonConverter<Author>());
+            options.JsonSerializerOptions.Converters.Add(new ResponseJsonConverter<Publication>());
+            options.JsonSerializerOptions.Converters.Add(new ResponseJsonConverter<Publisher>());
+            options.JsonSerializerOptions.Converters.Add(new ResponseJsonConverter<Author>());
         });
     }
     
@@ -90,13 +92,16 @@ public static class ServicesExtensions
     {
         services.AddScoped<IPublicationsRepository, PublicationsRepository>();
         services.AddScoped<IPublicationsService, PublicationsService>();
-        
         services.AddScoped<IAuthorsRepository, AuthorsRepository>();
         services.AddScoped<IPublishersRepository, PublishersRepository>();
         
         services.AddScoped<ISourceRepository, NotionRepository>();
         
         services.AddScoped<IRequestsRepository, RequestsRepository>();
+
+        services.AddScoped<IEntityRepository<Publication>, EntityRepository<Publication>>();
+        services.AddScoped<IEntityRepository<Publisher>, EntityRepository<Publisher>>();
+        services.AddScoped<IEntityRepository<Author>, EntityRepository<Author>>();
     }
     
     public static void AddBackgroundJobs(this IServiceCollection services, IConfiguration configuration)

@@ -5,7 +5,7 @@ using Publications.API.Models;
 
 namespace Publications.API.Serialization;
 
-public class IgnoreJsonConverter<T> : JsonConverter<T> where T : Entity<T>
+public class ResponseJsonConverter<T> : JsonConverter<T> where T : Entity<T>
 {
     public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
@@ -24,7 +24,7 @@ public class IgnoreJsonConverter<T> : JsonConverter<T> where T : Entity<T>
             {
                 continue;
             }
-
+            
             writer.WritePropertyName(property.Name.ToLower());
             JsonSerializer.Serialize(writer, property.GetValue(value), property.PropertyType, options);
         }

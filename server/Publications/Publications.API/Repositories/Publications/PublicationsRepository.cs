@@ -2,17 +2,19 @@
 using Publications.API.Models;
 using Publications.API.Repositories.Shared;
 using Redis.OM;
+using Redis.OM.Contracts;
 using Redis.OM.Searching;
 using Redis.OM.Searching.Query;
 
 namespace Publications.API.Repositories.Publications;
 
-public class PublicationsRepository: IPublicationsRepository
+public class PublicationsRepository: EntityRepository<Publication>, IPublicationsRepository
 {
-    private readonly RedisConnectionProvider _redisConnectionProvider;
+    private readonly IRedisConnectionProvider _redisConnectionProvider;
     private readonly IRedisCollection<Publication> _publications;
 
-    public PublicationsRepository(RedisConnectionProvider redisConnectionProvider)
+    public PublicationsRepository(IRedisConnectionProvider redisConnectionProvider)
+        : base(redisConnectionProvider)
     {
         _redisConnectionProvider = redisConnectionProvider;
         _publications = redisConnectionProvider.RedisCollection<Publication>();
@@ -65,18 +67,5 @@ public class PublicationsRepository: IPublicationsRepository
             Items: publications,
             ResultCount: publications.Count,
             TotalCount: (int)(await matchedCountTask).DocumentCount);
-    }
-
-    public async Task<Publication?> GetByIdAsync(
-        int id, CancellationToken cancellationToken = default)
-    {
-        return await _publications.FindByIdAsync(id.ToString());
-    }
-
-    public async Task InsertOrUpdateAsync(
-        IEnumerable<Publication> publications,
-        CancellationToken cancellationToken = default)
-    {
-        await _publications.InsertAsync(publications);
     }
 }

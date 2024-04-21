@@ -13,10 +13,8 @@ public interface IPublicationsRepository: IEntityRepository<Publication>
         PaginationFilterDTO paginationFilterDTO,
         CancellationToken cancellationToken = default);
     
+    
     Task<PaginatedCollection<Publication>> GetBySearchAsync(
         PaginationSearchDTO paginationSearchDTO,
         CancellationToken cancellationToken = default);
-    
-    Task<Publication?> GetByIdAsync(
-        int id, CancellationToken cancellationToken = default);
 }
