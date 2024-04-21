@@ -73,7 +73,7 @@ public static class ServicesExtensions
     
     public static void AddRedis(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton(new RedisConnectionProvider(
+        services.AddSingleton<IRedisConnectionProvider>(new RedisConnectionProvider(
             connectionString: configuration.GetConnectionString("Redis")!));
 
         services.AddHostedService<RedisHostedService>();

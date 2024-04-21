@@ -35,7 +35,7 @@ public class PublicationsController : ControllerBase
     
     [HttpGet("{id}")]
     [IdExtractionFilter]
-    [RequestAnalyticsFilter]
+    [RequestAnalyticsFilter<Publication>]
     [ProducesResponseType(typeof(Publication), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(
