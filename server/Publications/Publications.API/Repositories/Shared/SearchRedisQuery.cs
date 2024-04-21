@@ -1,4 +1,5 @@
-﻿using Publications.API.Models;
+﻿using Publications.API.DTOs;
+using Publications.API.Models;
 using Redis.OM.Searching.Query;
 
 namespace Publications.API.Repositories.Shared;
@@ -24,12 +25,17 @@ public class SearchRedisQuery
         return this;
     }
     
-    public SearchRedisQuery Filter(string type)
+    public SearchRedisQuery Filter(PublicationsPaginationFilterDTO filterDTO)
     {
-        if (type == string.Empty)
-            return this;
-
-        And(nameof(Publication.Type).EqualTo(type));
+        if (filterDTO.Year != default)
+            And(nameof(Publication.Year).EqualTo(filterDTO.Year.ToString()));
+        
+        if (!string.IsNullOrWhiteSpace(filterDTO.Type))
+            And(nameof(Publication.Type).EqualTo(filterDTO.Type));
+        
+        if (!string.IsNullOrWhiteSpace(filterDTO.Language))
+            And(nameof(Publication.Language).EqualTo(filterDTO.Language));
+        
         return this;
     }
     

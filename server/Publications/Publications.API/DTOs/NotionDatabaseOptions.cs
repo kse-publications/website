@@ -1,6 +1,9 @@
 ﻿namespace Publications.API.DTOs;
 
-public record NotionDatabaseOptions
+/// <summary>
+/// Notion database ids encapsulated in one options record.
+/// </summary>
+public class NotionDatabaseOptions
 {
     public string PublicationsDbId { get; init; } = null!;
     public string AuthorsDbId { get; init; } = null!;

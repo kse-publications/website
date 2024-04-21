@@ -1,5 +1,6 @@
 ﻿using Publications.API.DTOs;
 using Publications.API.Models;
+using Publications.API.Repositories.Shared;
 using Redis.OM;
 using Redis.OM.Searching;
 
@@ -26,11 +27,41 @@ public static class PublicationsRepositoryExtensions
     }
     
     public static IRedisCollection<Publication> ApplyFiltering(
-        this IRedisCollection<Publication> publications, PaginationFilterDTO paginationFilterDTO)
+        this IRedisCollection<Publication> publications,
+        PublicationsPaginationFilterDTO paginationDTO)
     {
-        return paginationFilterDTO.Filter == string.Empty
-            ? publications
-            : publications.Where(p => p.Type == paginationFilterDTO.Filter);
+        return publications
+            .FilterType(paginationDTO.Type)
+            .FilterYear(paginationDTO.Year)
+            .FilterLanguage(paginationDTO.Language);
+    }
+    
+    private static IRedisCollection<Publication> FilterYear(
+        this IRedisCollection<Publication> publications,
+        int year)
+    {
+        if (year == default)
+            return publications;
+        
+        return publications.Where(p => p.Year == year);
+    }
+    
+    private static IRedisCollection<Publication> FilterType(
+        this IRedisCollection<Publication> publications, string? type)
+    {
+        if (string.IsNullOrWhiteSpace(type))
+            return publications;
+        
+        return publications.Where(p => p.Type == type);
+    }
+    
+    private static IRedisCollection<Publication> FilterLanguage(
+        this IRedisCollection<Publication> publications, string? language)
+    {
+        if (string.IsNullOrWhiteSpace(language))
+            return publications;
+        
+        return publications.Where(p => p.Language == language);
     }
     
     public static IRedisCollection<Publication> ApplySorting(

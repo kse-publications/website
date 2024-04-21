@@ -2,6 +2,7 @@
 using Publications.API.Models;
 using Publications.API.Repositories;
 using Publications.API.Repositories.Publications;
+using Publications.API.Repositories.Shared;
 
 namespace Publications.API.Services;
 
@@ -15,16 +16,16 @@ public class PublicationsService: IPublicationsService
     }
 
     public async Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
-        PaginationFilterDTO paginationFilterDTO, CancellationToken cancellationToken = default)
+        PublicationsPaginationFilterDTO paginationDTO, CancellationToken cancellationToken = default)
     {
         PaginatedCollection<Publication> publications = await _publicationsRepository
-            .GetAllAsync(paginationFilterDTO, cancellationToken);
+            .GetAllAsync(paginationDTO, cancellationToken);
         
         return GetPublicationsSummaries(publications);
     }
 
     public async Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
-        PaginationSearchDTO paginationSearchDTO, 
+        PublicationsPaginationSearchDTO paginationSearchDTO, 
         CancellationToken cancellationToken = default)
     {
         const int minSearchTermLength = 2;

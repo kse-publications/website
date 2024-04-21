@@ -21,20 +21,20 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
     }
 
     public async Task<PaginatedCollection<Publication>> GetAllAsync(
-        PaginationFilterDTO paginationFilterDTO, CancellationToken cancellationToken = default)
+        PublicationsPaginationFilterDTO paginationDTO, CancellationToken cancellationToken = default)
     {
         IRedisCollection<Publication> sortedFilteredPublications = _publications
-            .ApplyFiltering(paginationFilterDTO)
-            .ApplySorting(paginationFilterDTO.SortBy, paginationFilterDTO.Ascending);
+            .ApplyFiltering(paginationDTO)
+            .ApplySorting(paginationDTO.SortBy, paginationDTO.Ascending);
         
         return await sortedFilteredPublications.ApplyPagination(
-            paginationFilterDTO.Page,
-            paginationFilterDTO.PageSize, 
+            paginationDTO.Page,
+            paginationDTO.PageSize, 
             totalMatches: await sortedFilteredPublications.CountAsync());
     }
 
     public async Task<PaginatedCollection<Publication>> GetBySearchAsync(
-        PaginationSearchDTO paginationSearchDTO,
+        PublicationsPaginationSearchDTO paginationSearchDTO,
         CancellationToken cancellationToken = default)
     {
         string searchTerm = paginationSearchDTO.SearchTerm;
@@ -48,7 +48,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             .Or($"{nameof(Publication.Publisher)}_{nameof(Publisher.Name)}".Search(searchTerm))
             .Or($"{nameof(Publication.Authors)}_{nameof(Author.Name)}".Prefix(searchTerm))
             .Or($"{nameof(Publication.Authors)}_{nameof(Author.Name)}".Search(searchTerm))
-            .Filter(paginationSearchDTO.Filter)
+            .Filter(paginationSearchDTO)
             .Build();
         
         Task<SearchResponse<Publication>> matchedCountTask = _redisConnectionProvider.Connection

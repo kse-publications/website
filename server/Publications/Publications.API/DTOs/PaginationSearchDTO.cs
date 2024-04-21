@@ -1,20 +1,16 @@
-﻿using System.Text.RegularExpressions;
-
+﻿
 namespace Publications.API.DTOs;
 
-public record PaginationSearchDTO(string SearchTerm = "") : PaginationFilterDTO
+/// <summary>
+/// Basic pagination and search DTO.
+/// </summary>
+public record PaginationSearchDTO: PaginationDTO, ISearchDTO
 {
-    /// <summary>
-    /// Removes special characters from the search term and trims it.
-    /// </summary>
-    /// <returns> Sanitized search term. </returns>
-    public string CleanSearchTerm()
+    private readonly string _searchTerm = string.Empty;
+    public string SearchTerm
     {
-        const int maxSearchTermLength = 50;
-        
-        string sanitizedTerm = Regex.Replace(SearchTerm, @"[^a-zA-Z0-9_ ]", "");
-        sanitizedTerm = Regex.Replace(sanitizedTerm, @"\s+", " ").Trim();
-        return sanitizedTerm.Substring(0, Math.Min(maxSearchTermLength, sanitizedTerm.Length));
+        get => _searchTerm;
+        init => _searchTerm = this.CleanSearchTerm(value);
     }
 }
 
