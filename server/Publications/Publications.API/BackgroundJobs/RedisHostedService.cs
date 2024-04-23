@@ -18,11 +18,21 @@ public class RedisHostedService: IHostedService
         var indexes = (await _redisConnectionProvider.Connection
             .ExecuteAsync("FT._LIST")).ToArray();
 
-        if (indexes.All(i => i != "publication-idx"))
+        await CreateIndexAsync<Publication>(indexes);
+        await CreateIndexAsync<Publisher>(indexes);
+        await CreateIndexAsync<Author>(indexes);
+        await CreateIndexAsync<FilterGroup>(indexes);
+    }
+
+    private async Task CreateIndexAsync<T>(RedisReply[] indexes)
+    {
+        if (indexes.All(i => i != GetIndexName<T>()))
         {
-            await _redisConnectionProvider.Connection.CreateIndexAsync(typeof(Publication));
+            await _redisConnectionProvider.Connection.CreateIndexAsync(typeof(T));
         }
     }
+    
+    private static string GetIndexName<T>() => $"{typeof(T).Name.ToLower()}-idx";
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
