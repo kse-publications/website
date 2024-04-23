@@ -126,15 +126,15 @@ public static class ServicesExtensions
     {
         serviceProvider.UseScheduler(scheduler =>
         {
-            // scheduler.Schedule<SyncWithNotionBackgroundTask>()
-            //     .Hourly()
-            //     .RunOnceAtStart()
-            //     .PreventOverlapping(nameof(SyncWithNotionBackgroundTask));
+            scheduler.Schedule<SyncWithNotionBackgroundTask>()
+                .Hourly()
+                .RunOnceAtStart()
+                .PreventOverlapping(nameof(SyncWithNotionBackgroundTask));
 
-            // scheduler.Schedule<UpdateResourceViewsTask>()
-            //     .Cron("0 */2 * * *") // Every 2 hours
-            //     .RunOnceAtStart()
-            //     .PreventOverlapping(nameof(UpdateResourceViewsTask));
+            scheduler.Schedule<UpdateResourceViewsTask>()
+                .Cron("0 */2 * * *") // Every 2 hours
+                .RunOnceAtStart()
+                .PreventOverlapping(nameof(UpdateResourceViewsTask));
         });
     }
     
