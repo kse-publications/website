@@ -39,6 +39,7 @@ public static class ServicesExtensions
         services.AddSwaggerGen(options =>
         {
             options.SwaggerDoc("v1", new OpenApiInfo { Title = "Publications.API", Version = "v1" });
+            options.SchemaFilter<SwaggerIgnoreFilter>();
         });
     }
     
