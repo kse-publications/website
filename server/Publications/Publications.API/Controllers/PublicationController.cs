@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Publications.API.Models;
 using Publications.API.DTOs;
 using Publications.API.Middleware;
+using Publications.API.Repositories.Authors;
+using Publications.API.Repositories.Filters;
 using Publications.API.Repositories.Shared;
 using Publications.API.Services;
 using Swashbuckle.AspNetCore.Annotations;
@@ -13,10 +15,17 @@ namespace Publications.API.Controllers;
 public class PublicationsController : ControllerBase
 {
     private readonly IPublicationsService _publicationsService;
+    private readonly IFiltersRepository _filtersRepository;
+    private readonly IAuthorsRepository _authorsRepository;
 
-    public PublicationsController(IPublicationsService publicationsService)
+    public PublicationsController(
+        IPublicationsService publicationsService,
+        IFiltersRepository filtersRepository, 
+        IAuthorsRepository authorsRepository)
     {
         _publicationsService = publicationsService;
+        _filtersRepository = filtersRepository;
+        _authorsRepository = authorsRepository;
     }
     
     [HttpGet]
@@ -25,7 +34,7 @@ public class PublicationsController : ControllerBase
         Summary = "Get all publications",
         Description = "By default, returns latest publications (Descending order by LastModified date time).")]
     public async Task<IActionResult> GetAll(
-        [FromQuery]PublicationsPaginationFilterDTO paginationDTO, CancellationToken cancellationToken)
+        [FromQuery]PaginationFilterDTO paginationDTO, CancellationToken cancellationToken)
     {
         PaginatedCollection<PublicationSummary> publications = await _publicationsService
             .GetAllAsync(paginationDTO, cancellationToken);
@@ -62,11 +71,25 @@ public class PublicationsController : ControllerBase
                       "Title, Abstract, and Keywords, Publisher.Name, Author.Name."
     )]
     public async Task<IActionResult> GetBySearch(
-        [FromQuery]PublicationsPaginationSearchDTO searchDTO, CancellationToken cancellationToken)
+        [FromQuery]PaginationFilterSearchDTO searchDTO, CancellationToken cancellationToken)
     {
         PaginatedCollection<PublicationSummary> publications = await _publicationsService
             .GetBySearchAsync(searchDTO, cancellationToken);
             
         return Ok(publications);
+    }
+    
+    [HttpGet("filters")]
+    [ProducesResponseType(typeof(IReadOnlyCollection<FilterGroup>), StatusCodes.Status200OK)]
+    [SwaggerOperation(
+        Summary = "Get all filters",
+        Description = "Returns all FilterGroups for publications: Year, Type, Lang etc."
+    )]
+    public async Task<IActionResult> GetFilters(CancellationToken cancellationToken)
+    {
+        IReadOnlyCollection<FilterGroup> filters = await _filtersRepository
+            .GetFiltersAsync(cancellationToken);
+        
+        return Ok(filters);
     }
 }
