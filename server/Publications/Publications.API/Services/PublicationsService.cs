@@ -16,7 +16,7 @@ public class PublicationsService: IPublicationsService
     }
 
     public async Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
-        PublicationsPaginationFilterDTO paginationDTO, CancellationToken cancellationToken = default)
+        PaginationFilterDTO paginationDTO, CancellationToken cancellationToken = default)
     {
         PaginatedCollection<Publication> publications = await _publicationsRepository
             .GetAllAsync(paginationDTO, cancellationToken);
@@ -25,7 +25,7 @@ public class PublicationsService: IPublicationsService
     }
 
     public async Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
-        PublicationsPaginationSearchDTO paginationSearchDTO, 
+        PaginationFilterSearchDTO paginationSearchDTO, 
         CancellationToken cancellationToken = default)
     {
         const int minSearchTermLength = 2;

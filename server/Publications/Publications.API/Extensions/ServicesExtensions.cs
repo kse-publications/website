@@ -8,6 +8,7 @@ using Publications.API.DTOs;
 using Publications.API.Middleware;
 using Publications.API.Models;
 using Publications.API.Repositories.Authors;
+using Publications.API.Repositories.Filters;
 using Publications.API.Repositories.Publications;
 using Publications.API.Repositories.Publishers;
 using Publications.API.Repositories.Requests;
@@ -29,6 +30,7 @@ public static class ServicesExtensions
             options.JsonSerializerOptions.Converters.Add(new ResponseJsonConverter<Publication>());
             options.JsonSerializerOptions.Converters.Add(new ResponseJsonConverter<Publisher>());
             options.JsonSerializerOptions.Converters.Add(new ResponseJsonConverter<Author>());
+            options.JsonSerializerOptions.Converters.Add(new ResponseJsonConverter<FilterGroup>());
         });
     }
     
@@ -102,6 +104,9 @@ public static class ServicesExtensions
         services.AddScoped<IEntityRepository<Publication>, EntityRepository<Publication>>();
         services.AddScoped<IEntityRepository<Publisher>, EntityRepository<Publisher>>();
         services.AddScoped<IEntityRepository<Author>, EntityRepository<Author>>();
+
+        services.AddScoped<IFiltersRepository, FiltersRepository>();
+        services.AddScoped<IFiltersService, FiltersService>();
     }
     
     public static void AddBackgroundJobs(this IServiceCollection services, IConfiguration configuration)

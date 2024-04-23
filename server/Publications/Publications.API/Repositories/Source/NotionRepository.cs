@@ -10,6 +10,9 @@ public class NotionRepository: ISourceRepository
     private readonly INotionClient _notionClient;
     private readonly NotionDatabaseOptions _databaseOptions;
 
+    private IReadOnlyCollection<Publisher>? _publishers;
+    private IReadOnlyCollection<Author>? _authors;
+
     public NotionRepository(
         INotionClient notionClient, 
         IOptions<NotionDatabaseOptions> databaseOptions)
@@ -32,7 +35,52 @@ public class NotionRepository: ISourceRepository
             .ToList()
             .AsReadOnly();
     }
-
+    
+    public async Task<IReadOnlyCollection<Author>> GetAuthorsAsync()
+    {
+        if (_authors is not null)
+            return _authors;
+        
+        PaginatedList<Page> notionAuthors = await _notionClient.Databases.QueryAsync(
+            _databaseOptions.AuthorsDbId, new DatabasesQueryParameters());
+        
+        _authors = notionAuthors.Results
+            .Where(IsNotionAuthorValid)
+            .Select(page => new Author 
+            { 
+                Id = (int)((UniqueIdPropertyValue)page.Properties["ID"]).UniqueId.Number!.Value,
+                NotionId = Guid.Parse(page.Id),
+                Name = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText,
+                ProfileLink = ((UrlPropertyValue)page.Properties["Profile link"]).Url 
+            }.UpdateSlug())
+            .ToList()
+            .AsReadOnly();
+        
+        return _authors;
+    }
+    
+    public async Task<IReadOnlyCollection<Publisher>> GetPublishersAsync()
+    {
+        if (_publishers is not null)
+            return _publishers;
+        
+        PaginatedList<Page> notionPublishers = await _notionClient.Databases.QueryAsync(
+            _databaseOptions.PublishersDbId, new DatabasesQueryParameters());
+        
+        _publishers = notionPublishers.Results
+            .Where(IsNotionPublisherValid)
+            .Select(page => new Publisher 
+            { 
+                Id = (int)((UniqueIdPropertyValue)page.Properties["ID"]).UniqueId.Number!.Value,
+                NotionId = Guid.Parse(page.Id),
+                Name = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText
+            }.UpdateSlug())
+            .ToList()
+            .AsReadOnly();
+        
+        return _publishers;
+    }
+    
     private static Publication MapPublicationFromPage(
         Page page, ICollection<Author> authors, ICollection<Publisher> publishers)
     {
@@ -67,42 +115,6 @@ public class NotionRepository: ISourceRepository
 
             LastModified = page.LastEditedTime
         }.UpdateSlug();
-    }
-    
-    
-    public async Task<IReadOnlyCollection<Author>> GetAuthorsAsync()
-    {
-        PaginatedList<Page> notionAuthors = await _notionClient.Databases.QueryAsync(
-            _databaseOptions.AuthorsDbId, new DatabasesQueryParameters());
-        
-        return notionAuthors.Results
-            .Where(IsNotionAuthorValid)
-            .Select(page => new Author 
-            { 
-                Id = (int)((UniqueIdPropertyValue)page.Properties["ID"]).UniqueId.Number!.Value,
-                NotionId = Guid.Parse(page.Id),
-                Name = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText,
-                ProfileLink = ((UrlPropertyValue)page.Properties["Profile link"]).Url 
-            }.UpdateSlug())
-            .ToList()
-            .AsReadOnly();
-    }
-    
-    public async Task<IReadOnlyCollection<Publisher>> GetPublishersAsync()
-    {
-        PaginatedList<Page> notionPublishers = await _notionClient.Databases.QueryAsync(
-            _databaseOptions.PublishersDbId, new DatabasesQueryParameters());
-        
-        return notionPublishers.Results
-            .Where(IsNotionPublisherValid)
-            .Select(page => new Publisher 
-            { 
-                Id = (int)((UniqueIdPropertyValue)page.Properties["ID"]).UniqueId.Number!.Value,
-                NotionId = Guid.Parse(page.Id),
-                Name = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText
-            }.UpdateSlug())
-            .ToList()
-            .AsReadOnly();
     }
 
     private static bool IsNotionPublicationValid(Page publicationPage)

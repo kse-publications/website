@@ -10,10 +10,10 @@ namespace Publications.API.Repositories.Publications;
 public interface IPublicationsRepository: IEntityRepository<Publication>
 {
     Task<PaginatedCollection<Publication>> GetAllAsync(
-        PublicationsPaginationFilterDTO paginationDTO,
+        PaginationFilterDTO paginationDTO,
         CancellationToken cancellationToken = default);
     
     Task<PaginatedCollection<Publication>> GetBySearchAsync(
-        PublicationsPaginationSearchDTO paginationSearchDTO,
+        PaginationFilterSearchDTO paginationSearchDTO,
         CancellationToken cancellationToken = default);
 }
