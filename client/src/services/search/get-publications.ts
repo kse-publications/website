@@ -5,14 +5,18 @@ import type { QueryParams, SearchPublicationsQueryParams } from '@/types/common/
 
 const BASE_URL = import.meta.env.PUBLIC_API_URL
 
+const getFiltersString = (filters: number[]): string => {
+  return filters.join('-')
+}
+
 export const getInitialPublications = async ({
   page = DEFAULT_PAGE,
-  filterType,
+  filters,
 }: QueryParams): Promise<PaginatedCollection<PublicationSummary>> => {
   let url = `${BASE_URL}/publications?Page=${page}&PageSize=${DEFAULT_PAGE_SIZE}`
 
-  if (filterType) {
-    url += `&Filter=${filterType}`
+  if (filters?.length) {
+    url += `&Filters=${getFiltersString(filters)}`
   }
 
   return fetch(url)
@@ -23,12 +27,12 @@ export const getInitialPublications = async ({
 export const searchPublications = async ({
   page,
   searchText,
-  filterType,
+  filters,
 }: SearchPublicationsQueryParams): Promise<PaginatedCollection<PublicationSummary>> => {
   let url = `${BASE_URL}/publications/search?Page=${page}&SearchTerm=${searchText}&PageSize=${DEFAULT_PAGE_SIZE}`
 
-  if (filterType) {
-    url += `&Filter=${filterType}`
+  if (filters?.length) {
+    url += `&Filters=${getFiltersString(filters)}`
   }
 
   return fetch(url).then((response) => response.json())
