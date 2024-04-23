@@ -1,15 +1,18 @@
-﻿using System.Text.RegularExpressions;
+﻿
+using System.Text.RegularExpressions;
 
 namespace Publications.API.DTOs;
 
 /// <summary>
-/// Provides extension methods for classes implementing <see cref="ISearchDTO"/>.
+/// Basic pagination and search DTO.
 /// </summary>
-public static partial class SearchDTOExtensions
+public partial record PaginationFilterSearchDTO: PaginationFilterDTO
 {
-    public static string CleanSearchTerm(this ISearchDTO searchDto, string? searchTerm)
+    private readonly string _searchTerm = string.Empty;
+    public string SearchTerm
     {
-        return CleanSearchTerm(searchTerm);
+        get => _searchTerm;
+        init => _searchTerm = CleanSearchTerm(value);
     }
     
     private static string CleanSearchTerm(string? searchTerm)
@@ -30,3 +33,4 @@ public static partial class SearchDTOExtensions
     [GeneratedRegex(@"\s+")]
     private static partial Regex ExtraSpacesRegex();
 }
+
