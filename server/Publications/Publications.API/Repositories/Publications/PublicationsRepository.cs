@@ -27,22 +27,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             .Filter(paginationDTO)
             .Sort(nameof(Publication.Year), SortDirection.Descending);
         
-        Task<SearchResponse<Publication>> matchedCountTask = _redisConnectionProvider.Connection
-            .SearchAsync<Publication>(query);
-        
-        query.Limit(paginationDTO.PageSize, paginationDTO.Page);
-        Task<SearchResponse<Publication>> paginatedPublicationsTask = _redisConnectionProvider.Connection
-            .SearchAsync<Publication>(query);
-        
-        await Task.WhenAll(matchedCountTask, paginatedPublicationsTask);
-        
-        IReadOnlyCollection<Publication> publications = (await paginatedPublicationsTask)
-            .Documents.Values.ToList().AsReadOnly();
-        
-        return new PaginatedCollection<Publication>(
-            Items: publications,
-            ResultCount: publications.Count,
-            TotalCount: (int)(await matchedCountTask).DocumentCount);
+        return await GetPaginatedPublicationsAsync(query, paginationDTO);
     }
 
     public async Task<PaginatedCollection<Publication>> GetBySearchAsync(
@@ -63,10 +48,16 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             .Build()
             .Filter(paginationSearchDTO);
         
+        return await GetPaginatedPublicationsAsync(query, paginationSearchDTO);
+    }
+    
+    private async Task<PaginatedCollection<Publication>> GetPaginatedPublicationsAsync(
+        RedisQuery query, PaginationFilterDTO paginationDTO)
+    {
         Task<SearchResponse<Publication>> matchedCountTask = _redisConnectionProvider.Connection
             .SearchAsync<Publication>(query);
         
-        query.Limit(paginationSearchDTO.PageSize, paginationSearchDTO.Page);
+        query.Limit(paginationDTO.PageSize, paginationDTO.Page);
         Task<SearchResponse<Publication>> paginatedPublicationsTask = _redisConnectionProvider.Connection
             .SearchAsync<Publication>(query);
         

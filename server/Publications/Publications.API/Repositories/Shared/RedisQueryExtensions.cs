@@ -42,11 +42,11 @@ public static class RedisQueryExtensions
             string filterGroupQuery = FilterQuery(filters.First());
             foreach (var filter in filters.Skip(1))
             {
-                filterGroupQuery = Either(
+                filterGroupQuery = Queries.Either(
                     filterGroupQuery, FilterQuery(filter));
             }
 
-            query.QueryText = Both(query.QueryText, filterGroupQuery);
+            query.QueryText = Queries.Both(query.QueryText, filterGroupQuery);
         }
         
         return query;
@@ -54,41 +54,5 @@ public static class RedisQueryExtensions
     
     private static string FilterQuery(int filterId) =>
         $"{nameof(Entity<Publication>.Filters)}_{nameof(Models.Filter.Id)}".EqualTo(filterId);
-    
-    public static string Either(string expression, string subquery)
-    {
-        return $"({expression} | {subquery})";
-    }
-    
-    public static string Both(string expression, string subquery)
-    {
-        return $"{expression} {subquery}";
-    }
-
-    public static SearchRedisQuery Where(this RedisQuery query, string subquery)
-    {
-        query.QueryText = subquery;
-        return new SearchRedisQuery(query);
-    }
-
-    public static string Search(this string propertyName, string searchTerm)
-    {
-        return $"(@{propertyName}:{searchTerm})";
-    }
-
-    public static string Prefix(this string propertyName, string searchTerm)
-    {
-        return $"(@{propertyName}:{searchTerm}*)";
-    }
-    
-    public static string EqualTo(this string propertyName, string searchTerm)
-    {
-        return $"(@{propertyName}:{{{searchTerm}}})";
-    }
-    
-    public static string EqualTo(this string propertyName, int numericValue)
-    {
-        return $"(@{propertyName}:[{numericValue},{numericValue}])";
-    }
 }
 

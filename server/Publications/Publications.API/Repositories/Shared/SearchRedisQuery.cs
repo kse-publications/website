@@ -4,7 +4,7 @@ namespace Publications.API.Repositories.Shared;
 
 public class SearchRedisQuery
 {
-    public RedisQuery Expression { get; set; }
+    protected RedisQuery Expression { get; set; }
     
     public SearchRedisQuery(RedisQuery query)
     {
@@ -13,13 +13,13 @@ public class SearchRedisQuery
     
     public SearchRedisQuery Or(string subquery)
     {
-        Expression.QueryText = RedisQueryExtensions.Either(Expression.QueryText, subquery);
+        Expression.QueryText = Queries.Either(Expression.QueryText, subquery);
         return this;
     }
 
     public SearchRedisQuery And(string subquery)
     {
-        Expression.QueryText = RedisQueryExtensions.Both(Expression.QueryText, subquery);
+        Expression.QueryText = Queries.Both(Expression.QueryText, subquery);
         return this;
     }
     
