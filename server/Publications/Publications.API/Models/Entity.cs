@@ -18,6 +18,9 @@ public abstract class Entity<T> where T: Entity<T>
     [Indexed(Sortable = true)]
     public int Views { get; set; } 
     
+    [Indexed(JsonPath = "$.Id")]
+    public Filter[] Filters { get; set; } = Array.Empty<Filter>();
+    
     public abstract T UpdateSlug();
 
     public T UpdateViews(int views = 1)

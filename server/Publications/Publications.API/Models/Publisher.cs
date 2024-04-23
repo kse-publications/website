@@ -6,7 +6,7 @@ namespace Publications.API.Models;
 /// <summary>
 /// Represents a publisher of a <see cref="Publication"/>. 
 /// </summary>
-[Document(IndexName = "publication-idx",StorageType = StorageType.Json, Prefixes = ["publisher"])]
+[Document(IndexName = "publisher-idx",StorageType = StorageType.Json, Prefixes = ["publisher"])]
 public class Publisher: Entity<Publisher>
 {
     [Searchable(Weight = 1.0, PhoneticMatcher = "dm:en")]

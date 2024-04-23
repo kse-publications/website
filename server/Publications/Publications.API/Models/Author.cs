@@ -6,7 +6,7 @@ namespace Publications.API.Models;
 /// <summary>
 /// Represents an author of a <see cref="Publication"/>.
 /// </summary>
-[Document (IndexName = "publication-idx", StorageType = StorageType.Json, Prefixes = ["author"])]
+[Document (IndexName = "author-idx", StorageType = StorageType.Json, Prefixes = ["author"])]
 public class Author: Entity<Author>
 {
     [Searchable(Weight = 1.0, PhoneticMatcher = "dm:en")]

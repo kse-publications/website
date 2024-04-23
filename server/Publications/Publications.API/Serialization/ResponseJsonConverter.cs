@@ -1,11 +1,10 @@
 ﻿using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Publications.API.Models;
 
 namespace Publications.API.Serialization;
 
-public class ResponseJsonConverter<T> : JsonConverter<T> where T : Entity<T>
+public class ResponseJsonConverter<T> : JsonConverter<T>
 {
     public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
