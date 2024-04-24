@@ -9,7 +9,7 @@ interface Props {
   light?: boolean
 }
 
-const { title } = Astro.props
+const { title, light } = Astro.props
 
 const clientUuid = Astro.cookies.get('client-uuid')
 
@@ -41,7 +41,7 @@ if (!clientUuid) {
     <LoadingIndicator color="#0f172a" height="4px" />
   </head>
   <body>
-    <Header light client:only />
+    <Header light={light} client:only />
     <main class="mx-auto max-w-[1160px] px-4">
       <slot />
     </main>
