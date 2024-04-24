@@ -13,12 +13,11 @@ import {
 } from 'react'
 import type { PublicationSummary } from '@/types/publication-summary/publication-summary'
 import { getInitialPublications, searchPublications } from '@/services/search/get-publications'
-import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '@/config/search-params'
+import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, SEARCH_TEXT_DEBOUNCE_MS } from '@/config/search-params'
 import type { PaginatedCollection } from '@/types/common/paginated-collection'
 import type { SearchPublicationsQueryParams } from '@/types/common/query-params'
 import type { IFilter } from '@/types/common/fiters'
 import { useDebounce } from 'use-debounce'
-import { SEARCH_TEXT_DEBOUNCE_MS } from 'dist/config/search-params'
 
 interface ISearchContext {
   debouncedSearchText: string

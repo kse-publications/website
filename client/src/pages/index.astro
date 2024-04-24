@@ -7,6 +7,7 @@ import type { PaginatedCollection } from '@/types/common/paginated-collection'
 import type { PublicationSummary } from '@/types/publication-summary/publication-summary'
 import { DEFAULT_PAGE } from '@/config/search-params'
 import { getFilters } from '@/services/filters/filters'
+import bgImage from '../assets/images/bg-image.png'
 
 const filters = await getFilters()
 
@@ -37,7 +38,13 @@ if (!searchText) {
 }
 ---
 
-<Layout title="KSE docs | Search">
+<img
+  class="absolute -z-10 w-full object-cover h-[540px]"
+  src={bgImage.src}
+  alt="Background image"
+/>
+<img class="absolute -z-[9] w-full bg-black opacity-30 h-[540px]" />
+<Layout light title="KSE docs | Search">
   <SearchSection
     filters={filters}
     initialPublications={initialPublications}

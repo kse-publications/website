@@ -22,11 +22,6 @@ interface SelectItem {
   label: string
 }
 
-const sortBySelectItems: SelectItem[] = Object.values(FilterTypes).map((value) => ({
-  value,
-  label: value,
-}))
-
 export const SearchFilters = () => {
   const { filters, selectedFilters, setSelectedFilters } = useSearchContext()
 
@@ -37,28 +32,32 @@ export const SearchFilters = () => {
   }
 
   return (
-    <div className="flex gap-4">
-      {filters.map((filter) => (
-        <Select
-          key={filter.id}
-          onValueChange={(value) => handleFilterChange(+value)}
-          value={selectedFilters.includes(+filter.id) ? filter.id.toString() : ''}
-        >
-          <SelectTrigger className="w-fit">
-            <SelectValue placeholder={`Filter by ${filter.name.toLowerCase()}`} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Filter by {filter.name.toLowerCase()}</SelectLabel>
-              {filter.filters.map(({ id, value }) => (
-                <SelectItem key={id} value={id.toString()}>
-                  {value}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      ))}
+    <div className="flex justify-center gap-6">
+      {(filters || []).map((filter) => {
+        const selectedFilter = filter.filters.find(({ id }) => selectedFilters.includes(id))
+
+        return (
+          <Select
+            key={filter.id}
+            onValueChange={(value) => handleFilterChange(+value)}
+            value={selectedFilter ? selectedFilter.id.toString() : ''}
+          >
+            <SelectTrigger className="w-fit">
+              <SelectValue placeholder={`Filter by ${filter.name.toLowerCase()}`} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Filter by {filter.name.toLowerCase()}</SelectLabel>
+                {filter.filters.map(({ id, value }) => (
+                  <SelectItem key={id} value={id.toString()}>
+                    {value}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        )
+      })}
     </div>
   )
 }

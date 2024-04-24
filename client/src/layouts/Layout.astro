@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 interface Props {
   title: string
+  light?: boolean
 }
 
 const { title } = Astro.props
@@ -40,7 +41,7 @@ if (!clientUuid) {
     <LoadingIndicator color="#0f172a" height="4px" />
   </head>
   <body>
-    <Header client:only />
+    <Header light client:only />
     <main class="mx-auto max-w-[1160px] px-4">
       <slot />
     </main>
