@@ -20,7 +20,7 @@ function Header({ light = false }) {
   }, [])
 
   return (
-    <header className="mx-auto mb-10 flex max-w-[1160px] flex-wrap items-center justify-between gap-4 px-4 py-9.5">
+    <header className="w-100% mb-10 flex flex-wrap items-center justify-around gap-96 bg-[#E4E541] px-4 py-9.5">
       <a href="/">
         <img width={160} height={40} src={light ? logoLight.src : logo.src} alt="KSE logo" />
       </a>
@@ -31,18 +31,22 @@ function Header({ light = false }) {
             <MobileMenuDrawer />
           </div>
         ) : (
-          <div
-            className={`rounded-full border border-gray-300 p-1 text-[17px] ${light ? 'text-white' : 'text-black'}`}
-          >
-            <Button variant="ghost" className="rounded-full">
-              About
-            </Button>
-            <Button variant="ghost" className="rounded-full">
-              Submissions
-            </Button>
-            <Button variant="ghost" className="rounded-full">
-              Team
-            </Button>
+          <div className="rounded-full border border-black p-1 text-[17px]">
+            <a href="/about" aria-label="Go to About page">
+              <Button variant="ghost" className="rounded-full">
+                About
+              </Button>
+            </a>
+            <a href="/submissions" aria-label="Go to Submissions page">
+              <Button variant="ghost" className="rounded-full">
+                Submissions
+              </Button>
+            </a>
+            <a href="/team" aria-label="Go to Team page">
+              <Button variant="ghost" className="rounded-full">
+                Team
+              </Button>
+            </a>
           </div>
         )}
       </div>
