@@ -24,6 +24,7 @@ public class EntityRepository<TEntity> : IEntityRepository<TEntity>
         IEnumerable<TEntity> entities, 
         CancellationToken cancellationToken = default)
     {
+        await _collection.DeleteAsync(await _collection.ToListAsync());
         await _collection.InsertAsync(entities);
     }
     
