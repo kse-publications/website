@@ -5,7 +5,10 @@ function TeamPage() {
     <>
       <GoBackButton />
       <div className="max-w-4xl mx-auto mb-10 overflow-auto rounded-lg border border-gray-300 bg-white p-6">
-        <h1 className="color-black pl-6 text-5xl">TEAM</h1>
+        <div className="ml-5 w-fit">
+          <h1 className="color-black text-5xl font-semibold leading-none tracking-tight">TEAM</h1>
+          <span className="-mt-1 block h-1 w-full bg-[#e4e541]"></span>
+        </div>
         <div className="p-10 pl-20">
           <p>
             This website was collaboratively developed by students and academic faculty of the
