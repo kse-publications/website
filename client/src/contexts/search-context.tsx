@@ -13,17 +13,21 @@ import {
 } from 'react'
 import type { PublicationSummary } from '@/types/publication-summary/publication-summary'
 import { getInitialPublications, searchPublications } from '@/services/search/get-publications'
-import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '@/config/search-params'
-import type { FilterTypes } from '@/types/common/filter-types'
+import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, SEARCH_TEXT_DEBOUNCE_MS } from '@/config/search-params'
 import type { PaginatedCollection } from '@/types/common/paginated-collection'
 import type { SearchPublicationsQueryParams } from '@/types/common/query-params'
+import type { IFilter } from '@/types/common/fiters'
+import { useDebounce } from 'use-debounce'
 
 interface ISearchContext {
+  debouncedSearchText: string
   searchText: string
   setSearchText: Dispatch<SetStateAction<string>>
 
-  filterType: FilterTypes | null
-  setFilterType: Dispatch<SetStateAction<FilterTypes | null>>
+  selectedFilters: number[]
+  setSelectedFilters: Dispatch<SetStateAction<number[]>>
+
+  filters: IFilter[]
 
   searchResults: PublicationSummary[]
   setSearchResults: Dispatch<SetStateAction<PublicationSummary[]>>
@@ -49,6 +53,7 @@ interface SearchContextProviderProps {
   initialSearchResults: PublicationSummary[]
   initialTotalResults: number
   initialIsRecent: boolean
+  initialFilters: IFilter[]
 }
 
 const SearchContextProvider = ({
@@ -56,6 +61,7 @@ const SearchContextProvider = ({
   initialSearchResults,
   initialTotalResults,
   initialIsRecent,
+  initialFilters,
 }: SearchContextProviderProps) => {
   const isInitialPublications = useRef(true)
   const isLoadingMoreStarted = useRef(false)
@@ -63,7 +69,7 @@ const SearchContextProvider = ({
   const [isRecent, setIsRecent] = useState<boolean>(initialIsRecent)
 
   const [searchText, setSearchText] = useState('')
-  const [filterType, setFilterType] = useState<FilterTypes | null>(null)
+  const [selectedFilters, setSelectedFilters] = useState<number[]>([])
 
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -72,10 +78,17 @@ const SearchContextProvider = ({
     initialSearchResults || []
   )
 
+  const [debouncedSearchText] = useDebounce(searchText, SEARCH_TEXT_DEBOUNCE_MS)
+
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search)
-    setFilterType((searchParams.get('filterType') as FilterTypes) || null)
     setSearchText(searchParams.get('searchText') || '')
+    setSelectedFilters(
+      searchParams
+        .get('filters')
+        ?.split(',')
+        .map((filter) => parseInt(filter, 10)) || []
+    )
 
     const rehydrateTimeout = setTimeout(() => {
       isInitialPublications.current = false
@@ -88,11 +101,11 @@ const SearchContextProvider = ({
     if (isInitialPublications.current) return
 
     setSearchResults([])
-    fetchPublications({ searchText, filterType })
+    fetchPublications({ searchText, filters: selectedFilters })
 
     updateQuery()
-    setIsRecent(!searchText && !filterType)
-  }, [searchText, filterType])
+    setIsRecent(!searchText)
+  }, [searchText, selectedFilters])
 
   const updateQuery = useCallback(() => {
     const urlSearchParams = new URLSearchParams()
@@ -100,10 +113,10 @@ const SearchContextProvider = ({
     if (searchText) urlSearchParams.append('searchText', searchText)
     else urlSearchParams.delete('searchText')
 
-    if (filterType) urlSearchParams.append('filterType', filterType)
-    else urlSearchParams.delete('filterType')
+    if (selectedFilters.length) urlSearchParams.append('filters', selectedFilters.join(','))
+    else urlSearchParams.delete('filters')
 
-    if (!searchText && !filterType) {
+    if (!searchText && !selectedFilters.length) {
       window.history.replaceState({}, '', window.location.origin)
       return
     }
@@ -112,7 +125,7 @@ const SearchContextProvider = ({
     const newUrl = window.location.pathname + '?' + queryString
 
     window.history.replaceState({}, '', newUrl)
-  }, [searchText, filterType])
+  }, [searchText, selectedFilters])
 
   const currentPage = useMemo(
     () => Math.ceil(searchResults.length / DEFAULT_PAGE_SIZE),
@@ -120,7 +133,11 @@ const SearchContextProvider = ({
   )
 
   const fetchPublications = useCallback(
-    async ({ searchText = '', page = DEFAULT_PAGE, filterType }: SearchPublicationsQueryParams) => {
+    async ({
+      searchText = '',
+      page = DEFAULT_PAGE,
+      filters = [],
+    }: SearchPublicationsQueryParams) => {
       setIsLoading(true)
       setError('')
 
@@ -132,12 +149,12 @@ const SearchContextProvider = ({
         let paginatedResponse: PaginatedCollection<PublicationSummary>
 
         if (searchText === '') {
-          paginatedResponse = await getInitialPublications({ page, filterType })
+          paginatedResponse = await getInitialPublications({ page, filters })
         } else {
           paginatedResponse = await searchPublications({
             searchText,
             page,
-            filterType,
+            filters,
           })
         }
 
@@ -162,18 +179,20 @@ const SearchContextProvider = ({
     fetchPublications({
       searchText,
       page: currentPage + 1,
-      filterType: filterType ?? undefined,
     })
-  }, [searchText, currentPage, filterType])
+  }, [searchText, currentPage])
 
   const value: ISearchContext = {
     loadMoreHandler,
 
     searchText,
     setSearchText,
+    debouncedSearchText,
 
-    filterType,
-    setFilterType,
+    filters: initialFilters,
+
+    selectedFilters,
+    setSelectedFilters,
 
     searchResults,
     setSearchResults,

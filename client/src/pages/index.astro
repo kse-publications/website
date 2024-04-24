@@ -3,31 +3,52 @@ import '@/styles/globals.css'
 import Layout from '../layouts/Layout.astro'
 import SearchSection from '@/components/search-results/search-section'
 import { getInitialPublications, searchPublications } from '../services/search/get-publications'
-import type { FilterTypes } from '@/types/common/filter-types'
 import type { PaginatedCollection } from '@/types/common/paginated-collection'
 import type { PublicationSummary } from '@/types/publication-summary/publication-summary'
 import { DEFAULT_PAGE } from '@/config/search-params'
+import { getFilters } from '@/services/filters/filters'
+import bgImage from '../assets/images/bg-image.png'
+
+const filters = await getFilters()
 
 let initialPublications: PaginatedCollection<PublicationSummary>
 const searchParams = Astro.url.searchParams
 
 const searchText = searchParams.get('searchText')
-const filterType = searchParams.get('filterType') as FilterTypes
+const selectedFilters =
+  searchParams
+    .get('filters')
+    ?.split(',')
+    .map((filter) => parseInt(filter, 10)) || []
 
-const isRecent = !searchText && !filterType
+const isRecent = !searchText && !selectedFilters.length
 
 if (!searchText) {
-  initialPublications = await getInitialPublications({ page: DEFAULT_PAGE, filterType })
+  initialPublications = await getInitialPublications({
+    page: DEFAULT_PAGE,
+    filters: selectedFilters,
+  })
 } else {
   const searchData = {
     searchText: searchText || '',
     page: DEFAULT_PAGE,
-    filterType: filterType,
+    filter: selectedFilters,
   }
   initialPublications = await searchPublications(searchData)
 }
 ---
 
-<Layout title="KSE docs | Search">
-  <SearchSection initialPublications={initialPublications} isRecent={isRecent} client:load />
+<img
+  class="absolute -z-10 w-full object-cover h-[540px]"
+  src={bgImage.src}
+  alt="Background image"
+/>
+<img class="absolute -z-[9] w-full bg-black opacity-30 h-[540px]" />
+<Layout light title="KSE docs | Search">
+  <SearchSection
+    filters={filters}
+    initialPublications={initialPublications}
+    isRecent={isRecent}
+    client:load
+  />
 </Layout>

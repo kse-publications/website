@@ -10,7 +10,7 @@ interface PublicationPageProps {
 }
 
 function PublicationPage({ data }: PublicationPageProps) {
-    const goBack = () => {
+  const goBack = () => {
     window.history.back()
   }
 

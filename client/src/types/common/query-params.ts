@@ -1,8 +1,6 @@
-import type { FilterTypes } from './filter-types'
-
 export interface QueryParams {
   page?: number
-  filterType?: FilterTypes | null
+  filters?: number[]
 }
 
 export interface SearchPublicationsQueryParams extends QueryParams {
