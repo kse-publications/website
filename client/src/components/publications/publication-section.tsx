@@ -1,27 +1,19 @@
 export const prerender = true
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { buttonVariants } from '@/components/ui/button'
 import type { Publication } from '@/types/publication/publication'
-import { ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons'
+import { ChevronRightIcon } from '@radix-ui/react-icons'
+
+import GoBackButton from '../static-pages/go-back-button'
 
 interface PublicationPageProps {
   data: Publication
 }
 
 function PublicationPage({ data }: PublicationPageProps) {
-    const goBack = () => {
-    window.history.back()
-  }
-
   return (
     <>
-      <div className="-ml-4.5 mb-4 flex items-center text-base">
-        <Button variant="link" onClick={goBack}>
-          <ChevronLeftIcon className="h-5 w-5" /> Go back
-        </Button>
-      </div>
-
+      <GoBackButton />
       <div className="max-w-4xl mx-auto mb-10 overflow-auto rounded-lg border border-gray-300 bg-white p-6">
         <Badge className="mb-3" variant="secondary">
           {data.type}
