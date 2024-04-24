@@ -20,7 +20,9 @@ function Header({ light = false }) {
   }, [])
 
   return (
-    <header className="w-100% mb-10 flex flex-wrap items-center justify-around gap-96 bg-[#E4E541] px-4 py-9.5">
+    <header
+      className={`w-100% mb-10 flex flex-wrap items-center justify-around gap-96 px-4 py-9.5 ${light ? 'bg-transparent' : 'bg-[#E4E541]'}`}
+    >
       <a href="/">
         <img width={160} height={40} src={light ? logoLight.src : logo.src} alt="KSE logo" />
       </a>
@@ -31,7 +33,9 @@ function Header({ light = false }) {
             <MobileMenuDrawer />
           </div>
         ) : (
-          <div className="rounded-full border border-black p-1 text-[17px]">
+          <div
+            className={`rounded-full border  p-1 text-[17px] ${light ? 'border-white text-white' : 'border-black text-black'}`}
+          >
             <a href="/about" aria-label="Go to About page">
               <Button variant="ghost" className="rounded-full">
                 About

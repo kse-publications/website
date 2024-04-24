@@ -104,7 +104,7 @@ const SearchContextProvider = ({
     fetchPublications({ searchText, filters: selectedFilters })
 
     updateQuery()
-    setIsRecent(!searchText)
+    setIsRecent(!searchText && !selectedFilters.length)
   }, [searchText, selectedFilters])
 
   const updateQuery = useCallback(() => {
