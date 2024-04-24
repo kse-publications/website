@@ -16,12 +16,20 @@ public abstract class BaseLoggableTask<TTask>: IInvocable
 
     public async Task Invoke()
     {
-        _taskLogger.LogInformation("Started executing {Task}...", typeof(TTask).Name);
-        _stopwatch.Start();
-        await DoLoggedTaskAsync();
-        _stopwatch.Stop();
-        _taskLogger.LogInformation("{Task} executed successfully. Elapsed time: {Elapsed}", 
-            typeof(TTask).Name, _stopwatch.Elapsed);
+        try
+        {
+            _taskLogger.LogInformation("Started executing {Task}...", typeof(TTask).Name);
+            _stopwatch.Start();
+            await DoLoggedTaskAsync();
+            _stopwatch.Stop();
+            _taskLogger.LogInformation("{Task} executed successfully. Elapsed time: {Elapsed}", 
+                typeof(TTask).Name, _stopwatch.Elapsed);
+        }
+        catch (Exception e)
+        {
+            _taskLogger.LogError(e, "An error occurred while executing the {Task}.", typeof(TTask).Name);
+            throw;
+        }
     }
 
     protected abstract Task DoLoggedTaskAsync();
