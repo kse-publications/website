@@ -21,6 +21,9 @@ export default {
         22.5: '5.625rem',
       },
       colors: {
+        accent: {
+          DEFAULT: '#e4e541',
+        },
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',

@@ -1,4 +1,5 @@
-﻿using Publications.API.Models;
+﻿using System.Linq.Expressions;
+using Publications.API.Models;
 
 namespace Publications.API.Services;
 
@@ -7,20 +8,22 @@ public class FiltersService: IFiltersService
     public async Task<IReadOnlyCollection<FilterGroup>> GetFiltersForPublicationsAsync(
         IEnumerable<Publication> publications)
     {
-        List<Task<FilterGroup>> filterGroupTasks = [];
-        ((List<Func<IEnumerable<Publication>, FilterGroup>>)
+        List<Func<IEnumerable<Publication>, FilterGroup>> filterFunctions =
         [
-            GetYearsFilterGroup, 
-            GetTypesFilterGroup, 
+            GetYearsFilterGroup,
+            GetTypesFilterGroup,
             GetLanguagesFilterGroup
-        ]).ForEach(f =>
-        {
-            filterGroupTasks.Add(Task.Run(() => f(publications)));
-        });
+        ];
         
-        List<FilterGroup> filters = (await Task.WhenAll(filterGroupTasks)).ToList();
-
-        return AssignIdsToFilters(filters).AsReadOnly();
+        List<Task<FilterGroup>> filterTasks = filterFunctions
+            .Select(f => Task.Run(() => f(publications)))
+            .ToList();
+        
+        FilterGroup[] sortedFilters = (await Task.WhenAll(filterTasks))
+            .OrderBy(f => f.Id)
+            .ToArray();
+        
+        return AssignIdsToFilters(sortedFilters).AsReadOnly();
     }
     
     public async Task<ICollection<Publication>> AssignFiltersToPublicationsAsync(
@@ -29,91 +32,84 @@ public class FiltersService: IFiltersService
         foreach (Publication publication in publications)
         {
             publication.Filters = filters
-                .SelectMany(fg => MatchingFilters(publication, fg))
+                .Select(fg => MatchingFilters(publication, fg))
                 .ToArray();
         }
 
         return publications;
     }
-
-    private static List<Filter> MatchingFilters(Publication publication, FilterGroup filterGroup)
-    {
-        return filterGroup.Name switch
-        {
-            nameof(Publication.Year) => filterGroup.Filters
-                .Where(f => f.Value == publication.Year.ToString()).ToList(),
-            
-            nameof(Publication.Type) => filterGroup.Filters
-                .Where(f => f.Value == publication.Type).ToList(),
-            
-            nameof(Publication.Language) => filterGroup.Filters
-                .Where(f => f.Value == publication.Language).ToList(),
-            _ => []
-        };
-    }
     
-    private List<FilterGroup> AssignIdsToFilters(List<FilterGroup> filters)
+    private FilterGroup[] AssignIdsToFilters(FilterGroup[] filters)
     {
-        int filtersIdBase = 0;
-        for (int i = 0; i < filters.Count; i++)
+        foreach (var filter in filters.SelectMany(group => group.Filters))
         {
-            filters[i].Id = i + 1;
-            for (int j = 0; j < filters[i].Filters.Length; j++)
-            {
-                filters[i].Filters[j].Id = filtersIdBase + j + 1;
-            }
-
-            filtersIdBase += filters[i].Filters.Length;
+            filter.Id = IdGenerator.GenerateFromValue(filter.Value);
         }
 
         return filters;
     }
-
-    private FilterGroup GetYearsFilterGroup(IEnumerable<Publication> publications)
-    {
-        var yearFilters = publications
-            .Select(p => p.Year)
-            .Distinct()
-            .Select(y => new Filter { Value = y.ToString() })
-            .ToList();
-
-        return new FilterGroup
-        {
-            Name = nameof(Publication.Year),
-            ResourceName = nameof(Publication),
-            Filters = yearFilters.ToArray()
-        };
-    }
     
     private FilterGroup GetTypesFilterGroup(IEnumerable<Publication> publications)
     {
-        var typeFilters = publications
-            .Select(p => p.Type)
-            .Distinct()
-            .Select(t => new Filter { Value = t })
-            .ToList();
-
-        return new FilterGroup
-        {
-            Name =nameof(Publication.Type),
-            ResourceName = nameof(Publication),
-            Filters = typeFilters.ToArray()
-        };
+        return GetFilterGroupFrom(publications, p => p.Type, index: 1);
+    }
+    
+    private FilterGroup GetYearsFilterGroup(IEnumerable<Publication> publications)
+    {
+        return GetFilterGroupFrom(publications, p => p.Year, index: 2);
     }
     
     private FilterGroup GetLanguagesFilterGroup(IEnumerable<Publication> publications)
     {
-        var languageFilters = publications
-            .Select(p => p.Language)
+        return GetFilterGroupFrom(publications, p => p.Language, index: 3);
+    }
+    
+    private FilterGroup GetFilterGroupFrom<TProperty>(
+        IEnumerable<Publication> publications, 
+        Expression<Func<Publication, TProperty>> propertySelector,
+        int index) where TProperty : notnull
+    {
+        var filters = publications
+            .Select(propertySelector.Compile())
             .Distinct()
-            .Select(l => new Filter { Value = l })
+            .Select(f => new Filter { Value = f.ToString()! })
             .ToList();
 
         return new FilterGroup
         {
-            Name = nameof(Publication.Language),
+            Id = index,
+            Name = GetPropertyName(propertySelector),
             ResourceName = nameof(Publication),
-            Filters = languageFilters.ToArray()
+            Filters = filters.ToArray()
         };
+    }
+    
+    private static Filter MatchingFilters(Publication publication, FilterGroup filterGroup)
+    {
+        return (filterGroup.Name switch
+        {
+            nameof(Publication.Year) => filterGroup.Filters
+                .FirstOrDefault(f => f.Value == publication.Year.ToString()),
+            
+            nameof(Publication.Type) => filterGroup.Filters
+                .FirstOrDefault(f => f.Value == publication.Type),
+            
+            nameof(Publication.Language) => filterGroup.Filters
+                .FirstOrDefault(f => f.Value == publication.Language),
+            
+            _ => throw new ArgumentException("Invalid filter group name.")
+        })!;
+    }
+    
+    private static string GetPropertyName<TProperty>(
+        Expression<Func<Publication, TProperty>> propertySelector)
+    {
+        if (propertySelector.Body is MemberExpression memberExpression)
+            return memberExpression.Member.Name;
+        
+        if (propertySelector.Body is UnaryExpression unaryExpression)
+            return ((MemberExpression)unaryExpression.Operand).Member.Name;
+        
+        throw new ArgumentException("Invalid property selector.");
     }
 }

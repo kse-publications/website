@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 
 import logo from '../../assets/images/logo.png'
+import logoLight from '../../assets/images/logo-white.png'
 import MobileMenuDrawer from './mobile-menu'
 
-function Header() {
+function Header({ light = false }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 480)
 
   useEffect(() => {
@@ -21,7 +22,7 @@ function Header() {
   return (
     <header className="w-100% mb-10 flex flex-wrap items-center justify-around gap-96 bg-[#E4E541] px-4 py-9.5">
       <a href="/">
-        <img width={160} height={40} src={logo.src} alt="KSE logo" />
+        <img width={160} height={40} src={light ? logoLight.src : logo.src} alt="KSE logo" />
       </a>
 
       <div className="flex items-center justify-center" id="header-buttons">
