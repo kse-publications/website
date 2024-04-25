@@ -12,6 +12,4 @@ public record PaginationFilterDTO: FilterDTO
 
     [Range(1, 101, ErrorMessage = "PageSize must be between 1 and 100 (inclusive).")]
     public int PageSize { get; init; } = 20;
-    
-    public bool Ascending { get; init; } = false;
 }
