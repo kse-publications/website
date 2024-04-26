@@ -6,9 +6,6 @@ public interface IRequestsRepository
 {
     Task AddAsync(Request request);
     
-    Task<Dictionary<int, int>> GetResourceViews<TResource>() 
-        where TResource : Entity<TResource>;
-    
-    Task<Dictionary<int, int>> GetResourceDistinctViews<TResource>() 
+    Task<Dictionary<int, int>>  GetResourceViews<TResource>(bool distinct = true) 
         where TResource : Entity<TResource>;
 }

@@ -16,6 +16,8 @@ using Publications.API.Repositories.Shared;
 using Publications.API.Repositories.Source;
 using Publications.API.Serialization;
 using Publications.API.Services;
+using Publications.API.Services.Filters;
+using Publications.API.Services.Publications;
 using Redis.OM;
 using Redis.OM.Contracts;
 

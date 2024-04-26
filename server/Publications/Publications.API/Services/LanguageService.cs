@@ -1,4 +1,4 @@
-﻿namespace Publications.API.Slugs;
+﻿namespace Publications.API.Services;
 
 public class LanguageService
 {

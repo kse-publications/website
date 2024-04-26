@@ -1,4 +1,4 @@
-﻿using Publications.API.Slugs;
+﻿using Publications.API.Services;
 using Redis.OM.Modeling;
 
 namespace Publications.API.Models;
@@ -17,7 +17,7 @@ public class Author: Entity<Author>
     
     public override Author UpdateSlug()
     {
-        Slug = SlugGenerator.GenerateSlug(
+        Slug = SlugService.GenerateSlug(
             Name, Id.ToString(), LanguageService.English);
         
         return this;

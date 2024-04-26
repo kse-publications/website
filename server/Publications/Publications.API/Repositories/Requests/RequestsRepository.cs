@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Publications.API.Models;
+using Publications.API.Services;
 
 namespace Publications.API.Repositories.Requests;
 
@@ -18,10 +19,10 @@ public class RequestsRepository: IRequestsRepository
         await _dbContext.SaveChangesAsync();
     }
     
-    public async Task<Dictionary<int, int>> GetResourceViews<TResource>() 
+    public async Task<Dictionary<int, int>> GetResourceViews<TResource>(bool distinct = true) 
         where TResource : Entity<TResource>
     {
-        string resourceName = GetResourceName<TResource>();
+        string resourceName = ResourceHelper.GetResourceName<TResource>();
         
         return await _dbContext.Requests
             .Where(r => r.ResourceName == resourceName)
@@ -29,32 +30,10 @@ public class RequestsRepository: IRequestsRepository
             .Select(group => new
             {
                 ResourceId = group.Key,
-                Views = group.Count()
+                Views = distinct 
+                    ? group.Select(r => r.SessionId).Distinct().Count() 
+                    : group.Count()
             })
             .ToDictionaryAsync(k => k.ResourceId, v => v.Views);
-    }
-    
-    public async Task<Dictionary<int, int>> GetResourceDistinctViews<TResource>() 
-        where TResource : Entity<TResource>
-    {
-        string resourceName = GetResourceName<TResource>();
-        
-        return await _dbContext.Requests
-            .Where(r => r.ResourceName == resourceName)
-            .GroupBy(r => r.ResourceId)
-            .Select(group => new
-            {
-                ResourceId = group.Key, 
-                Views = group
-                    .Select(r => r.SessionId)
-                    .Distinct()
-                    .Count()
-            })
-            .ToDictionaryAsync(k => k.ResourceId, v => v.Views);
-    }
-    
-    private static string GetResourceName<TResource>()
-    {
-        return typeof(TResource).Name.ToLower() + "s";
     }
 }

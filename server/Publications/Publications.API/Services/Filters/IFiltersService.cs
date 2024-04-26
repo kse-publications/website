@@ -1,6 +1,6 @@
 ﻿using Publications.API.Models;
 
-namespace Publications.API.Services;
+namespace Publications.API.Services.Filters;
 
 public interface IFiltersService
 {

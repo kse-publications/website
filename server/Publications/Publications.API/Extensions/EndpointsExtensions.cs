@@ -20,10 +20,11 @@ public static class EndpointsExtensions
                     .PreventOverlapping(nameof(SyncWithNotionBackgroundTask));
             });
 
-        endpoints.MapGet("/views", async ([FromServices] IRequestsRepository requestsRepository) =>
+        endpoints.MapGet("/FC2097AD-8BE2-463C-AD89-1190880C44AD/views", 
+            async ([FromServices] IRequestsRepository requestsRepository) =>
         {
             Dictionary<int, int> views = await requestsRepository
-                .GetResourceDistinctViews<Publication>();
+                .GetResourceViews<Publication>();
             
             return views;
         });

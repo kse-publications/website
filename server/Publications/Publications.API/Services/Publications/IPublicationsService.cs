@@ -1,9 +1,8 @@
 ﻿using Publications.API.DTOs;
 using Publications.API.Models;
-using Publications.API.Repositories;
 using Publications.API.Repositories.Shared;
 
-namespace Publications.API.Services;
+namespace Publications.API.Services.Publications;
 
 public interface IPublicationsService
 {

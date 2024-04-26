@@ -33,4 +33,6 @@ public abstract class Entity<T> where T: Entity<T>
         Views = views;
         return (T)this;
     }
+    
+    public static string IndexName => $"{typeof(T).Name.ToLower()}-idx";
 }

@@ -1,5 +1,4 @@
-﻿using Publications.API.Models;
-using Redis.OM.Searching.Query;
+﻿using Redis.OM.Searching.Query;
 
 namespace Publications.API.Repositories.Shared;
 

@@ -36,7 +36,7 @@ public class UpdateResourceViewsTask: BaseLoggableTask<UpdateResourceViewsTask>
     private async Task UpdateResourceViews<T>() 
         where T : Entity<T>
     {
-        Dictionary<int, int> views = await _requestsRepository.GetResourceDistinctViews<T>();
+        Dictionary<int, int> views = await _requestsRepository.GetResourceViews<T>();
         IEntityRepository<T> resourceRepository = GetRepository<T>();
         
         IEnumerable<T> updatedResource = (await resourceRepository.GetAllAsync())

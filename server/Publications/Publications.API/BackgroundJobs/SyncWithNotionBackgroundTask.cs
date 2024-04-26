@@ -6,6 +6,7 @@ using Publications.API.Repositories.Publications;
 using Publications.API.Repositories.Publishers;
 using Publications.API.Repositories.Source;
 using Publications.API.Services;
+using Publications.API.Services.Filters;
 
 namespace Publications.API.BackgroundJobs;
 

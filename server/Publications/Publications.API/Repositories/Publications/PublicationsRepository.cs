@@ -23,7 +23,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
     public async Task<PaginatedCollection<Publication>> GetAllAsync(
         PaginationFilterDTO paginationDTO, CancellationToken cancellationToken = default)
     {
-        RedisQuery query = new RedisQuery("publication-idx")
+        RedisQuery query = new RedisQuery(Publication.IndexName)
             .Filter(paginationDTO)
             .Sort(nameof(Publication.Year), SortDirection.Descending);
         
@@ -36,7 +36,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
     {
         string searchTerm = paginationSearchDTO.SearchTerm;
         
-        RedisQuery query = new RedisQuery("publication-idx")
+        RedisQuery query = new RedisQuery(Publication.IndexName)
             .Where(nameof(Publication.Title).Prefix(searchTerm))
             .Or(nameof(Publication.Title).Search(searchTerm))
             .Or(nameof(Publication.Abstract).Prefix(searchTerm))
