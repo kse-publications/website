@@ -8,7 +8,7 @@ namespace Publications.API.Extensions;
 
 public static class EndpointsExtensions
 {
-    public static IEndpointRouteBuilder MapSyncEndpoint(this IEndpointRouteBuilder endpoints)
+    public static IEndpointRouteBuilder MapSystemEndpoints(this IEndpointRouteBuilder endpoints)
     {
         endpoints.MapGet("/EB292BF0-E995-491A-A98E-6121601E1069/sync", 
             (ILogger<Program> logger, IScheduler scheduler) => 
@@ -30,7 +30,7 @@ public static class EndpointsExtensions
         });
         
         endpoints.MapGet("/C178F906-9553-4EBF-AA3D-84A1C043F680/update-views", 
-            async (ILogger<Program> logger, IScheduler scheduler) =>
+            (ILogger<Program> logger, IScheduler scheduler) =>
             {
                 logger.LogInformation("/update-views endpoint hit");
                 scheduler.Schedule<UpdateResourceViewsTask>()
