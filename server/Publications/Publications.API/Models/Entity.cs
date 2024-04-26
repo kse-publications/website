@@ -8,15 +8,15 @@ public abstract class Entity<T> where T: Entity<T>
     [RedisIdField]
     [Indexed]
     [IgnoreInResponse]
-    public int Id { get; set; }
+    public int Id { get; init; }
     
     [IgnoreInResponse]
-    public Guid NotionId { get; set; }
+    public Guid NotionId { get; init; }
     
-    public string Slug { get; set; } = string.Empty;
+    public string Slug { get; protected set; } = string.Empty;
     
     [Indexed(Sortable = true)]
-    public int Views { get; set; } 
+    public int Views { get; private set; } 
     
     [Indexed(JsonPath = "$.Id")]
     public Filter[] Filters { get; set; } = Array.Empty<Filter>();

@@ -10,7 +10,7 @@ namespace Publications.API.Models;
 public class Publication: Entity<Publication>
 {
     [Searchable(Weight = 1.0)]
-    public string Title { get; set; } = null!;
+    public string Title { get; init; } = null!;
     
     [Indexed(Sortable = true)]
     public string Type { get; set;} = null!;
