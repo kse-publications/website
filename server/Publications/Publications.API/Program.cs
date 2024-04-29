@@ -1,4 +1,6 @@
 using Publications.API.Extensions;
+using Publications.BackgroundJobs;
+using Publications.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -9,14 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddCorsPolicies(builder.Configuration);
     builder.Services.AddErrorHandlerMiddleware();
 
-    builder.Services.AddRedis(builder.Configuration);
-    builder.Services.AddSqliteDb(builder.Configuration);
-    
-    builder.Services.AddNotionClient(builder.Configuration);
-    
-    builder.Services.AddRepositories();
-
-    builder.Services.AddBackgroundJobs(builder.Configuration);
+    builder.Services
+        .AddInfrastructure(builder.Configuration)
+        .AddBackgroundJobs(builder.Configuration);
 }
 
 var app = builder.Build();

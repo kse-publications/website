@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
-using Publications.API.Services;
+using Publications.Domain.Shared;
 
 namespace Publications.API.Middleware;
 
@@ -11,7 +11,7 @@ public class IdExtractionFilterAttribute: ActionFilterAttribute
         if (context.ActionArguments.TryGetValue("id", out var argument))
         {
             string slug = argument?.ToString() ?? string.Empty;
-            string id = SlugService.RetrieveIdFromSlug(slug);
+            string id = SlugService.GetId(slug);
             
             if (!int.TryParse(id, out int parsedId))
             {

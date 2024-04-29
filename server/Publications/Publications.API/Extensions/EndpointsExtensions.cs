@@ -1,8 +1,8 @@
 ﻿using Coravel.Scheduling.Schedule.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Publications.API.BackgroundJobs;
-using Publications.API.Models;
-using Publications.API.Repositories.Requests;
+using Publications.Application.Repositories;
+using Publications.BackgroundJobs;
+using Publications.Domain.Publications;
 
 namespace Publications.API.Extensions;
 

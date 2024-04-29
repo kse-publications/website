@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
-using Publications.API.Models;
-using Publications.API.DTOs;
 using Publications.API.Middleware;
-using Publications.API.Repositories.Filters;
-using Publications.API.Repositories.Shared;
-using Publications.API.Services;
-using Publications.API.Services.Publications;
+using Publications.Application;
+using Publications.Application.DTOs;
+using Publications.Application.Repositories;
+using Publications.Application.Services;
+using Publications.Domain.Filters;
+using Publications.Domain.Publications;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Publications.API.Controllers;
