@@ -34,14 +34,6 @@
             }
           },
           {
-            "name": "Ascending",
-            "in": "query",
-            "style": "form",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
             "name": "Filters",
             "in": "query",
             "style": "form",
@@ -172,14 +164,6 @@
             }
           },
           {
-            "name": "Ascending",
-            "in": "query",
-            "style": "form",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
             "name": "Filters",
             "in": "query",
             "style": "form",
@@ -259,11 +243,13 @@
         "properties": {
           "slug": {
             "type": "string",
-            "nullable": true
+            "nullable": true,
+            "readOnly": true
           },
           "views": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "readOnly": true
           },
           "filters": {
             "type": "array",
@@ -288,7 +274,8 @@
         "properties": {
           "id": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "readOnly": true
           },
           "value": {
             "type": "string",
@@ -350,11 +337,13 @@
         "properties": {
           "slug": {
             "type": "string",
-            "nullable": true
+            "nullable": true,
+            "readOnly": true
           },
           "views": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "readOnly": true
           },
           "filters": {
             "type": "array",
@@ -470,11 +459,13 @@
         "properties": {
           "slug": {
             "type": "string",
-            "nullable": true
+            "nullable": true,
+            "readOnly": true
           },
           "views": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "readOnly": true
           },
           "filters": {
             "type": "array",
