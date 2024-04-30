@@ -24,12 +24,10 @@ export const SearchBackground = () => {
 
       <CSSTransition in={!isRecent} timeout={400} classNames="change-padding">
         <div
-          className={`relative mx-auto  max-w-[1160px] px-4 ${isRecent ? 'pb-32 pt-6' : '-mt-10 pb-6'}`}
+          className={`relative mx-auto max-w-[1160px] px-4 ${isRecent ? 'pb-10 lg:pb-32 lg:pt-6' : 'pb-6'}`}
         >
           <CSSTransition in={isRecent} timeout={400} classNames="slide" unmountOnExit>
-            <p
-              className={`${isRecent ? 'mb-[77px]' : ''} px-8 text-center text-2xl text-white md:text-4xl`}
-            >
+            <p className={`mb-12 text-center text-2xl text-white md:text-4xl lg:mb-[77px] xl:px-8`}>
               KSE Publications is a collection of the major academic and analytical publications
               produced by the KSE community.
             </p>

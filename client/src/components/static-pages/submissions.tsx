@@ -1,3 +1,4 @@
+import { AnimatedHeadLine } from '../ui/animated-headline'
 import MainPageButton from './go-back-button'
 
 function SubmissionsPage() {
@@ -5,9 +6,7 @@ function SubmissionsPage() {
     <>
       <MainPageButton />
       <div className="max-w-4xl mx-auto mb-10 overflow-auto rounded-lg border border-gray-300 bg-white p-6">
-        <h1 className="color-black text-5xl font-semibold leading-none tracking-tight">
-          SUBMISSIONS
-        </h1>
+        <AnimatedHeadLine>SUBMISSIONS</AnimatedHeadLine>
         <div className="pt-6">
           <p>
             We gather publications created by the KSE community, regardless of their type, from all
