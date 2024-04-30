@@ -34,7 +34,7 @@ if (!searchText) {
   const searchData = {
     searchText: searchText || '',
     page: DEFAULT_PAGE,
-    filter: selectedFilters,
+    filters: selectedFilters,
   }
   initialPublications = await searchPublications(searchData)
 }
