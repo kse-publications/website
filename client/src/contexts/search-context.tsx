@@ -105,7 +105,7 @@ const SearchContextProvider = ({
 
     updateQuery()
     setIsRecent(!searchText && !selectedFilters.length)
-  }, [searchText, selectedFilters])
+  }, [debouncedSearchText, selectedFilters])
 
   const updateQuery = useCallback(() => {
     const urlSearchParams = new URLSearchParams()

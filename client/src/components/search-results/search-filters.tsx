@@ -9,7 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select'
-import { FilterTypes } from '@/types/common/filter-types'
 
 interface Filter {
   id: string
@@ -25,10 +24,15 @@ interface SelectItem {
 export const SearchFilters = () => {
   const { filters, selectedFilters, setSelectedFilters } = useSearchContext()
 
-  const handleFilterChange = (value: number) => {
-    setSelectedFilters((prev) =>
-      prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]
-    )
+  const handleFilterChange = (value: string, siblingsIds: number[]) => {
+    setSelectedFilters((prev) => {
+      if (value === 'reset') {
+        return prev.filter((item) => !siblingsIds.includes(item))
+      }
+      return prev.includes(+value)
+        ? prev.filter((item) => item !== +value)
+        : [...prev.filter((item) => !siblingsIds.includes(item)), +value]
+    })
   }
 
   return (
@@ -39,15 +43,21 @@ export const SearchFilters = () => {
         return (
           <Select
             key={filter.id}
-            onValueChange={(value) => handleFilterChange(+value)}
+            onValueChange={(value) =>
+              handleFilterChange(
+                value,
+                filter.filters.map(({ id }) => +id)
+              )
+            }
             value={selectedFilter ? selectedFilter.id.toString() : ''}
           >
-            <SelectTrigger className="w-fit">
+            <SelectTrigger className="w-[171px]">
               <SelectValue placeholder={`Filter by ${filter.name.toLowerCase()}`} />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>Filter by {filter.name.toLowerCase()}</SelectLabel>
+                <SelectItem value={'reset'}>None</SelectItem>
                 {filter.filters.map(({ id, value }) => (
                   <SelectItem key={id} value={id.toString()}>
                     {value}
