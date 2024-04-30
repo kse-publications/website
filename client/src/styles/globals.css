@@ -175,3 +175,42 @@ body {
     padding var(--basic-transition) var(--basic-timing),
     margin var(--basic-transition) var(--basic-timing);
 }
+
+.search-result-item-enter {
+  opacity: 0;
+  transform: translateY(50px);
+}
+
+.search-result-item-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--basic-transition),
+    transform var(--basic-transition);
+}
+
+.search-result-item-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.search-result-item-exit-active {
+  opacity: 0;
+  transform: translateY(50px);
+  transition:
+    opacity var(--basic-transition),
+    transform var(--basic-transition);
+}
+
+.search-result-item {
+  opacity: 0;
+  transform: translateY(50px);
+  transition:
+    opacity var(--basic-transition),
+    transform var(--basic-transition);
+}
+
+.search-result-item.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
