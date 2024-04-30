@@ -8,12 +8,10 @@ export const SearchResults = () => {
 
   return (
     <div>
-      {isRecent && (
-        <h2 className="mb-4 w-fit text-3xl font-semibold leading-none tracking-tight">
-          Latest Publications
-          <span className="-mt-1 block h-1 w-full bg-[#e4e541]"></span>
-        </h2>
-      )}
+      <h2 className="mb-4 w-fit text-3xl font-semibold leading-none tracking-tight">
+        {isRecent ? 'Recent publications' : 'Found in publications'}
+        <span className="-mt-1 block h-1 w-full bg-[#e4e541]"></span>
+      </h2>
       {error ? (
         <div className="text-red-500">Error: {error}</div>
       ) : (

@@ -11,6 +11,6 @@ const data = await getPublication(id).catch((error) => {
 })
 ---
 
-<Layout title=`KSE docs | ${data.title}`>
+<Layout title=`KSE Publications | ${data.title}`>
   <PublicationPage data={data} transition:persist client:load />
 </Layout>
