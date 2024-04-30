@@ -14,10 +14,10 @@ public abstract class Entity<T> where T: Entity<T>
     [IgnoreInResponse]
     public Guid NotionId { get; init; }
 
-    public string Slug { get; protected set; } = string.Empty;
+    public string Slug { get; set; } = string.Empty;
     
     [Indexed(Sortable = true)]
-    public int Views { get; private set; } 
+    public int Views { get; set; } 
     
     [Indexed(JsonPath = "$.Id")]
     public Filter[] Filters { get; set; } = Array.Empty<Filter>();

@@ -1,4 +1,6 @@
-﻿namespace Publications.Domain.Publications;
+﻿using Publications.Domain.Publications;
+
+namespace Publications.Application.DTOs;
 
 /// <summary>
 /// A DTO that represents a publication summary.
@@ -6,12 +8,12 @@
 /// </summary>
 public class PublicationSummary
 { 
-    public string Slug { get; set; } = null!;
-    public string Title { get; set; } = null!;
-    public string Type { get; set; } = string.Empty;
-    public int Year { get; set; }
-    public string[] Authors { get; set; } = Array.Empty<string>();
-    public string Publisher { get; set; } = string.Empty;
+    public string Slug { get; init; } = null!;
+    public string Title { get; init; } = null!;
+    public string Type { get; init; } = string.Empty;
+    public int Year { get; init; }
+    public string[] Authors { get; init; } = Array.Empty<string>();
+    public string Publisher { get; init; } = string.Empty;
     
     public static PublicationSummary FromPublication(Publication publication)
     {

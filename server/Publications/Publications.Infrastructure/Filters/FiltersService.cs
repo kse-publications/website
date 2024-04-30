@@ -58,7 +58,7 @@ public class FiltersService: IFiltersService
         var filters = publications
             .Select(propertySelector.Compile())
             .Distinct()
-            .Select(f => new Filter { Value = f.ToString()! })
+            .Select(f => Filter.Create(f.ToString()!))
             .ToList();
 
         return new FilterGroup

@@ -7,19 +7,18 @@ namespace Publications.Domain.Filters;
 public class Filter
 {
     [Indexed]
-    public int Id { get; private set; }
-
-    private readonly string _value = null!;
-    public string Value
-    {
-        get => _value; 
-        init 
-        {
-            _value = value;
-            Id = GenerateIdFromValue(value);
-        }
-    }
+    public int Id { get; set; }
+    public string Value { get; set; } = string.Empty;
     
+    public static Filter Create(string value)
+    {
+        return new Filter
+        {
+            Id = GenerateIdFromValue(value),
+            Value = value
+        };
+    }
+
     private static int GenerateIdFromValue(string value)
     {
         using SHA256 sha256 = SHA256.Create();
