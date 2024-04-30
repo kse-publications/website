@@ -23,7 +23,7 @@ export default function SearchSection({
       initialFilters={filters}
       initialIsRecent={isRecent}
     >
-      <section>
+      <section className="flex grow flex-col">
         <SearchBackground />
         <SearchResults />
       </section>
