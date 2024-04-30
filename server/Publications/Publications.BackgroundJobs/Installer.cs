@@ -13,13 +13,12 @@ public static class Installer
         services.AddHostedService<RedisHostedService>();
 
         services.Configure<RetriableTaskOptions>(
-            configuration.GetSection("BackgroundTasks:SyncWithNotion"));
+            configuration.GetSection("BackgroundTasks:SyncDatabasesTask"));
         
-        services.AddTransient<SyncWithNotionBackgroundTask>();
+        services.AddTransient<SyncDatabasesTask>();
         services.AddScheduler();
         
         services.AddTransient<StoreRequestAnalyticsTask>();
-        services.AddTransient<UpdateResourceViewsTask>();
         services.AddQueue();
         return services;
     }
@@ -28,20 +27,10 @@ public static class Installer
     {
         serviceProvider.UseScheduler(scheduler =>
         {
-            scheduler.Schedule<SyncWithNotionBackgroundTask>()
+            scheduler.Schedule<SyncDatabasesTask>()
                 .Hourly()
                 .RunOnceAtStart()
-                .PreventOverlapping(nameof(SyncWithNotionBackgroundTask));
-            
-            scheduler.Schedule<UpdateResourceViewsTask>()
-                .Cron("0 */2 * * *") // Every 2 hours
-                .RunOnceAtStart()
-                .PreventOverlapping(nameof(UpdateResourceViewsTask));
+                .PreventOverlapping(nameof(SyncDatabasesTask));
         });
-    }
-    
-    public static bool AreScheduledJobsEnabled(this IConfiguration configuration)
-    {
-        return configuration.GetValue<string>("RUN_SCHEDULED_BG_JOBS") == "true";
     }
 }

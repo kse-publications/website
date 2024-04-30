@@ -8,6 +8,6 @@ public interface IFiltersService
     Task<IReadOnlyCollection<FilterGroup>> GetFiltersForPublicationsAsync(
         IEnumerable<Publication> publications);
     
-    Task<ICollection<Publication>> AssignFiltersToPublicationsAsync(
-        ICollection<Publication> publications, IReadOnlyCollection<FilterGroup> filters);
+    Task<IReadOnlyCollection<Publication>> AssignFiltersToPublicationsAsync(
+        ICollection<Publication> publications, ICollection<FilterGroup> filters);
 }

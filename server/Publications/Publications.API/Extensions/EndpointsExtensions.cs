@@ -14,10 +14,10 @@ public static class EndpointsExtensions
             (ILogger<Program> logger, IScheduler scheduler) => 
             {
                 logger.LogInformation("/sync endpoint hit");
-                scheduler.Schedule<SyncWithNotionBackgroundTask>()
+                scheduler.Schedule<SyncDatabasesTask>()
                     .EverySecond()
                     .Once()
-                    .PreventOverlapping(nameof(SyncWithNotionBackgroundTask));
+                    .PreventOverlapping(nameof(SyncDatabasesTask));
             });
 
         endpoints.MapGet("/FC2097AD-8BE2-463C-AD89-1190880C44AD/views", 
@@ -28,16 +28,6 @@ public static class EndpointsExtensions
             
             return views;
         });
-        
-        endpoints.MapGet("/C178F906-9553-4EBF-AA3D-84A1C043F680/update-views", 
-            (ILogger<Program> logger, IScheduler scheduler) =>
-            {
-                logger.LogInformation("/update-views endpoint hit");
-                scheduler.Schedule<UpdateResourceViewsTask>()
-                    .EverySecond()
-                    .Once()
-                    .PreventOverlapping(nameof(UpdateResourceViewsTask));
-            });
         
         return endpoints;
     }

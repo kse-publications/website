@@ -4,9 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Notion.Client;
 using Publications.Application.Repositories;
 using Publications.Application.Services;
-using Publications.Domain.Authors;
-using Publications.Domain.Publications;
-using Publications.Domain.Publishers;
 using Publications.Domain.Shared;
 using Publications.Infrastructure.Authors;
 using Publications.Infrastructure.Filters;
@@ -65,10 +62,6 @@ public static class Installer
         services.AddScoped<ISourceRepository, NotionRepository>();
         
         services.AddScoped<IRequestsRepository, RequestsRepository>();
-
-        services.AddScoped<IEntityRepository<Publication>, EntityRepository<Publication>>();
-        services.AddScoped<IEntityRepository<Publisher>, EntityRepository<Publisher>>();
-        services.AddScoped<IEntityRepository<Author>, EntityRepository<Author>>();
 
         services.AddScoped<IFiltersRepository, FiltersRepository>();
         

@@ -27,10 +27,9 @@ public class FiltersService: IFiltersService
             .AsReadOnly();
     }
     
-    public async Task<ICollection<Publication>> AssignFiltersToPublicationsAsync(
-        ICollection<Publication> publications, IReadOnlyCollection<FilterGroup> filters)
+    public async Task<IReadOnlyCollection<Publication>> AssignFiltersToPublicationsAsync(
+        ICollection<Publication> publications, ICollection<FilterGroup> filters)
     {
-        //TODO: HIGH VOLUME ITERATION
         foreach (Publication publication in publications)
         {
             publication.Filters = filters
@@ -38,7 +37,9 @@ public class FiltersService: IFiltersService
                 .ToArray();
         }
 
-        return publications;
+        return publications
+            .ToList()
+            .AsReadOnly();
     }
     
     private FilterGroup GetTypesFilterGroup(IEnumerable<Publication> publications) => 
