@@ -33,6 +33,9 @@
     --ring: 222.2 84% 4.9%;
 
     --radius: 0.5rem;
+
+    --basic-transition: 400ms;
+    --basic-timing: ease-out;
   }
 
   .dark {
@@ -63,6 +66,9 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+
+    --basic-transition: 400ms;
+    --basic-timing: ease-out;
   }
 }
 
@@ -106,4 +112,66 @@ body {
     -webkit-column-count: 1;
     column-count: 1;
   }
+}
+
+.slide-enter {
+  opacity: 0;
+  height: 0;
+  margin-bottom: 0;
+}
+
+.slide-enter-active {
+  opacity: 1;
+  height: 100%;
+  margin-bottom: 77px;
+  transition:
+    opacity var(--basic-transition) var(--basic-timing),
+    height var(--basic-transition) var(--basic-timing),
+    margin var(--basic-transition) var(--basic-timing);
+}
+
+.slide-exit {
+  opacity: 1;
+  height: 100%;
+  margin-bottom: 77px;
+}
+
+.slide-exit-active {
+  opacity: 0;
+  height: 0;
+  margin-bottom: 0;
+  transition:
+    opacity var(--basic-transition) var(--basic-timing),
+    height var(--basic-transition) var(--basic-timing),
+    margin var(--basic-transition) var(--basic-timing);
+}
+
+.change-padding-enter {
+  padding-bottom: 128px;
+  padding-top: 24px;
+  margin-top: 0;
+}
+
+.change-padding-enter-active {
+  padding-bottom: 24px;
+  padding-top: 24px;
+  margin-top: -40px;
+  transition:
+    padding var(--basic-transition) var(--basic-timing),
+    margin var(--basic-transition) var(--basic-timing);
+}
+
+.change-padding-exit {
+  padding-bottom: 24px;
+  padding-top: 24px;
+  margin-top: -40px;
+}
+
+.change-padding-exit-active {
+  padding-bottom: 128px;
+  padding-top: 24px;
+  margin-top: 0;
+  transition:
+    padding var(--basic-transition) var(--basic-timing),
+    margin var(--basic-transition) var(--basic-timing);
 }
