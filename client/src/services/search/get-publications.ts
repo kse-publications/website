@@ -5,8 +5,6 @@ import type { QueryParams, SearchPublicationsQueryParams } from '@/types/common/
 
 const BASE_URL = import.meta.env.PUBLIC_API_URL
 
-console.log(BASE_URL)
-
 const getFiltersString = (filters: number[]): string => {
   return filters.join(';')
 }
