@@ -26,7 +26,7 @@ var app = builder.Build();
     
     app.Services.UpdateDatabase();
 
-    if (app.Configuration.AreScheduledJobsEnabled())
+    if (app.AreScheduledJobsEnabled())
     {
         app.Services.UseBackgroundJobs();
     }

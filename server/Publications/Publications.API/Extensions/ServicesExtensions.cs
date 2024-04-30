@@ -68,4 +68,10 @@ public static class ServicesExtensions
     {
         app.UseMiddleware<ErrorHandlingMiddleware>();
     }
+    
+    public static bool AreScheduledJobsEnabled(this WebApplication app)
+    {
+        return !(app.Environment.IsDevelopment() &&
+                 app.Configuration["RUN_SCHEDULED_BG_JOBS"] is not null and not "true");
+    }
 }
