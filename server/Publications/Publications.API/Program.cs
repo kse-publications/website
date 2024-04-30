@@ -25,8 +25,11 @@ var app = builder.Build();
     }
     
     app.Services.UpdateDatabase();
-    
-    app.Services.UseBackgroundJobs();
+
+    if (app.Configuration.AreScheduledJobsEnabled())
+    {
+        app.Services.UseBackgroundJobs();
+    }
     
     app.UseCorsPolicies();
     app.UseHttpsRedirection();

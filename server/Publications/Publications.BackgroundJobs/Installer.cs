@@ -32,11 +32,16 @@ public static class Installer
                 .Hourly()
                 .RunOnceAtStart()
                 .PreventOverlapping(nameof(SyncWithNotionBackgroundTask));
-
-            // scheduler.Schedule<UpdateResourceViewsTask>()
-            //     .Cron("0 */2 * * *") // Every 2 hours
-            //     .RunOnceAtStart()
-            //     .PreventOverlapping(nameof(UpdateResourceViewsTask));
+            
+            scheduler.Schedule<UpdateResourceViewsTask>()
+                .Cron("0 */2 * * *") // Every 2 hours
+                .RunOnceAtStart()
+                .PreventOverlapping(nameof(UpdateResourceViewsTask));
         });
+    }
+    
+    public static bool AreScheduledJobsEnabled(this IConfiguration configuration)
+    {
+        return configuration.GetValue<string>("RUN_SCHEDULED_BG_JOBS") == "true";
     }
 }
