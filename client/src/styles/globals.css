@@ -147,13 +147,11 @@ body {
 .change-padding-enter {
   padding-bottom: 128px;
   padding-top: 24px;
-  margin-top: 0;
 }
 
 .change-padding-enter-active {
   padding-bottom: 24px;
   padding-top: 24px;
-  margin-top: -40px;
   transition:
     padding var(--basic-transition) var(--basic-timing),
     margin var(--basic-transition) var(--basic-timing);
@@ -162,16 +160,12 @@ body {
 .change-padding-exit {
   padding-bottom: 24px;
   padding-top: 24px;
-  margin-top: -40px;
 }
 
 .change-padding-exit-active {
   padding-bottom: 128px;
   padding-top: 24px;
-  margin-top: 0;
-  transition:
-    padding var(--basic-transition) var(--basic-timing),
-    margin var(--basic-transition) var(--basic-timing);
+  transition: padding var(--basic-transition) var(--basic-timing);
 }
 
 .search-result-item-enter {
