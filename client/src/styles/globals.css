@@ -106,7 +106,7 @@ body {
   break-inside: avoid;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
   #publications {
     -moz-column-count: 1;
     -webkit-column-count: 1;

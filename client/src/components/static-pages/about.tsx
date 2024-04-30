@@ -1,15 +1,12 @@
-import GoBackButton from './go-back-button'
+import MainPageButton from './go-back-button'
 
 function AboutPage() {
   return (
     <>
-      <GoBackButton />
+      <MainPageButton />
       <div className="max-w-4xl mx-auto mb-10 overflow-auto rounded-lg border border-gray-300 bg-white p-6">
-        <div className="ml-5 w-fit">
-          <h1 className="color-black text-5xl font-semibold leading-none tracking-tight">ABOUT</h1>
-          <span className="-mt-1 block h-1 w-full bg-[#e4e541]"></span>
-        </div>
-        <div className="p-10 pl-20">
+        <h1 className="color-black text-5xl font-semibold leading-none tracking-tight">ABOUT</h1>
+        <div className="pt-6">
           <p>
             The KSE Publications website presents a collection of the major academic and analytical
             publications produced by the KSE community. Its main objective is to disseminate KSE's

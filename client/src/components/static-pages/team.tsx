@@ -1,27 +1,86 @@
-import GoBackButton from './go-back-button'
+import MainPageButton from './go-back-button'
 
 function TeamPage() {
   return (
     <>
-      <GoBackButton />
+      <MainPageButton />
       <div className="max-w-4xl mx-auto mb-10 overflow-auto rounded-lg border border-gray-300 bg-white p-6">
-        <div className="ml-5 w-fit">
-          <h1 className="color-black text-5xl font-semibold leading-none tracking-tight">TEAM</h1>
-          <span className="-mt-1 block h-1 w-full bg-[#e4e541]"></span>
-        </div>
-        <div className="p-10 pl-20">
+        <h1 className="color-black text-5xl font-semibold leading-none tracking-tight">TEAM</h1>
+        <div className="pt-6">
           <p>
-            This website was collaboratively developed by students and academic faculty of the
-            university as part of an initiative to promote our own publication repository and
-            working paper series. All aspects of the website's creation were supervised and guided
-            by Mark Motliuk.
+            This website is collaboratively developed by students and academic faculty of the
+            university as part of an initiative to promote KSE publications. The project is
+            proposed, organized, and executed by Dr.{' '}
+            <a
+              href="https://www.linkedin.com/in/dr-larysa-tamilina-45a50431/"
+              className="underline"
+              target="_blank"
+            >
+              Larysa Tamilina
+            </a>{' '}
+            (Associate Professor at KSE). All aspects of the website's creation are supervised and
+            guided by{' '}
+            <a
+              href="https://www.linkedin.com/in/mark-motliuk/"
+              className="underline"
+              target="_blank"
+            >
+              Mark Motliuk
+            </a>{' '}
+            (KSE BA '25).
           </p>
           <br />
-          <p>The student team involved in the website's development included: [Names here].</p>
+          <p>The technical team comprises four students:</p>
+          <p>
+            - Back-End development is led by{' '}
+            <a
+              href="https://www.linkedin.com/in/vladyslav-prudius/"
+              className="underline"
+              target="_blank"
+            >
+              Vlad Prudius
+            </a>{' '}
+            (KSE BA '27) and assisted by{' '}
+            <a
+              href="https://www.linkedin.com/in/anna-opanasenko-25a762264/"
+              className="underline"
+              target="_blank"
+            >
+              Anna Opanasenko
+            </a>{' '}
+            (KSE BA '27);
+          </p>
+          <p>
+            - Front-End development is led by{' '}
+            <a
+              href="https://www.linkedin.com/in/dmytro-kolisnyk-203a61235/"
+              className="underline"
+              target="_blank"
+            >
+              Dmytro Kolisnyk
+            </a>{' '}
+            (KSE BA '27) and assisted by{' '}
+            <a
+              href="https://www.linkedin.com/in/tetiana-stasiuk-16947b210/"
+              className="underline"
+              target="_blank"
+            >
+              Tetiana Stasiuk
+            </a>{' '}
+            (KSE MA '24).
+          </p>
           <br />
-          <p>The web design was crafted by Viktoriia Verych.</p>
-          <br />
-          <p>Currently, the role of content manager is held by [Some Name].</p>
+          <p>
+            The web design is crafted by{' '}
+            <a
+              href="https://www.linkedin.com/in/viktoriia-verych-8842b725a/"
+              className="underline"
+              target="_blank"
+            >
+              Viktoriia Verych
+            </a>{' '}
+            (KSE BA '26).
+          </p>
         </div>
       </div>
     </>
