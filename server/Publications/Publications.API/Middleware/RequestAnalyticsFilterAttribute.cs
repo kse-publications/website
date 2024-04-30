@@ -50,7 +50,7 @@ public class RequestAnalyticsFilterAttribute<TResource> : TypeFilterAttribute
         {
             clientUuid = null;
             
-            if (context.Request.Headers.TryGetValue("client-uuid", out StringValues values) &&
+            if (context.Request.Headers.TryGetValue("Client-Uuid", out StringValues values) &&
                 values.Count > 0)
             {
                 clientUuid = values.First();
