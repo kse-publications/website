@@ -7,7 +7,7 @@ export const SearchResults = () => {
   const { isRecent, error, isLoading, searchResults } = useSearchContext()
 
   return (
-    <div className="w-full bg-[#f0f0f0] pb-4 pt-8">
+    <div className="w-full grow bg-[#f0f0f0] pb-4 pt-8">
       <div className="mx-auto max-w-[1160px] px-4">
         <h2 className="mb-4 w-fit text-3xl font-semibold leading-none tracking-tight">
           {isRecent ? 'Recent publications' : 'Found in publications'}
