@@ -7,9 +7,6 @@ import type { PaginatedCollection } from '@/types/common/paginated-collection'
 import type { PublicationSummary } from '@/types/publication-summary/publication-summary'
 import { DEFAULT_PAGE } from '@/config/search-params'
 import { getFilters } from '@/services/filters/filters'
-import bgImage from '../assets/images/bg-image.jpg'
-import bgImageWebp from '../assets/images/bg-image.webp'
-import bgImageAvif from '../assets/images/bg-image.avif'
 
 const filters = await getFilters()
 
@@ -40,18 +37,7 @@ if (!searchText) {
 }
 ---
 
-<picture>
-  <source srcset={bgImageWebp.src} type="image/webp" />
-  <source srcset={bgImageAvif.src} type="image/avif" />
-  <img
-    class="absolute -z-10 w-full object-cover h-[540px]"
-    src={bgImage.src}
-    alt="Background image"
-  />
-</picture>
-
-<div class="absolute -z-[9] w-full bg-black opacity-40 h-[540px]"></div>
-<Layout light title="KSE Publications | Search">
+<Layout fullSize light title="KSE Publications | Search">
   <SearchSection
     filters={filters}
     initialPublications={initialPublications}
