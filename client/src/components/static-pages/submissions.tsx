@@ -1,17 +1,14 @@
-import GoBackButton from './go-back-button'
+import MainPageButton from './go-back-button'
 
 function SubmissionsPage() {
   return (
     <>
-      <GoBackButton />
+      <MainPageButton />
       <div className="max-w-4xl mx-auto mb-10 overflow-auto rounded-lg border border-gray-300 bg-white p-6">
-        <div className="ml-5 w-fit">
-          <h1 className="color-black text-5xl font-semibold leading-none tracking-tight">
-            SUBMISSIONS
-          </h1>
-          <span className="-mt-1 block h-1 w-full bg-[#e4e541]"></span>
-        </div>
-        <div className="p-10 pl-20">
+        <h1 className="color-black text-5xl font-semibold leading-none tracking-tight">
+          SUBMISSIONS
+        </h1>
+        <div className="pt-6">
           <p>
             We gather publications created by the KSE community, regardless of their type, from all
             sources relevant to academic or policy-making contexts. We welcome publications from
@@ -74,7 +71,9 @@ function SubmissionsPage() {
           <br />
           <p>
             For any inquiries or further assistance, please contact{' '}
-            <span className="font-bold">publications@kse.org.ua</span>
+            <span className="font-bold">
+              <a href="mailto:publications@kse.org.ua">publications@kse.org.ua</a>
+            </span>
           </p>
         </div>
       </div>

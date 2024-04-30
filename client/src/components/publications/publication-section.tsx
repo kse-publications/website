@@ -31,7 +31,7 @@ function PublicationPage({ data }: PublicationPageProps) {
           <div className="author mb-4 ">
             <h4 className="text-l scroll-m-20 font-semibold tracking-tight">Authors:</h4>{' '}
             {data.authors.map((author: any, index: number) => (
-              <span key={author.id}>
+              <span key={author.slug}>
                 {author.name}
                 {index < data.authors.length - 1 ? ', ' : ''}{' '}
               </span>

@@ -7,22 +7,28 @@ export default function MobileMenuDrawer() {
   return (
     <Sheet key="top">
       <SheetTrigger asChild>
-        <ListBulletIcon className="h-9 w-9 rounded-full border border-black p-2" />
+        <ListBulletIcon className="h-9 w-9 rounded-full border border-white p-2" color="white" />
       </SheetTrigger>
       <SheetContent side="top" className="fixed inset-0 z-50 overflow-auto bg-white">
         <div className="max-w-sm mx-auto mt-10 w-full">
           <Separator />
-          <Button variant="link" className="mb-1 mt-1 pl-0">
-            About
-          </Button>
+          <a href="/about" aria-label="Go to About page">
+            <Button variant="link" className="mb-1 mt-1 pl-0">
+              About
+            </Button>
+          </a>
           <Separator />
-          <Button variant="link" className="mb-1 mt-1 pl-0">
-            Submissions
-          </Button>
+          <a href="/about" aria-label="Go to About page">
+            <Button variant="link" className="mb-1 mt-1 pl-0">
+              Submissions
+            </Button>
+          </a>
           <Separator />
-          <Button variant="link" className="mb-1 mt-1 pl-0">
-            Team
-          </Button>
+          <a href="/about" aria-label="Go to About page">
+            <Button variant="link" className="mb-1 mt-1 pl-0">
+              Team
+            </Button>
+          </a>
           <Separator />
         </div>
       </SheetContent>
