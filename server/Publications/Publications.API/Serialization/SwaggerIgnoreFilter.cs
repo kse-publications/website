@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
+using Publications.Domain.Shared.Attributes;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Publications.API.Serialization;
@@ -12,8 +13,8 @@ public class SwaggerIgnoreFilter : ISchemaFilter
         if (schema.Properties.Count == 0)
             return;
 
-        const BindingFlags bindingFlags = BindingFlags.Public |
-                                          BindingFlags.NonPublic |
+        const BindingFlags bindingFlags = BindingFlags.Public | 
+                                          BindingFlags.NonPublic | 
                                           BindingFlags.Instance;
         
         var memberList = schemaFilterContext.Type
@@ -22,12 +23,9 @@ public class SwaggerIgnoreFilter : ISchemaFilter
                 .GetProperties(bindingFlags));
 
         var excludedList = memberList.Where(m =>
-                m.GetCustomAttribute<IgnoreInResponseAttribute>()
-                != null)
-            .Select(m =>
-                (m.GetCustomAttribute<JsonPropertyAttribute>()
-                     ?.PropertyName
-                 ?? m.Name.ToCamelCase()));
+                m.GetCustomAttribute<IgnoreInResponseAttribute>() != null)
+            .Select(m => m.GetCustomAttribute<JsonPropertyAttribute>()
+                ?.PropertyName ?? ToCamelCase(m.Name));
 
         foreach (var excludedName in excludedList)
         {
@@ -35,11 +33,8 @@ public class SwaggerIgnoreFilter : ISchemaFilter
                 schema.Properties.Remove(excludedName);
         }
     }
-}
-
-internal static class StringExtensions
-{
-    internal static string ToCamelCase(this string value)
+    
+    private static string ToCamelCase(string value)
     {
         if (string.IsNullOrEmpty(value)) return value;
         return char.ToLowerInvariant(value[0]) + value.Substring(1);

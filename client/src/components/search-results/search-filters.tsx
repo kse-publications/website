@@ -36,7 +36,7 @@ export const SearchFilters = () => {
   }
 
   return (
-    <div className="flex justify-center gap-6">
+    <div className="flex flex-wrap justify-center gap-6">
       {(filters || []).map((filter) => {
         const selectedFilter = filter.filters.find(({ id }) => selectedFilters.includes(id))
 
@@ -51,7 +51,7 @@ export const SearchFilters = () => {
             }
             value={selectedFilter ? selectedFilter.id.toString() : ''}
           >
-            <SelectTrigger className="w-[171px]">
+            <SelectTrigger className="w-full xs:w-[171px]">
               <SelectValue placeholder={`Filter by ${filter.name.toLowerCase()}`} />
             </SelectTrigger>
             <SelectContent>

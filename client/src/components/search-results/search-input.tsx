@@ -11,7 +11,7 @@ export const SearchInput = () => {
 
   return (
     <Input
-      className="mx-auto mb-6 w-full max-w-[562px]"
+      className="mx-auto mb-6 w-full max-w-[700px] p-4 py-6 text-lg"
       aria-label="Search docs input"
       placeholder="Enter your search here"
       value={searchText}

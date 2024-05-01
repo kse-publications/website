@@ -3,9 +3,10 @@ using Coravel.Queuing.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Primitives;
-using Publications.API.BackgroundJobs;
-using Publications.API.Models;
-using Publications.API.Services;
+using Publications.BackgroundJobs;
+using Publications.Domain.Requests;
+using Publications.Domain.Shared;
+using Publications.Infrastructure.Requests;
 
 namespace Publications.API.Middleware;
 
@@ -49,7 +50,7 @@ public class RequestAnalyticsFilterAttribute<TResource> : TypeFilterAttribute
         {
             clientUuid = null;
             
-            if (context.Request.Headers.TryGetValue("client-uuid", out StringValues values) &&
+            if (context.Request.Headers.TryGetValue("Client-Uuid", out StringValues values) &&
                 values.Count > 0)
             {
                 clientUuid = values.First();
