@@ -18,13 +18,13 @@ export default function MobileMenuDrawer() {
             </Button>
           </a>
           <Separator />
-          <a href="/about" aria-label="Go to About page">
+          <a href="/submissions" aria-label="Go to About page">
             <Button variant="link" className="mb-1 mt-1 pl-0">
               Submissions
             </Button>
           </a>
           <Separator />
-          <a href="/about" aria-label="Go to About page">
+          <a href="/team" aria-label="Go to About page">
             <Button variant="link" className="mb-1 mt-1 pl-0">
               Team
             </Button>
