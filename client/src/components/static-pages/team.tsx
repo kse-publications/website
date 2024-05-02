@@ -5,7 +5,7 @@ function TeamPage() {
     <>
       <MainPageButton />
       <div className="max-w-4xl mx-auto mb-10 overflow-auto rounded-lg border border-gray-300 bg-white p-6">
-        <h1 className="color-black text-5xl font-semibold leading-none tracking-tight">TEAM</h1>
+        <h1 className="color-black text-4xl font-semibold leading-none tracking-tight">TEAM</h1>
         <div className="pt-6">
           <p>
             This website is collaboratively developed by students and academic faculty of the
