@@ -37,7 +37,7 @@ export const LoadingTrigger = () => {
 
   if (isTriggerHidden) {
     return (
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="pt-2 text-center text-sm text-muted-foreground">
         You have reached the end of the list
       </p>
     )

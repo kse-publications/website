@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
-using Publications.API.Models;
-using Publications.API.DTOs;
 using Publications.API.Middleware;
-using Publications.API.Repositories.Authors;
-using Publications.API.Repositories.Filters;
-using Publications.API.Repositories.Shared;
-using Publications.API.Services;
+using Publications.Application;
+using Publications.Application.DTOs;
+using Publications.Application.Repositories;
+using Publications.Application.Services;
+using Publications.Domain.Filters;
+using Publications.Domain.Publications;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Publications.API.Controllers;
@@ -16,16 +16,13 @@ public class PublicationsController : ControllerBase
 {
     private readonly IPublicationsService _publicationsService;
     private readonly IFiltersRepository _filtersRepository;
-    private readonly IAuthorsRepository _authorsRepository;
 
     public PublicationsController(
         IPublicationsService publicationsService,
-        IFiltersRepository filtersRepository, 
-        IAuthorsRepository authorsRepository)
+        IFiltersRepository filtersRepository)
     {
         _publicationsService = publicationsService;
         _filtersRepository = filtersRepository;
-        _authorsRepository = authorsRepository;
     }
     
     [HttpGet]

@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Publications.Domain.Shared.Attributes;
 
 namespace Publications.API.Serialization;
 

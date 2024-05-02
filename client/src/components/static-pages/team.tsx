@@ -1,3 +1,4 @@
+import { AnimatedHeadLine } from '../ui/animated-headline'
 import MainPageButton from './go-back-button'
 
 function TeamPage() {
@@ -5,18 +6,18 @@ function TeamPage() {
     <>
       <MainPageButton />
       <div className="max-w-4xl mx-auto mb-10 overflow-auto rounded-lg border border-gray-300 bg-white p-6">
-        <h1 className="color-black text-4xl font-semibold leading-none tracking-tight">TEAM</h1>
+        <AnimatedHeadLine>TEAM</AnimatedHeadLine>
         <div className="pt-6">
           <p>
             This website is collaboratively developed by students and academic faculty of the
             university as part of an initiative to promote KSE publications. The project is
-            proposed, organized, and executed by Dr.{' '}
+            proposed, organized, and executed by{' '}
             <a
               href="https://www.linkedin.com/in/dr-larysa-tamilina-45a50431/"
               className="underline"
               target="_blank"
             >
-              Larysa Tamilina
+              Dr. Larysa Tamilina
             </a>{' '}
             (Associate Professor at KSE). All aspects of the website's creation are supervised and
             guided by{' '}
