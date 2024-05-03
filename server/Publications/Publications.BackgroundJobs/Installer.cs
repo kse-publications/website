@@ -1,6 +1,8 @@
 ﻿using Coravel;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Publications.Application;
 using Publications.BackgroundJobs.Abstractions;
 
 namespace Publications.BackgroundJobs;
@@ -23,12 +25,14 @@ public static class Installer
         return services;
     }
     
-    public static void UseBackgroundJobs(this IServiceProvider serviceProvider)
+    public static void UseBackgroundJobs(this IServiceProvider serviceProvider, 
+        IOptionsMonitor<FeatureFlags> optionsMonitor)
     {
         serviceProvider.UseScheduler(scheduler =>
         {
             scheduler.Schedule<SyncDatabasesTask>()
-                .Hourly()
+                .EveryFifteenSeconds()
+                .When(() => Task.FromResult(optionsMonitor.CurrentValue.SyncDatabases))
                 .RunOnceAtStart()
                 .PreventOverlapping(nameof(SyncDatabasesTask));
         });

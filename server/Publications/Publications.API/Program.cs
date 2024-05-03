@@ -14,6 +14,8 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services
         .AddInfrastructure(builder.Configuration)
         .AddBackgroundJobs(builder.Configuration);
+    
+    builder.Services.ConfigureFeatureFlags(builder.Configuration);
 }
 
 var app = builder.Build();
@@ -25,11 +27,8 @@ var app = builder.Build();
     }
     
     app.Services.UpdateDatabase();
-
-    if (app.AreScheduledJobsEnabled())
-    {
-        app.Services.UseBackgroundJobs();
-    }
+    
+    app.Services.UseBackgroundJobs(app.GetFeatureFlagsMonitor());
     
     app.UseCorsPolicies();
     app.UseHttpsRedirection();
