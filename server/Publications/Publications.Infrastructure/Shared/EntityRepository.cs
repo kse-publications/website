@@ -21,11 +21,10 @@ public class EntityRepository<TEntity> : IEntityRepository<TEntity>
         return (await _collection.ToListAsync()).AsReadOnly();
     }
 
-    public async Task InsertOrUpdateAsync(
+    public virtual async Task InsertOrUpdateAsync(
         IEnumerable<TEntity> entities, 
         CancellationToken cancellationToken = default)
     {
-        await _collection.DeleteAsync(await _collection.ToListAsync());
         await _collection.InsertAsync(entities);
     }
     
@@ -34,12 +33,5 @@ public class EntityRepository<TEntity> : IEntityRepository<TEntity>
         CancellationToken cancellationToken = default)
     {
         return await _collection.FindByIdAsync(resourceId.ToString());
-    }
-    
-    public async Task UpdateAsync(
-        IEnumerable<TEntity> entities, 
-        CancellationToken cancellationToken = default)
-    {
-        await _collection.UpdateAsync(entities);
     }
 }

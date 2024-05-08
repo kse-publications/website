@@ -14,6 +14,7 @@ using Publications.Infrastructure.Shared;
 using Publications.Infrastructure.Source;
 using Redis.OM;
 using Redis.OM.Contracts;
+using StackExchange.Redis;
 
 namespace Publications.Infrastructure;
 

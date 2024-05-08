@@ -7,13 +7,14 @@ namespace Publications.Domain.Shared;
 public abstract class Entity<T> where T: Entity<T>
 {
     [RedisIdField]
-    [Indexed]
+    [Indexed(Sortable = true)]
     [IgnoreInResponse]
     public int Id { get; init; }
     
     [IgnoreInResponse]
     public Guid NotionId { get; init; }
 
+    [Indexed(Sortable = true)]
     public string Slug { get; set; } = string.Empty;
     
     [Indexed(Sortable = true)]

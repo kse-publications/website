@@ -16,8 +16,4 @@ public interface IEntityRepository<TEntity>
     Task<TEntity?> GetByIdAsync(
         int resourceId,
         CancellationToken cancellationToken = default);
-    
-    Task UpdateAsync(
-        IEnumerable<TEntity> entities,
-        CancellationToken cancellationToken = default);
 }
