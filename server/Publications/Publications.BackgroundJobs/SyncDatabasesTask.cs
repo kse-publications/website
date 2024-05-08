@@ -53,7 +53,7 @@ public class SyncDatabasesTask : BaseRetriableTask<SyncDatabasesTask>
     }
 
     private async Task<IReadOnlyCollection<TResource>> SetResourceViewsAsync<TResource>(
-        IReadOnlyCollection<TResource> resourceItemsCollection)
+        IEnumerable<TResource> resourceItemsCollection)
         where TResource : Entity<TResource>
     {
         Dictionary<int, int> views = await _requestsRepository.GetResourceViews<TResource>();

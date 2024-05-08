@@ -12,7 +12,7 @@ public static class Installer
     public static IServiceCollection AddBackgroundJobs(this IServiceCollection services, 
         IConfiguration configuration)
     {
-        services.AddHostedService<RedisHostedService>();
+        services.AddHostedService<ConfigurationHostedService>();
 
         services.Configure<RetriableTaskOptions>(
             configuration.GetSection("BackgroundTasks:SyncDatabasesTask"));
@@ -31,7 +31,7 @@ public static class Installer
         serviceProvider.UseScheduler(scheduler =>
         {
             scheduler.Schedule<SyncDatabasesTask>()
-                .EveryFifteenSeconds()
+                .Hourly()
                 .When(() => Task.FromResult(optionsMonitor.CurrentValue.SyncDatabases))
                 .RunOnceAtStart()
                 .PreventOverlapping(nameof(SyncDatabasesTask));
