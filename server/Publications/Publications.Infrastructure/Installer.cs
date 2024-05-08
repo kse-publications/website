@@ -37,6 +37,11 @@ public static class Installer
     {
         services.AddSingleton<IRedisConnectionProvider>(new RedisConnectionProvider(
             connectionString: configuration.GetConnectionString("Redis")!));
+        
+        services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer
+            .Connect(configuration.GetConnectionString("RedisShort")!, 
+                options => options.AbortOnConnectFail = false));
+        
         services.AddTransient<IDbConfigurationService, RedisConfigurationService>();
         
         return services;
