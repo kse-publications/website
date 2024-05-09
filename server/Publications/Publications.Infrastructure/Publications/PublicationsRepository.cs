@@ -11,11 +11,8 @@ using Publications.Domain.Authors;
 using Publications.Domain.Publications;
 using Publications.Domain.Publishers;
 using Publications.Infrastructure.Shared;
-using Publications.Infrastructure.Shared.Queries;
-using Redis.OM;
 using Redis.OM.Contracts;
 using Redis.OM.Searching;
-using Redis.OM.Searching.Query;
 using StackExchange.Redis;
 
 namespace Publications.Infrastructure.Publications;
@@ -76,21 +73,44 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         PaginationFilterSearchDTO paginationSearchDTO,
         CancellationToken cancellationToken = default)
     {
+        SearchCommands ft = _db.FT();
         string searchTerm = paginationSearchDTO.SearchTerm;
         
-        RedisQuery query = new RedisQuery(Publication.IndexName)
-            .Where(nameof(Publication.Title).Prefix(searchTerm))
-            .Or(nameof(Publication.Title).Search(searchTerm))
-            .Or(nameof(Publication.Abstract).Prefix(searchTerm))
-            .Or(nameof(Publication.Abstract).Search(searchTerm))
-            .Or($"{nameof(Publication.Publisher)}_{nameof(Publisher.Name)}".Prefix(searchTerm))
-            .Or($"{nameof(Publication.Publisher)}_{nameof(Publisher.Name)}".Search(searchTerm))
-            .Or($"{nameof(Publication.Authors)}_{nameof(Author.Name)}".Prefix(searchTerm))
-            .Or($"{nameof(Publication.Authors)}_{nameof(Author.Name)}".Search(searchTerm))
-            .Build()
+        SearchFieldName title = new(nameof(Publication.Title));
+        SearchFieldName abstractField = new(nameof(Publication.Abstract));
+        SearchFieldName publisherName = new($"{nameof(Publication.Publisher)}_{nameof(Publisher.Name)}");
+        SearchFieldName authorsName = new($"{nameof(Publication.Authors)}_{nameof(Author.Name)}");
+
+        SearchQuery query = SearchQuery
+            .Where(title.Prefix(searchTerm))
+            .Or(title.Search(searchTerm))
+            .Or(abstractField.Prefix(searchTerm))
+            .Or(abstractField.Search(searchTerm))
+            .Or(publisherName.Prefix(searchTerm))
+            .Or(publisherName.Search(searchTerm))
+            .Or(authorsName.Prefix(searchTerm))
+            .Or(authorsName.Search(searchTerm))
             .Filter(paginationSearchDTO);
         
-        return await GetPaginatedPublicationsAsync(query, paginationSearchDTO);
+        var searchResult = await ft.SearchAsync(Publication.IndexName, 
+            new Query(query.Build())
+                .Limit(
+                    offset: paginationSearchDTO.PageSize * (paginationSearchDTO.Page - 1),
+                    count: paginationSearchDTO.PageSize)
+                .Dialect(3));
+        
+        IReadOnlyCollection<PublicationSummary> publications = searchResult
+            .ToJson()
+            .Select(json => PublicationSummary
+                .FromPublication(JsonSerializer
+                    .Deserialize<Publication[]>(json)!.First()))
+            .ToList()
+            .AsReadOnly();
+        
+        return new PaginatedCollection<PublicationSummary>(
+            Items: publications,
+            TotalCount: (int)searchResult.TotalResults,
+            ResultCount: publications.Count);
     }
 
     public override async Task InsertOrUpdateAsync(
@@ -99,27 +119,6 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
     {
         await _publications.DeleteAsync(await _publications.ToListAsync());
         await _publications.InsertAsync(entities);
-    }
-    
-    private async Task<PaginatedCollection<PublicationSummary>> GetPaginatedPublicationsAsync(
-        RedisQuery query, PaginationFilterDTO paginationDTO)
-    {
-        Task<SearchResponse<Publication>> matchedCountTask = _redisConnectionProvider.Connection
-            .SearchAsync<Publication>(query);
-        
-        query.Limit(paginationDTO.PageSize, paginationDTO.Page);
-        Task<SearchResponse<Publication>> paginatedPublicationsTask = _redisConnectionProvider.Connection
-            .SearchAsync<Publication>(query);
-        
-        await Task.WhenAll(matchedCountTask, paginatedPublicationsTask);
-        
-        IReadOnlyCollection<Publication> publications = (await paginatedPublicationsTask)
-            .Documents.Values.ToList().AsReadOnly();
-        
-        return new PaginatedCollection<PublicationSummary>(
-            Items: publications.Select(PublicationSummary.FromPublication).ToList().AsReadOnly(),
-            ResultCount: publications.Count,
-            TotalCount: (int)(await matchedCountTask).DocumentCount);
     }
     
     private static ICollection<PublicationSummary> MapToPublicationSummaries(

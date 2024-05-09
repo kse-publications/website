@@ -13,7 +13,7 @@ namespace Publications.Domain.Publications;
 public class Publication: Entity<Publication>
 {
     [Searchable(Weight = 1.0)]
-    public string Title { get; init; } = null!;
+    public string Title { get; set; } = null!;
     
     [Indexed(Sortable = true)]
     public string Type { get; set;} = null!;
@@ -39,9 +39,6 @@ public class Publication: Entity<Publication>
     [Indexed(JsonPath = "$.Id")]
     [Searchable(JsonPath = "$.Name", Weight = 0.8, PhoneticMatcher = "dm:en")]
     public Publisher? Publisher { get; set; }
-    
-    [Indexed(Sortable = true)]
-    public DateTime LastModified { get; set; }
     
     public override Publication UpdateSlug(IWordsService wordsService)
     {

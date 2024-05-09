@@ -1,4 +1,5 @@
-﻿using Publications.Domain.Filters;
+﻿using System.Text.Json.Serialization;
+using Publications.Domain.Filters;
 using Publications.Domain.Shared.Attributes;
 using Redis.OM.Modeling;
 
@@ -26,6 +27,7 @@ public abstract class Entity<T> where T: Entity<T>
     
     [Indexed]
     [IgnoreInResponse]
+    [JsonConverter(typeof(UnixTimestampJsonConverter))]
     public DateTime SynchronizedAt { get; set; }
     
     public abstract T UpdateSlug(IWordsService wordsService);

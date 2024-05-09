@@ -48,7 +48,7 @@ public class SearchQuery
     
     public static SearchQuery CreateWithFilter(FilterDTO filterDTO, SearchQuery? query = null)
     {
-        if (filterDTO.GetParsedFilters().Length == 0)
+        if (filterDTO.GetParsedFilters().Length == 0 && (query is null || query.AllowsAll()))
             return Where(AllowedAll);
 
         SearchQuery fullQuery = query is not null 

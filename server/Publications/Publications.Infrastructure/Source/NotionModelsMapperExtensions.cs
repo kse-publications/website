@@ -49,8 +49,6 @@ public static class NotionModelsMapperExtensions
 
             Abstract = ((RichTextPropertyValue)page.Properties["Abstract"])
                 .RichText.Select(r => r.PlainText).FirstOrDefault()!,
-
-            LastModified = page.LastEditedTime
         }.UpdateSlug(wordsService).Synchronize();
     }
     
