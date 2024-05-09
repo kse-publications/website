@@ -10,9 +10,6 @@ public abstract class Entity<T> where T: Entity<T>
     [Indexed(Sortable = true)]
     [IgnoreInResponse]
     public int Id { get; init; }
-    
-    [IgnoreInResponse]
-    public Guid NotionId { get; init; }
 
     [Indexed(Sortable = true)]
     public string Slug { get; set; } = string.Empty;
@@ -21,7 +18,15 @@ public abstract class Entity<T> where T: Entity<T>
     public int Views { get; set; } 
     
     [Indexed(JsonPath = "$.Id")]
+    [IgnoreInResponse]
     public Filter[] Filters { get; set; } = Array.Empty<Filter>();
+    
+    [IgnoreInResponse]
+    public Guid NotionId { get; init; }
+    
+    [Indexed]
+    [IgnoreInResponse]
+    public DateTime SynchronizedAt { get; set; }
     
     public abstract T UpdateSlug(IWordsService wordsService);
 
@@ -33,6 +38,12 @@ public abstract class Entity<T> where T: Entity<T>
         }
         
         Views = views;
+        return (T)this;
+    }
+    
+    public T Synchronize()
+    {
+        SynchronizedAt = DateTime.UtcNow;
         return (T)this;
     }
     

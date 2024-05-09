@@ -15,7 +15,7 @@ public static class NotionModelsMapperExtensions
             Id = (int)((UniqueIdPropertyValue)page.Properties["ID"]).UniqueId.Number!.Value,
             NotionId = Guid.Parse(page.Id),
             Name = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText
-        }.UpdateSlug(wordsService);
+        }.UpdateSlug(wordsService).Synchronize();
     }
     
     public static Publication MapToPublication(this Page page,
@@ -51,7 +51,7 @@ public static class NotionModelsMapperExtensions
                 .RichText.Select(r => r.PlainText).FirstOrDefault()!,
 
             LastModified = page.LastEditedTime
-        }.UpdateSlug(wordsService);
+        }.UpdateSlug(wordsService).Synchronize();
     }
     
     public static Author MapToAuthor(this Page page, IWordsService wordsService)
@@ -62,6 +62,6 @@ public static class NotionModelsMapperExtensions
             NotionId = Guid.Parse(page.Id),
             Name = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText,
             ProfileLink = ((UrlPropertyValue)page.Properties["Profile link"]).Url
-        }.UpdateSlug(wordsService);
+        }.UpdateSlug(wordsService).Synchronize();
     }
 }

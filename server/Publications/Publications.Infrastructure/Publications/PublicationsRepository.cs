@@ -12,6 +12,7 @@ using Publications.Domain.Publications;
 using Publications.Domain.Publishers;
 using Publications.Domain.Shared;
 using Publications.Infrastructure.Shared;
+using Publications.Infrastructure.Shared.Queries;
 using Redis.OM;
 using Redis.OM.Contracts;
 using Redis.OM.Searching;

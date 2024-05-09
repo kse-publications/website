@@ -7,7 +7,7 @@ using Publications.Domain.Shared;
 using Redis.OM;
 using Redis.OM.Searching;
 
-namespace Publications.Infrastructure.Shared;
+namespace Publications.Infrastructure.Shared.Queries;
 
 internal static class RedisCollectionQueryExtensions
 {

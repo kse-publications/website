@@ -1,6 +1,6 @@
 ﻿using Redis.OM.Searching.Query;
 
-namespace Publications.Infrastructure.Shared;
+namespace Publications.Infrastructure.Shared.Queries;
 
 public static class Queries
 {

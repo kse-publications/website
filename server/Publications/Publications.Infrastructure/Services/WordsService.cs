@@ -3,7 +3,7 @@ using Publications.Domain.Shared.ValueObjects;
 using StopWord;
 using Unidecode.NET;
 
-namespace Publications.Infrastructure.Shared;
+namespace Publications.Infrastructure.Services;
 
 public class WordsService: IWordsService
 {

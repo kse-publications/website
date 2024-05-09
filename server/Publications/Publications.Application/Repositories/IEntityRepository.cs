@@ -8,12 +8,16 @@ public interface IEntityRepository<TEntity>
 {
     Task<IReadOnlyCollection<TEntity>> GetAllAsync(
         CancellationToken cancellationToken = default);
+
+    Task<TEntity?> GetByIdAsync(
+        int resourceId,
+        CancellationToken cancellationToken = default);
     
     Task InsertOrUpdateAsync(
         IEnumerable<TEntity> entities,
         CancellationToken cancellationToken = default);
-
-    Task<TEntity?> GetByIdAsync(
-        int resourceId,
+    
+    Task SynchronizeAsync(
+        DateTime lastSyncDateTime,
         CancellationToken cancellationToken = default);
 }
