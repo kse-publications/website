@@ -135,3 +135,21 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         }).ToList();
     }
 }
+
+internal class MySearchCommands: SearchCommandsAsync
+{
+    private readonly IDatabaseAsync _db;
+    public MySearchCommands(IDatabaseAsync db) : base(db)
+    {
+        _db = db;
+    }
+    
+    public new async Task<AggregationResult> AggregateAsync(string index, AggregationRequest query)
+    {
+        if (!query.dialect.HasValue && this.defaultDialect.HasValue)
+            query.Dialect(this.defaultDialect.Value);
+        RedisResult result = await this._db.ExecuteAsync(SearchCommandBuilder.Aggregate(index, query));
+
+        return null;
+    }
+}
