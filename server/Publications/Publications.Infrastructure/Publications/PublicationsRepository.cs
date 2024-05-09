@@ -10,7 +10,6 @@ using Publications.Application.Repositories;
 using Publications.Domain.Authors;
 using Publications.Domain.Publications;
 using Publications.Domain.Publishers;
-using Publications.Domain.Shared;
 using Publications.Infrastructure.Shared;
 using Publications.Infrastructure.Shared.Queries;
 using Redis.OM;
@@ -43,8 +42,10 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         PaginationFilterDTO paginationDTO, CancellationToken cancellationToken = default)
     {
         SearchCommands ft = _db.FT();
+        SearchQuery query = SearchQuery.CreateWithFilter(paginationDTO);
+        
         AggregationResult aggregationResult = await ft.AggregateAsync(Publication.IndexName,
-            new AggregationRequest(FilterQuery("", paginationDTO))
+            new AggregationRequest(query.Build())
                 .Load(
                     new FieldName(nameof(Publication.Slug)),
                     new FieldName(nameof(Publication.Title)),
@@ -69,46 +70,6 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             Items: publications,
             TotalCount: (int)aggregationResult.TotalResults,
             ResultCount: publications.Count);
-    }
-
-    private static string FilterQuery(string query, FilterDTO filterDTO)
-    {
-        if (filterDTO.GetParsedFilters().Length == 0)
-            return query.Length == 0 ? "*" : query;
-        
-        foreach (int[] filters in filterDTO.GetParsedFilters())
-        {
-            if (filters.Length == 0)
-                continue;
-
-            string filterGroupQuery = FilterQuery(filters.First());
-            foreach (var filter in filters.Skip(1))
-            {
-                filterGroupQuery = Queries.Either(
-                    filterGroupQuery, FilterQuery(filter));
-            }
-
-            query = Queries.Both(query, filterGroupQuery);
-        }
-        
-        return query;
-    }
-    
-    private static string FilterQuery(int filterId) =>
-        $"{nameof(Entity<Publication>.Filters)}_{nameof(Domain.Filters.Filter.Id)}".EqualTo(filterId);
-    
-    private static ICollection<PublicationSummary> MapToPublicationSummaries(
-        IEnumerable<Dictionary<string, RedisValue>> aggregationResults)
-    {
-        return aggregationResults.Select(result => new PublicationSummary
-        {
-            Slug = result[nameof(Publication.Slug)]!,
-            Title = JsonSerializer.Deserialize<string[]>(result[nameof(Publication.Title)]!)!.First(),
-            Type = result[nameof(Publication.Type)]!,
-            Year = (int)result[nameof(Publication.Year)]!,
-            Authors = JsonSerializer.Deserialize<string[]>(result[$"{nameof(Publication.Authors)}_{nameof(Author.Name)}"]!)!,
-            Publisher = JsonSerializer.Deserialize<string[]>(result[$"{nameof(Publication.Publisher)}_{nameof(Publisher.Name)}"]!)!.First()
-        }).ToList();
     }
     
     public async Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
@@ -160,22 +121,18 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             ResultCount: publications.Count,
             TotalCount: (int)(await matchedCountTask).DocumentCount);
     }
-}
-
-internal class MySearchCommands: SearchCommandsAsync
-{
-    private readonly IDatabaseAsync _db;
-    public MySearchCommands(IDatabaseAsync db) : base(db)
-    {
-        _db = db;
-    }
     
-    public new async Task<AggregationResult> AggregateAsync(string index, AggregationRequest query)
+    private static ICollection<PublicationSummary> MapToPublicationSummaries(
+        IEnumerable<Dictionary<string, RedisValue>> aggregationResults)
     {
-        if (!query.dialect.HasValue && this.defaultDialect.HasValue)
-            query.Dialect(this.defaultDialect.Value);
-        RedisResult result = await this._db.ExecuteAsync(SearchCommandBuilder.Aggregate(index, query));
-
-        return null;
+        return aggregationResults.Select(result => new PublicationSummary
+        {
+            Slug = result[nameof(Publication.Slug)]!,
+            Title = JsonSerializer.Deserialize<string[]>(result[nameof(Publication.Title)]!)!.First(),
+            Type = result[nameof(Publication.Type)]!,
+            Year = (int)result[nameof(Publication.Year)]!,
+            Authors = JsonSerializer.Deserialize<string[]>(result[$"{nameof(Publication.Authors)}_{nameof(Author.Name)}"]!)!,
+            Publisher = JsonSerializer.Deserialize<string[]>(result[$"{nameof(Publication.Publisher)}_{nameof(Publisher.Name)}"]!)!.First()
+        }).ToList();
     }
 }
