@@ -6,7 +6,7 @@ using Publications.Domain.Publishers;
 using Redis.OM;
 using Redis.OM.Contracts;
 
-namespace Publications.Infrastructure.Shared;
+namespace Publications.Infrastructure.Services;
 
 public class RedisConfigurationService: IDbConfigurationService
 {
@@ -19,22 +19,21 @@ public class RedisConfigurationService: IDbConfigurationService
 
     public async Task ConfigureAsync()
     {
-        var indexes = (await _redisConnectionProvider.Connection
-            .ExecuteAsync("FT._LIST")).ToArray();
+        await ClearAllAsync();
 
-        await CreateIndexAsync<Publication>(indexes);
-        await CreateIndexAsync<Publisher>(indexes);
-        await CreateIndexAsync<Author>(indexes);
-        await CreateIndexAsync<FilterGroup>(indexes);
+        await CreateIndexAsync<Publication>();
+        await CreateIndexAsync<Publisher>();
+        await CreateIndexAsync<Author>();
+        await CreateIndexAsync<FilterGroup>();
     }
 
-    private async Task CreateIndexAsync<T>(RedisReply[] indexes)
+    private async Task CreateIndexAsync<T>()
     {
-        if (indexes.All(i => i != GetIndexName<T>()))
-        {
-            await _redisConnectionProvider.Connection.CreateIndexAsync(typeof(T));
-        }
+        await _redisConnectionProvider.Connection.CreateIndexAsync(typeof(T));
     }
     
-    private static string GetIndexName<T>() => $"{typeof(T).Name.ToLower()}-idx";
+    private async Task ClearAllAsync()
+    {
+        await _redisConnectionProvider.Connection.ExecuteAsync("FLUSHDB");
+    }
 }

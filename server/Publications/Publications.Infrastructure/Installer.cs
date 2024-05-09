@@ -10,6 +10,7 @@ using Publications.Infrastructure.Filters;
 using Publications.Infrastructure.Publications;
 using Publications.Infrastructure.Publishers;
 using Publications.Infrastructure.Requests;
+using Publications.Infrastructure.Services;
 using Publications.Infrastructure.Shared;
 using Publications.Infrastructure.Source;
 using Redis.OM;
@@ -36,12 +37,13 @@ public static class Installer
     private static IServiceCollection AddRedis(this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddSingleton<IRedisConnectionProvider>(new RedisConnectionProvider(
-            connectionString: configuration.GetConnectionString("Redis")!));
+        var connectionMultiplexer = ConnectionMultiplexer
+            .Connect(configuration.GetConnectionString("Redis")!);
         
-        services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer
-            .Connect(configuration.GetConnectionString("RedisShort")!, 
-                options => options.AbortOnConnectFail = false));
+        services.AddSingleton<IConnectionMultiplexer>(connectionMultiplexer);
+        
+        services.AddSingleton<IRedisConnectionProvider>(
+            new RedisConnectionProvider(connectionMultiplexer));
         
         services.AddTransient<IDbConfigurationService, RedisConfigurationService>();
         

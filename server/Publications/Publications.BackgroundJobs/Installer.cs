@@ -33,7 +33,6 @@ public static class Installer
             scheduler.Schedule<SyncDatabasesTask>()
                 .Hourly()
                 .When(() => Task.FromResult(optionsMonitor.CurrentValue.SyncDatabases))
-                .RunOnceAtStart()
                 .PreventOverlapping(nameof(SyncDatabasesTask));
         });
     }
