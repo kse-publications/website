@@ -8,11 +8,11 @@ namespace Publications.Application.Repositories;
 /// </summary>
 public interface IPublicationsRepository: IEntityRepository<Publication>
 {
-    Task<PaginatedCollection<Publication>> GetAllAsync(
+    Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
         PaginationFilterDTO paginationDTO,
         CancellationToken cancellationToken = default);
     
-    Task<PaginatedCollection<Publication>> GetBySearchAsync(
+    Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
         PaginationFilterSearchDTO paginationSearchDTO,
         CancellationToken cancellationToken = default);
 }

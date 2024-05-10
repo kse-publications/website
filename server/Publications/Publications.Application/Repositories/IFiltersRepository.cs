@@ -7,7 +7,7 @@ public interface IFiltersRepository
     Task<IReadOnlyCollection<FilterGroup>> GetFiltersAsync(
         CancellationToken cancellationToken = default);
     
-    Task InsertOrUpdateAsync(
+    Task ReplaceWithAsync(
         IEnumerable<FilterGroup> filters, 
         CancellationToken cancellationToken = default);
 }

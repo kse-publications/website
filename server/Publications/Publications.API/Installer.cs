@@ -1,15 +1,17 @@
 ﻿using System.Text.Json;
-using Microsoft.OpenApi.Models; 
+using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
 using Publications.API.Middleware;
 using Publications.API.Serialization;
+using Publications.Application;
 using Publications.Domain.Authors;
 using Publications.Domain.Filters;
 using Publications.Domain.Publications;
 using Publications.Domain.Publishers;
 
-namespace Publications.API.Extensions;
+namespace Publications.API;
 
-public static class ServicesExtensions
+public static class Installer
 {
     public static IMvcBuilder ConfigureJsonOptions(this IMvcBuilder builder)
     {
@@ -59,6 +61,17 @@ public static class ServicesExtensions
         });
     }
     
+    public static void ConfigureFeatureFlags(this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.Configure<FeatureFlags>(configuration.GetSection("FeatureFlags"));
+    }
+    
+    public static IOptionsMonitor<FeatureFlags> GetFeatureFlagsMonitor(this WebApplication app)
+    {
+        return app.Services.GetRequiredService<IOptionsMonitor<FeatureFlags>>();
+    }
+    
     public static void UseCorsPolicies(this WebApplication app)
     {
         app.UseCors("FrontEndClient");
@@ -67,11 +80,5 @@ public static class ServicesExtensions
     public static void UseErrorHandlerMiddleware(this WebApplication app)
     {
         app.UseMiddleware<ErrorHandlingMiddleware>();
-    }
-    
-    public static bool AreScheduledJobsEnabled(this WebApplication app)
-    {
-        return !(app.Environment.IsDevelopment() &&
-                 app.Configuration["RUN_SCHEDULED_BG_JOBS"] is not null and not "true");
     }
 }

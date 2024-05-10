@@ -4,9 +4,9 @@ using Publications.Application.Repositories;
 using Publications.BackgroundJobs;
 using Publications.Domain.Publications;
 
-namespace Publications.API.Extensions;
+namespace Publications.API.Endpoints;
 
-public static class EndpointsExtensions
+public static class SystemEndpoints
 {
     public static IEndpointRouteBuilder MapSystemEndpoints(this IEndpointRouteBuilder endpoints)
     {

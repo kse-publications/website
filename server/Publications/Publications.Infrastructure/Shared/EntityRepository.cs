@@ -1,5 +1,6 @@
 ﻿using Publications.Application.Repositories;
 using Publications.Domain.Shared;
+using Redis.OM;
 using Redis.OM.Contracts;
 using Redis.OM.Searching;
 
@@ -20,14 +21,6 @@ public class EntityRepository<TEntity> : IEntityRepository<TEntity>
     {
         return (await _collection.ToListAsync()).AsReadOnly();
     }
-
-    public async Task InsertOrUpdateAsync(
-        IEnumerable<TEntity> entities, 
-        CancellationToken cancellationToken = default)
-    {
-        await _collection.DeleteAsync(await _collection.ToListAsync());
-        await _collection.InsertAsync(entities);
-    }
     
     public async Task<TEntity?> GetByIdAsync(
         int resourceId, 
@@ -36,10 +29,24 @@ public class EntityRepository<TEntity> : IEntityRepository<TEntity>
         return await _collection.FindByIdAsync(resourceId.ToString());
     }
     
-    public async Task UpdateAsync(
+    public virtual async Task InsertOrUpdateAsync(
         IEnumerable<TEntity> entities, 
         CancellationToken cancellationToken = default)
     {
-        await _collection.UpdateAsync(entities);
+        await _collection.InsertAsync(entities);
+    }
+    
+    /// <summary>
+    /// Deletes entities that were last synchronized before the given date.
+    /// </summary>
+    public virtual async Task SynchronizeAsync(
+        DateTime lastSyncDateTime, 
+        CancellationToken cancellationToken = default)
+    {
+        var entitiesToDelete = await _collection
+            .Where(e => e.SynchronizedAt < lastSyncDateTime)
+            .ToListAsync();
+        
+        await _collection.DeleteAsync(entitiesToDelete);
     }
 }

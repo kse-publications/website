@@ -249,13 +249,6 @@
             "type": "integer",
             "format": "int32"
           },
-          "filters": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Filter"
-            },
-            "nullable": true
-          },
           "name": {
             "type": "string",
             "nullable": true
@@ -340,13 +333,6 @@
             "type": "integer",
             "format": "int32"
           },
-          "filters": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Filter"
-            },
-            "nullable": true
-          },
           "title": {
             "type": "string",
             "nullable": true
@@ -387,10 +373,6 @@
           },
           "publisher": {
             "$ref": "#/components/schemas/Publisher"
-          },
-          "lastModified": {
-            "type": "string",
-            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -459,13 +441,6 @@
           "views": {
             "type": "integer",
             "format": "int32"
-          },
-          "filters": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Filter"
-            },
-            "nullable": true
           },
           "name": {
             "type": "string",

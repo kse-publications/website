@@ -23,7 +23,7 @@ public class FiltersRepository: IFiltersRepository
         return (await _filters.ToListAsync()).AsReadOnly();
     }
     
-    public async Task InsertOrUpdateAsync(
+    public async Task ReplaceWithAsync(
         IEnumerable<FilterGroup> filters, 
         CancellationToken cancellationToken)
     {

@@ -18,10 +18,10 @@ public class PublicationsService: IPublicationsService
     public async Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
         PaginationFilterDTO paginationDTO, CancellationToken cancellationToken = default)
     {
-        PaginatedCollection<Publication> publications = await _publicationsRepository
+        PaginatedCollection<PublicationSummary> publications = await _publicationsRepository
             .GetAllAsync(paginationDTO, cancellationToken);
         
-        return GetPublicationsSummaries(publications);
+        return publications;
     }
 
     public async Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
@@ -33,30 +33,16 @@ public class PublicationsService: IPublicationsService
         if (paginationSearchDTO.SearchTerm.Length < minSearchTermLength)
             return EmptyResponse;
         
-        PaginatedCollection<Publication> matchedPublications = await _publicationsRepository
+        PaginatedCollection<PublicationSummary> matchedPublications = await _publicationsRepository
             .GetBySearchAsync(paginationSearchDTO, cancellationToken);
-        
-        return GetPublicationsSummaries(matchedPublications);
+
+        return matchedPublications;
     }
 
     public async Task<Publication?> GetByIdAsync(
         int id, CancellationToken cancellationToken = default)
     {
         return await _publicationsRepository.GetByIdAsync(id, cancellationToken);
-    }
-
-    private static PaginatedCollection<PublicationSummary> GetPublicationsSummaries(
-        PaginatedCollection<Publication> publications)
-    {
-        IReadOnlyCollection<PublicationSummary> summaries = publications.Items
-            .Select(PublicationSummary.FromPublication)
-            .ToList()
-            .AsReadOnly();
-        
-        return new PaginatedCollection<PublicationSummary>(
-            Items: summaries,
-            ResultCount: publications.ResultCount,
-            TotalCount: publications.TotalCount);
     }
     
     private static PaginatedCollection<PublicationSummary> EmptyResponse => 

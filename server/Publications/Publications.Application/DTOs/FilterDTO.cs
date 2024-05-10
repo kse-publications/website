@@ -11,6 +11,11 @@ public record FilterDTO
     public string Filters { get; init; } = string.Empty;
     
     private int[][]? _filterIds;
+    
+    /// <summary>
+    /// Parses the filters string into a jagged array of integers.
+    /// </summary>
+    /// <returns>Array of groups of filter ids.</returns>
     public int[][] GetParsedFilters()
     {
         return _filterIds ??= ParseFilters(Filters);
