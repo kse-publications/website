@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models; 
+using Microsoft.OpenApi.Models;
 using Publications.API.Middleware;
 using Publications.API.Serialization;
 using Publications.Application;
@@ -9,9 +9,9 @@ using Publications.Domain.Filters;
 using Publications.Domain.Publications;
 using Publications.Domain.Publishers;
 
-namespace Publications.API.Extensions;
+namespace Publications.API;
 
-public static class ServicesExtensions
+public static class Installer
 {
     public static IMvcBuilder ConfigureJsonOptions(this IMvcBuilder builder)
     {

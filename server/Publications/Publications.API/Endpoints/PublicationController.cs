@@ -8,7 +8,7 @@ using Publications.Domain.Filters;
 using Publications.Domain.Publications;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace Publications.API.Controllers;
+namespace Publications.API.Endpoints;
 
 [ApiController]
 [Route("publications")]

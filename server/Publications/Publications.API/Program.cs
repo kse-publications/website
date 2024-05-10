@@ -1,4 +1,5 @@
-using Publications.API.Extensions;
+using Publications.API;
+using Publications.API.Endpoints;
 using Publications.BackgroundJobs;
 using Publications.Infrastructure;
 
