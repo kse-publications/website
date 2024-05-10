@@ -1,13 +1,11 @@
 ﻿using Publications.Domain.Filters;
+using Publications.Domain.Publications;
 
 namespace Publications.Application.Repositories;
 
-public interface IFiltersRepository
+public interface IPublicationsCommandRepository: IEntityRepository<Publication>
 {
-    Task<IReadOnlyCollection<FilterGroup>> GetFiltersAsync(
-        CancellationToken cancellationToken = default);
-    
-    Task ReplaceWithAsync(
+    Task ReplaceFiltersAsync(
         IEnumerable<FilterGroup> filters, 
         CancellationToken cancellationToken = default);
 }

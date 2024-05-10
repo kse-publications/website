@@ -14,29 +14,26 @@ namespace Publications.BackgroundJobs;
 public class SyncDatabasesTask : BaseRetriableTask<SyncDatabasesTask>
 {
     private readonly ISourceRepository _sourceRepository;
-    private readonly IPublicationsRepository _publicationsRepository;
+    private readonly IPublicationsCommandRepository _publicationsCommandRepository;
     private readonly IAuthorsRepository _authorsRepository;
     private readonly IPublishersRepository _publishersRepository;
     private readonly IFiltersService _filtersService;
-    private readonly IFiltersRepository _filtersRepository;
     private readonly IRequestsRepository _requestsRepository;
 
     public SyncDatabasesTask(
         ILogger<SyncDatabasesTask> taskLogger,
         ISourceRepository sourceRepository,
         IOptions<RetriableTaskOptions> options, 
-        IPublicationsRepository publicationsRepository,
+        IPublicationsCommandRepository publicationsCommandRepository,
         IAuthorsRepository authorsRepository, 
         IPublishersRepository publishersRepository,
-        IFiltersRepository filtersRepository, 
         IFiltersService filtersService,
         IRequestsRepository requestsRepository) : base(taskLogger, options.Value)
     {
         _sourceRepository = sourceRepository;
-        _publicationsRepository = publicationsRepository;
+        _publicationsCommandRepository = publicationsCommandRepository;
         _authorsRepository = authorsRepository;
         _publishersRepository = publishersRepository;
-        _filtersRepository = filtersRepository;
         _filtersService = filtersService;
         _requestsRepository = requestsRepository;
     }
@@ -61,12 +58,12 @@ public class SyncDatabasesTask : BaseRetriableTask<SyncDatabasesTask>
         _publications = await _filtersService.AssignFiltersToPublicationsAsync(
             _publications!.ToList(), _filters.ToList());
         
-        await _publicationsRepository.InsertOrUpdateAsync(await SetResourceViewsAsync(_publications));
+        await _publicationsCommandRepository.InsertOrUpdateAsync(await SetResourceViewsAsync(_publications));
         await _authorsRepository.InsertOrUpdateAsync(await SetResourceViewsAsync(_authors!));
         await _publishersRepository.InsertOrUpdateAsync(await SetResourceViewsAsync(_publishers!));
-        await _filtersRepository.ReplaceWithAsync(_filters);
+        await _publicationsCommandRepository.ReplaceFiltersAsync(_filters);
         
-        await _publicationsRepository.SynchronizeAsync(_syncStartDateTime);
+        await _publicationsCommandRepository.SynchronizeAsync(_syncStartDateTime);
         await _authorsRepository.SynchronizeAsync(_syncStartDateTime);
         await _publishersRepository.SynchronizeAsync(_syncStartDateTime);
     }

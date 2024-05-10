@@ -1,6 +1,8 @@
 ﻿using Publications.Domain.Authors;
+using Publications.Domain.Filters;
 using Publications.Domain.Publishers;
 using Publications.Domain.Shared;
+using Publications.Domain.Shared.Attributes;
 using Publications.Domain.Shared.ValueObjects;
 using Redis.OM.Modeling;
 
@@ -39,6 +41,10 @@ public class Publication: Entity<Publication>
     [Indexed(JsonPath = "$.Id")]
     [Searchable(JsonPath = "$.Name", Weight = 0.8, PhoneticMatcher = "dm:en")]
     public Publisher? Publisher { get; set; }
+    
+    [Indexed(JsonPath = "$.Id")]
+    [IgnoreInResponse]
+    public Filter[] Filters { get; set; } = Array.Empty<Filter>();
     
     public override Publication UpdateSlug(IWordsService wordsService)
     {

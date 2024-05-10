@@ -3,6 +3,7 @@ using System.Reflection;
 using Publications.Application;
 using Publications.Application.DTOs;
 using Publications.Domain.Filters;
+using Publications.Domain.Publications;
 using Publications.Domain.Shared;
 using Redis.OM;
 using Redis.OM.Searching;
@@ -11,13 +12,13 @@ namespace Publications.Infrastructure.Shared;
 
 internal static class RedisCollectionQueryExtensions
 {
-    internal static IRedisCollection<T> Filter<T>(this IRedisCollection<T> collection,
-        FilterDTO filterDto) where T : Entity<T>
+    internal static IRedisCollection<Publication> Filter(this IRedisCollection<Publication> collection,
+        FilterDTO filterDto)
     {
         if (filterDto.GetParsedFilters().Length == 0)
             return collection;
 
-        ParameterExpression entityParameter = Expression.Parameter(typeof(T), "e");
+        ParameterExpression entityParameter = Expression.Parameter(typeof(Publication), "e");
         ParameterExpression filterParameter = Expression.Parameter(typeof(Filter), "f");
         
         MethodInfo anyMethod = typeof(Enumerable).GetMethods()
@@ -26,7 +27,7 @@ internal static class RedisCollectionQueryExtensions
                 m.GetParameters().Length == 2)
             .MakeGenericMethod(typeof(Filter));
         
-        MemberExpression filtersProperty = Expression.Property(entityParameter, nameof(Entity<T>.Filters));
+        MemberExpression filtersProperty = Expression.Property(entityParameter, nameof(Publication.Filters));
         MemberExpression filtersIdProperty = Expression.Property(filterParameter, nameof(Domain.Filters.Filter.Id));
         
         Expression? body = null;
@@ -62,7 +63,7 @@ internal static class RedisCollectionQueryExtensions
         if (body is null)
             return collection;
         
-        var lambda = Expression.Lambda<Func<T, bool>>(body, entityParameter);
+        var lambda = Expression.Lambda<Func<Publication, bool>>(body, entityParameter);
         return collection.Where(lambda);
     }
 

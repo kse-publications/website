@@ -18,10 +18,6 @@ public abstract class Entity<T> where T: Entity<T>
     [Indexed(Sortable = true)]
     public int Views { get; set; } 
     
-    [Indexed(JsonPath = "$.Id")]
-    [IgnoreInResponse]
-    public Filter[] Filters { get; set; } = Array.Empty<Filter>();
-    
     [IgnoreInResponse]
     public Guid NotionId { get; init; }
     

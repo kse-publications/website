@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Publications.Application.DTOs;
 using Publications.Domain.Publications;
-using Publications.Domain.Shared;
+
 
 namespace Publications.Infrastructure.Shared;
 
@@ -76,7 +76,7 @@ public class SearchQuery
     }
     
     private static string FilterQuery(int filterId) =>
-        new SearchFieldName($"{nameof(Entity<Publication>.Filters)}_{nameof(Domain.Filters.Filter.Id)}")
+        new SearchFieldName($"{nameof(Publication.Filters)}_{nameof(Domain.Filters.Filter.Id)}")
             .EqualTo(filterId);
     
     private SearchQuery Clear()

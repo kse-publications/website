@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Microsoft.Extensions.Logging;
 using NRedisStack;
 using NRedisStack.RedisStackCommands;
 using NRedisStack.Search;
@@ -8,30 +7,20 @@ using Publications.Application;
 using Publications.Application.DTOs;
 using Publications.Application.Repositories;
 using Publications.Domain.Authors;
+using Publications.Domain.Filters;
 using Publications.Domain.Publications;
 using Publications.Domain.Publishers;
 using Publications.Infrastructure.Shared;
-using Redis.OM.Contracts;
-using Redis.OM.Searching;
 using StackExchange.Redis;
 
 namespace Publications.Infrastructure.Publications;
 
-public class PublicationsRepository: EntityRepository<Publication>, IPublicationsRepository
+public class PublicationsQueryRepository: IPublicationsQueryRepository
 {
-    private readonly IRedisConnectionProvider _redisConnectionProvider;
-    private readonly IRedisCollection<Publication> _publications;
-    private readonly ILogger<PublicationsRepository> _logger;
     private readonly IDatabase _db;
 
-    public PublicationsRepository(
-        IRedisConnectionProvider redisConnectionProvider, 
-        IConnectionMultiplexer connectionMultiplexer,
-        ILogger<PublicationsRepository> logger) : base(redisConnectionProvider)
+    public PublicationsQueryRepository(IConnectionMultiplexer connectionMultiplexer)
     {
-        _redisConnectionProvider = redisConnectionProvider;
-        _logger = logger;
-        _publications = redisConnectionProvider.RedisCollection<Publication>();
         _db = connectionMultiplexer.GetDatabase();
     }
 
@@ -68,7 +57,8 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             TotalCount: (int)aggregationResult.TotalResults,
             ResultCount: publications.Count);
     }
-    
+
+
     public async Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
         PaginationFilterSearchDTO paginationSearchDTO,
         CancellationToken cancellationToken = default)
@@ -113,14 +103,12 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             ResultCount: publications.Count);
     }
 
-    public override async Task InsertOrUpdateAsync(
-        IEnumerable<Publication> entities,
-        CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<FilterGroup>> GetFiltersAsync(
+        PaginationFilterSearchDTO filterSearchDTO, CancellationToken cancellationToken = default)
     {
-        await _publications.DeleteAsync(await _publications.ToListAsync());
-        await _publications.InsertAsync(entities);
+        throw new NotImplementedException();
     }
-    
+
     private static ICollection<PublicationSummary> MapToPublicationSummaries(
         IEnumerable<Dictionary<string, RedisValue>> aggregationResults)
     {
