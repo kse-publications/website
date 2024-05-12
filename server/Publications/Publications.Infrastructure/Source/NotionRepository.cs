@@ -5,6 +5,7 @@ using Publications.Domain.Authors;
 using Publications.Domain.Publications;
 using Publications.Domain.Publishers;
 using Publications.Domain.Shared;
+using Publications.Domain.Shared.Slugs;
 
 namespace Publications.Infrastructure.Source;
 

@@ -1,4 +1,5 @@
 ﻿using Publications.Domain.Shared;
+using Publications.Domain.Shared.Slugs;
 using Publications.Domain.Shared.ValueObjects;
 using StopWord;
 using Unidecode.NET;

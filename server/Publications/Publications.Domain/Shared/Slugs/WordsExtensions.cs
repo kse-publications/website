@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
 using Publications.Domain.Shared.ValueObjects;
 
-namespace Publications.Domain.Shared;
+namespace Publications.Domain.Shared.Slugs;
 
 internal static class WordsExtensions
 {

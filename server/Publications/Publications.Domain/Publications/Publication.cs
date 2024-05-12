@@ -1,6 +1,7 @@
 ﻿using Publications.Domain.Authors;
 using Publications.Domain.Publishers;
 using Publications.Domain.Shared;
+using Publications.Domain.Shared.Slugs;
 using Publications.Domain.Shared.ValueObjects;
 using Redis.OM.Modeling;
 
