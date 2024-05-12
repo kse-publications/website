@@ -234,6 +234,59 @@
           }
         }
       }
+    },
+    "/publications/filters/v2": {
+      "get": {
+        "tags": [
+          "Publications"
+        ],
+        "parameters": [
+          {
+            "name": "SearchTerm",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "maximum": 101,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Filters",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "pattern": "^\\d+:(?:\\d+(?:-\\d+)*)(?:;\\d+:(?:\\d+(?:-\\d+)*))*;?$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -270,6 +323,10 @@
           "value": {
             "type": "string",
             "nullable": true
+          },
+          "matchedPublicationsCount": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
