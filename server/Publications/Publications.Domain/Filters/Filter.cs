@@ -10,6 +10,8 @@ public class Filter
     public int Id { get; set; }
     public string Value { get; set; } = string.Empty;
     
+    public int MatchedPublicationsCount { get; set; }
+    
     public static Filter Create(string value)
     {
         return new Filter
