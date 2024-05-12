@@ -78,11 +78,20 @@ public class PublicationsController : ControllerBase
         Summary = "Get all filters",
         Description = "Returns all FilterGroups for publications: Year, Type, Lang etc."
     )]
-    public async Task<IActionResult> GetFilters(
-        [FromQuery]PaginationFilterSearchDTO filterSearchDTO, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetFilters(CancellationToken cancellationToken)
     {
         IReadOnlyCollection<FilterGroup> filters = await _publicationsService
-            .GetFiltersAsync(filterSearchDTO, cancellationToken);
+            .GetFiltersAsync(cancellationToken);
+        
+        return Ok(filters);
+    }
+    
+    [HttpGet("filters/v2")]
+    public async Task<IActionResult> GetFiltersWithCount(
+        [FromQuery]PaginationFilterSearchDtoV2 filterSearchDTO, CancellationToken cancellationToken)
+    {
+        IReadOnlyCollection<FilterGroup> filters = await _publicationsService
+            .GetFiltersV2Async(filterSearchDTO, cancellationToken);
         
         return Ok(filters);
     }
