@@ -33,11 +33,6 @@ public class PublicationsService: IPublicationsService
         PaginationFilterSearchDTO paginationSearchDTO, 
         CancellationToken cancellationToken = default)
     {
-        const int minSearchTermLength = 2;
-        
-        if (paginationSearchDTO.SearchTerm.Length < minSearchTermLength)
-            return EmptyResponse;
-        
         PaginatedCollection<PublicationSummary> matchedPublications = await 
             _publicationsQueryRepository.GetBySearchAsync(paginationSearchDTO, cancellationToken);
 
@@ -51,10 +46,46 @@ public class PublicationsService: IPublicationsService
     }
 
     public async Task<IReadOnlyCollection<FilterGroup>> GetFiltersAsync(
-        PaginationFilterSearchDTO filterSearchDTO, CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default)
     {
-        return await _publicationsQueryRepository
-            .GetFiltersAsync(filterSearchDTO, cancellationToken);
+        return (await _publicationsCommandRepository.GetFiltersAsync(cancellationToken))
+            .OrderBy(fg => fg.Id)
+            .ToList()
+            .AsReadOnly();
+    }
+
+    public async Task<IReadOnlyCollection<FilterGroup>> GetFiltersV2Async(
+        PaginationFilterSearchDtoV2 filterSearchDTO, CancellationToken cancellationToken = default)
+    {
+        IReadOnlyCollection<FilterGroup> filterGroups = await
+            _publicationsCommandRepository.GetFiltersAsync(cancellationToken);
+        
+        Dictionary<string, int> filtersValuesWithMatchesCount = await
+            _publicationsQueryRepository.GetFiltersCountAsync(filterSearchDTO, cancellationToken);
+        
+        return MatchFiltersCount(filterGroups, filtersValuesWithMatchesCount)
+            .OrderBy(fg => fg.Id)
+            .ToList()
+            .AsReadOnly();
+    }
+    
+    private static IReadOnlyCollection<FilterGroup> MatchFiltersCount(
+        IReadOnlyCollection<FilterGroup> filterGroups,
+        Dictionary<string, int> filtersValuesWithMatchesCount)
+    {
+        foreach (FilterGroup filterGroup in filterGroups)
+        {
+            foreach (Filter filter in filterGroup.Filters)
+            {
+                if (filtersValuesWithMatchesCount.
+                    TryGetValue(filter.Value, out int matchesCount))
+                {
+                    filter.MatchedPublicationsCount = matchesCount;
+                }
+            }
+        }
+
+        return filterGroups;
     }
 
     private static PaginatedCollection<PublicationSummary> EmptyResponse => 

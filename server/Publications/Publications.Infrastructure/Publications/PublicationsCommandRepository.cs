@@ -27,4 +27,10 @@ public class PublicationsCommandRepository :
         await _filters.DeleteAsync(await _filters.ToListAsync());
         await _filters.InsertAsync(filters);
     }
+
+    public async Task<IReadOnlyCollection<FilterGroup>> GetFiltersAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return (await _filters.ToListAsync()).AsReadOnly();
+    }
 }

@@ -1,5 +1,4 @@
 ﻿using Publications.Application.DTOs;
-using Publications.Domain.Filters;
 using Publications.Domain.Publications;
 
 namespace Publications.Application.Repositories;
@@ -17,7 +16,11 @@ public interface IPublicationsQueryRepository
         PaginationFilterSearchDTO paginationSearchDTO,
         CancellationToken cancellationToken = default);
     
-    Task<IReadOnlyCollection<FilterGroup>> GetFiltersAsync(
-        PaginationFilterSearchDTO filterSearchDTO,
+    /// <summary>
+    /// Returns the number of publications that match each filter, if it would be applied.
+    /// Basically a group by filter id query. 
+    /// </summary>
+    Task<Dictionary<string, int>> GetFiltersCountAsync(
+        PaginationFilterSearchDtoV2 filterSearchDTO,
         CancellationToken cancellationToken = default);
 }

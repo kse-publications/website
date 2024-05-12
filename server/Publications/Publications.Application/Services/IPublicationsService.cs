@@ -18,6 +18,9 @@ public interface IPublicationsService
         int id, CancellationToken cancellationToken = default);
     
     Task<IReadOnlyCollection<FilterGroup>> GetFiltersAsync(
-        PaginationFilterSearchDTO filterSearchDTO,
+        CancellationToken cancellationToken = default);
+    
+    Task<IReadOnlyCollection<FilterGroup>> GetFiltersV2Async(
+        PaginationFilterSearchDtoV2 filterSearchDTO,
         CancellationToken cancellationToken = default);
 }
