@@ -5,8 +5,8 @@ using Notion.Client;
 using Publications.Application.Repositories;
 using Publications.Application.Services;
 using Publications.Domain.Shared;
+using Publications.Domain.Shared.Slugs;
 using Publications.Infrastructure.Authors;
-using Publications.Infrastructure.Filters;
 using Publications.Infrastructure.Publications;
 using Publications.Infrastructure.Publishers;
 using Publications.Infrastructure.Requests;
@@ -64,15 +64,14 @@ public static class Installer
     
     private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
-        services.AddScoped<IPublicationsRepository, PublicationsRepository>();
+        services.AddScoped<IPublicationsQueryRepository, PublicationsQueryRepository>();
+        services.AddScoped<IPublicationsCommandRepository, PublicationsCommandRepository>();
         services.AddScoped<IAuthorsRepository, AuthorsRepository>();
         services.AddScoped<IPublishersRepository, PublishersRepository>();
         
         services.AddScoped<ISourceRepository, NotionRepository>();
         
         services.AddScoped<IRequestsRepository, RequestsRepository>();
-
-        services.AddScoped<IFiltersRepository, FiltersRepository>();
         
         return services;
     }

@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Microsoft.Extensions.Logging;
 using NRedisStack;
 using NRedisStack.RedisStackCommands;
 using NRedisStack.Search;
@@ -8,30 +7,20 @@ using Publications.Application;
 using Publications.Application.DTOs;
 using Publications.Application.Repositories;
 using Publications.Domain.Authors;
+using Publications.Domain.Filters;
 using Publications.Domain.Publications;
 using Publications.Domain.Publishers;
 using Publications.Infrastructure.Shared;
-using Redis.OM.Contracts;
-using Redis.OM.Searching;
 using StackExchange.Redis;
 
 namespace Publications.Infrastructure.Publications;
 
-public class PublicationsRepository: EntityRepository<Publication>, IPublicationsRepository
+public class PublicationsQueryRepository: IPublicationsQueryRepository
 {
-    private readonly IRedisConnectionProvider _redisConnectionProvider;
-    private readonly IRedisCollection<Publication> _publications;
-    private readonly ILogger<PublicationsRepository> _logger;
     private readonly IDatabase _db;
 
-    public PublicationsRepository(
-        IRedisConnectionProvider redisConnectionProvider, 
-        IConnectionMultiplexer connectionMultiplexer,
-        ILogger<PublicationsRepository> logger) : base(redisConnectionProvider)
+    public PublicationsQueryRepository(IConnectionMultiplexer connectionMultiplexer)
     {
-        _redisConnectionProvider = redisConnectionProvider;
-        _logger = logger;
-        _publications = redisConnectionProvider.RedisCollection<Publication>();
         _db = connectionMultiplexer.GetDatabase();
     }
 
@@ -48,11 +37,11 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
                     new FieldName(nameof(Publication.Title)),
                     new FieldName(nameof(Publication.Type)),
                     new FieldName(nameof(Publication.Year)),
-                    new FieldName($"{nameof(Publication.Authors)}_{nameof(Author.Name)}"),
-                    new FieldName($"{nameof(Publication.Publisher)}_{nameof(Publisher.Name)}"))
+                    new FieldName(PublicationAuthorsName),
+                    new FieldName(PublicationPublisherName))
                 .SortBy(
-                    new SortedField("@Year", SortedField.SortOrder.DESC),
-                    new SortedField("@Id", SortedField.SortOrder.DESC))
+                    new SortedField($"@{nameof(Publication.Year)}", SortedField.SortOrder.DESC),
+                    new SortedField($"@{nameof(Publication.Id)}", SortedField.SortOrder.DESC))
                 .Limit(
                     offset: paginationDTO.PageSize * (paginationDTO.Page - 1),
                     count: paginationDTO.PageSize)
@@ -60,7 +49,6 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         
         IReadOnlyCollection<PublicationSummary> publications = 
             MapToPublicationSummaries(aggregationResult.GetResults())
-                .ToList()
                 .AsReadOnly();
         
         return new PaginatedCollection<PublicationSummary>(
@@ -68,28 +56,21 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             TotalCount: (int)aggregationResult.TotalResults,
             ResultCount: publications.Count);
     }
-    
+
+
     public async Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
         PaginationFilterSearchDTO paginationSearchDTO,
         CancellationToken cancellationToken = default)
     {
         SearchCommands ft = _db.FT();
-        string searchTerm = paginationSearchDTO.SearchTerm;
         
-        SearchFieldName title = new(nameof(Publication.Title));
-        SearchFieldName abstractField = new(nameof(Publication.Abstract));
-        SearchFieldName publisherName = new($"{nameof(Publication.Publisher)}_{nameof(Publisher.Name)}");
-        SearchFieldName authorsName = new($"{nameof(Publication.Authors)}_{nameof(Author.Name)}");
+        SearchFieldName[] searchFields = Publication.GetSearchableFields()
+            .Select(fieldName => new SearchFieldName(fieldName))
+            .ToArray();
 
         SearchQuery query = SearchQuery
-            .Where(title.Prefix(searchTerm))
-            .Or(title.Search(searchTerm))
-            .Or(abstractField.Prefix(searchTerm))
-            .Or(abstractField.Search(searchTerm))
-            .Or(publisherName.Prefix(searchTerm))
-            .Or(publisherName.Search(searchTerm))
-            .Or(authorsName.Prefix(searchTerm))
-            .Or(authorsName.Search(searchTerm))
+            .CreateWithSearch(
+                paginationSearchDTO.SearchTerm, searchFields)
             .Filter(paginationSearchDTO);
         
         var searchResult = await ft.SearchAsync(Publication.IndexName, 
@@ -113,15 +94,54 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             ResultCount: publications.Count);
     }
 
-    public override async Task InsertOrUpdateAsync(
-        IEnumerable<Publication> entities,
-        CancellationToken cancellationToken = default)
+    public async Task<Dictionary<string, int>> GetFiltersCountAsync(
+        PaginationFilterSearchDtoV2 filterSearchDTO, CancellationToken cancellationToken = default)
     {
-        await _publications.DeleteAsync(await _publications.ToListAsync());
-        await _publications.InsertAsync(entities);
+        SearchCommands ft = _db.FT();
+        SearchFieldName[] searchFields = Publication.GetSearchableFields()
+            .Select(fieldName => new SearchFieldName(fieldName))
+            .ToArray();
+        
+        List<Task<Dictionary<string, int>>> aggregationTasks = Publication
+            .GetEntityFilters()
+            .Select(async entityFilter =>
+            {
+                Dictionary<int, int[]> filtersWithoutCurrentGroup = new(filterSearchDTO
+                    .GetParsedFilters());
+                
+                filtersWithoutCurrentGroup.Remove(entityFilter.GroupId);
+                
+                var newFilter = FilterDtoV2.CreateFromFilters(
+                    filtersWithoutCurrentGroup);
+                
+                SearchQuery query = SearchQuery
+                    .CreateWithSearch(filterSearchDTO.SearchTerm, searchFields)
+                    .Filter(newFilter);
+                
+                var result = await ft.AggregateAsync(Publication.IndexName,
+                    new AggregationRequest(query.Build())
+                        .Load(new FieldName(entityFilter.PropertyName))
+                        .GroupBy($"@{entityFilter.PropertyName}", 
+                            Reducers.Count().As("count"))
+                        .Dialect(3));
+
+                return result.GetResults()
+                    .Select(dict => new
+                    {
+                        Value = dict[entityFilter.PropertyName].ToString(),
+                        Count = (int)dict["count"]
+                    })
+                    .ToDictionary(x => x.Value, x => x.Count);  
+            })
+            .ToList();
+
+
+        return (await Task.WhenAll(aggregationTasks))
+            .SelectMany(dict => dict)
+            .ToDictionary(pair => pair.Key, pair => pair.Value);
     }
-    
-    private static ICollection<PublicationSummary> MapToPublicationSummaries(
+
+    private static List<PublicationSummary> MapToPublicationSummaries(
         IEnumerable<Dictionary<string, RedisValue>> aggregationResults)
     {
         return aggregationResults.Select(result => new PublicationSummary
@@ -130,8 +150,17 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             Title = JsonSerializer.Deserialize<string[]>(result[nameof(Publication.Title)]!)!.First(),
             Type = result[nameof(Publication.Type)]!,
             Year = (int)result[nameof(Publication.Year)]!,
-            Authors = JsonSerializer.Deserialize<string[]>(result[$"{nameof(Publication.Authors)}_{nameof(Author.Name)}"]!)!,
-            Publisher = JsonSerializer.Deserialize<string[]>(result[$"{nameof(Publication.Publisher)}_{nameof(Publisher.Name)}"]!)!.First()
+            Authors = JsonSerializer.Deserialize<string[]>(result[PublicationAuthorsName]!)!,
+            Publisher = JsonSerializer.Deserialize<string[]>(result[PublicationPublisherName]!)!.First()
         }).ToList();
     }
+
+    private static string PublicationAuthorsName => 
+        $"{nameof(Publication.Authors)}_{nameof(Author.Name)}";
+    
+    private static string PublicationPublisherName =>
+        $"{nameof(Publication.Publisher)}_{nameof(Publisher.Name)}";
+    
+    private static string PublicationFiltersId =>
+        $"{nameof(Publication.Filters)}_{nameof(Filter.Id)}";
 }

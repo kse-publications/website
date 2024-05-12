@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Publications.Domain.Shared;
+using Publications.Domain.Shared.Slugs;
 
 namespace Publications.API.Middleware;
 

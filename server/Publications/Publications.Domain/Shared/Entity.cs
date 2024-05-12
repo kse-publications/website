@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using Publications.Domain.Filters;
 using Publications.Domain.Shared.Attributes;
+using Publications.Domain.Shared.Slugs;
 using Redis.OM.Modeling;
 
 namespace Publications.Domain.Shared;

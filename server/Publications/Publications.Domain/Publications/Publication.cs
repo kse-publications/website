@@ -1,6 +1,7 @@
 ﻿using Publications.Domain.Authors;
 using Publications.Domain.Publishers;
 using Publications.Domain.Shared;
+using Publications.Domain.Shared.Slugs;
 using Publications.Domain.Shared.ValueObjects;
 using Redis.OM.Modeling;
 
@@ -18,7 +19,7 @@ public class Publication: Entity<Publication>
     [Indexed(Sortable = true)]
     public string Type { get; set;} = null!;
     
-    [Indexed]
+    [Indexed(Sortable = true)]
     public string Language { get; set; } = string.Empty;
     
     [Indexed(Sortable = true)]
@@ -47,4 +48,19 @@ public class Publication: Entity<Publication>
         
         return this;
     }
+    
+    public static EntityFilter[] GetEntityFilters() =>
+    [
+        new EntityFilter(groupId: 1, nameof(Type)),
+        new EntityFilter(groupId: 2, nameof(Year)),
+        new EntityFilter(groupId: 3, nameof(Language))
+    ];
+    
+    public static string[] GetSearchableFields() =>
+    [
+        nameof(Title),
+        nameof(Abstract),
+        $"{nameof(Authors)}_{nameof(Author.Name)}",
+        $"{nameof(Publisher)}_{nameof(Publisher.Name)}"
+    ];
 }

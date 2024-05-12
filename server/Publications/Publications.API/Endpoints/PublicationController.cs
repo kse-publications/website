@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Publications.API.Middleware;
 using Publications.Application;
 using Publications.Application.DTOs;
-using Publications.Application.Repositories;
 using Publications.Application.Services;
 using Publications.Domain.Filters;
 using Publications.Domain.Publications;
@@ -15,14 +14,11 @@ namespace Publications.API.Endpoints;
 public class PublicationsController : ControllerBase
 {
     private readonly IPublicationsService _publicationsService;
-    private readonly IFiltersRepository _filtersRepository;
 
     public PublicationsController(
-        IPublicationsService publicationsService,
-        IFiltersRepository filtersRepository)
+        IPublicationsService publicationsService)
     {
         _publicationsService = publicationsService;
-        _filtersRepository = filtersRepository;
     }
     
     [HttpGet]
@@ -84,8 +80,18 @@ public class PublicationsController : ControllerBase
     )]
     public async Task<IActionResult> GetFilters(CancellationToken cancellationToken)
     {
-        IReadOnlyCollection<FilterGroup> filters = await _filtersRepository
+        IReadOnlyCollection<FilterGroup> filters = await _publicationsService
             .GetFiltersAsync(cancellationToken);
+        
+        return Ok(filters);
+    }
+    
+    [HttpGet("filters/v2")]
+    public async Task<IActionResult> GetFiltersWithCount(
+        [FromQuery]PaginationFilterSearchDtoV2 filterSearchDTO, CancellationToken cancellationToken)
+    {
+        IReadOnlyCollection<FilterGroup> filters = await _publicationsService
+            .GetFiltersV2Async(filterSearchDTO, cancellationToken);
         
         return Ok(filters);
     }

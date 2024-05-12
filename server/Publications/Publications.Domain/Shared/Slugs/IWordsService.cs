@@ -1,6 +1,6 @@
 ﻿using Publications.Domain.Shared.ValueObjects;
 
-namespace Publications.Domain.Shared;
+namespace Publications.Domain.Shared.Slugs;
 
 public interface IWordsService
 {
