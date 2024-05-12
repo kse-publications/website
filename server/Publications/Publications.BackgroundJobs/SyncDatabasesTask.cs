@@ -55,7 +55,7 @@ public class SyncDatabasesTask : BaseRetriableTask<SyncDatabasesTask>
     protected override async Task OnSuccessAsync()
     {
         _filters = await _filtersService.GetFiltersForPublicationsAsync(_publications!);
-        _publications = await _filtersService.AssignFiltersToPublicationsAsync(
+        _publications = _filtersService.AssignFiltersToPublicationsAsync(
             _publications!.ToList(), _filters.ToList());
         
         await _publicationsCommandRepository.InsertOrUpdateAsync(await SetResourceViewsAsync(_publications));
