@@ -41,7 +41,7 @@ public record FilterDTO
     }
 }
 
-public record FilterDtoV2
+public record FilterDTOV2
 {
     /// <summary>
     /// Raw filters value from url query.
@@ -60,9 +60,9 @@ public record FilterDtoV2
         return _filterIds ??= ParseFilters(Filters);
     }
 
-    public static FilterDtoV2 CreateFromFilters(Dictionary<int, int[]> filterGroups)
+    public static FilterDTOV2 CreateFromFilters(Dictionary<int, int[]> filterGroups)
     {
-        return new FilterDtoV2 { _filterIds = filterGroups };
+        return new FilterDTOV2 { _filterIds = filterGroups };
     }
     
     private static Dictionary<int, int[]> ParseFilters(string rawFilters)

@@ -102,17 +102,17 @@ public class SearchQuery
         return fullQuery;
     }
     
-    public SearchQuery Filter(FilterDtoV2 filterDTO)
+    public SearchQuery Filter(FilterDTOV2 filterDTO)
     {
         return Filter(this, filterDTO);
     }
     
-    public static SearchQuery CreateWithFilter(FilterDtoV2 filterDTO)
+    public static SearchQuery CreateWithFilter(FilterDTOV2 filterDTO)
     {
         return Filter(MatchAll(), filterDTO);
     }
     
-    private static SearchQuery Filter(SearchQuery query, FilterDtoV2 filterDTO)
+    private static SearchQuery Filter(SearchQuery query, FilterDTOV2 filterDTO)
     {
         if (filterDTO.GetParsedFilters().Keys.Count == 0)
             return query;

@@ -25,10 +25,11 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
     }
 
     public async Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
-        PaginationFilterDTO paginationDTO, CancellationToken cancellationToken = default)
+        FilterDTO filterDTO, PaginationDTO paginationDTO,
+        CancellationToken cancellationToken = default)
     {
         SearchCommands ft = _db.FT();
-        SearchQuery query = SearchQuery.CreateWithFilter(paginationDTO);
+        SearchQuery query = SearchQuery.CreateWithFilter(filterDTO);
         
         AggregationResult aggregationResult = await ft.AggregateAsync(Publication.IndexName,
             new AggregationRequest(query.Build())
@@ -59,7 +60,7 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
 
 
     public async Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
-        PaginationFilterSearchDTO paginationSearchDTO,
+        FilterDTO filterDTO, PaginationDTO paginationDTO, SearchDTO searchDTO,
         CancellationToken cancellationToken = default)
     {
         SearchCommands ft = _db.FT();
@@ -70,14 +71,14 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
 
         SearchQuery query = SearchQuery
             .CreateWithSearch(
-                paginationSearchDTO.SearchTerm, searchFields)
-            .Filter(paginationSearchDTO);
+                searchDTO.SearchTerm, searchFields)
+            .Filter(filterDTO);
         
         var searchResult = await ft.SearchAsync(Publication.IndexName, 
             new Query(query.Build())
                 .Limit(
-                    offset: paginationSearchDTO.PageSize * (paginationSearchDTO.Page - 1),
-                    count: paginationSearchDTO.PageSize)
+                    offset: paginationDTO.PageSize * (paginationDTO.Page - 1),
+                    count: paginationDTO.PageSize)
                 .Dialect(3));
         
         IReadOnlyCollection<PublicationSummary> publications = searchResult
@@ -95,7 +96,8 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
     }
 
     public async Task<Dictionary<string, int>> GetFiltersCountAsync(
-        PaginationFilterSearchDtoV2 filterSearchDTO, CancellationToken cancellationToken = default)
+        FilterDTOV2 filterDtoV2, PaginationDTO paginationDTO, SearchDTO searchDTO,
+        CancellationToken cancellationToken = default)
     {
         SearchCommands ft = _db.FT();
         SearchFieldName[] searchFields = Publication.GetSearchableFields()
@@ -106,16 +108,16 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
             .GetEntityFilters()
             .Select(async entityFilter =>
             {
-                Dictionary<int, int[]> filtersWithoutCurrentGroup = new(filterSearchDTO
+                Dictionary<int, int[]> filtersWithoutCurrentGroup = new(filterDtoV2
                     .GetParsedFilters());
                 
                 filtersWithoutCurrentGroup.Remove(entityFilter.GroupId);
                 
-                var newFilter = FilterDtoV2.CreateFromFilters(
+                var newFilter = FilterDTOV2.CreateFromFilters(
                     filtersWithoutCurrentGroup);
                 
                 SearchQuery query = SearchQuery
-                    .CreateWithSearch(filterSearchDTO.SearchTerm, searchFields)
+                    .CreateWithSearch(searchDTO.SearchTerm, searchFields)
                     .Filter(newFilter);
                 
                 var result = await ft.AggregateAsync(Publication.IndexName,

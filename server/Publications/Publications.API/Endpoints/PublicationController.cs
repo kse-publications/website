@@ -27,10 +27,12 @@ public class PublicationsController : ControllerBase
         Summary = "Get all publications",
         Description = "By default, returns latest publications (Descending order by LastModified date time).")]
     public async Task<IActionResult> GetAll(
-        [FromQuery]PaginationFilterDTO paginationDTO, CancellationToken cancellationToken)
+        [FromQuery]FilterDTO filterDTO, 
+        [FromQuery]PaginationDTO paginationDTO,
+        CancellationToken cancellationToken)
     {
         PaginatedCollection<PublicationSummary> publications = await _publicationsService
-            .GetAllAsync(paginationDTO, cancellationToken);
+            .GetAllAsync(filterDTO, paginationDTO, cancellationToken);
             
         return Ok(publications);
     } 
@@ -64,10 +66,13 @@ public class PublicationsController : ControllerBase
                       "Title, Abstract, and Keywords, Publisher.Name, Author.Name."
     )]
     public async Task<IActionResult> GetBySearch(
-        [FromQuery]PaginationFilterSearchDTO searchDTO, CancellationToken cancellationToken)
+        [FromQuery]FilterDTO filterDTO,
+        [FromQuery]PaginationDTO paginationDTO,
+        [FromQuery]SearchDTO searchDTO,
+        CancellationToken cancellationToken)
     {
         PaginatedCollection<PublicationSummary> publications = await _publicationsService
-            .GetBySearchAsync(searchDTO, cancellationToken);
+            .GetBySearchAsync(filterDTO, paginationDTO, searchDTO, cancellationToken);
             
         return Ok(publications);
     }
@@ -88,10 +93,13 @@ public class PublicationsController : ControllerBase
     
     [HttpGet("filters/v2")]
     public async Task<IActionResult> GetFiltersWithCount(
-        [FromQuery]PaginationFilterSearchDtoV2 filterSearchDTO, CancellationToken cancellationToken)
+        [FromQuery]FilterDTOV2 filterDtoV2,
+        [FromQuery]PaginationDTO paginationDTO,
+        [FromQuery]SearchDTO searchDTO,
+        CancellationToken cancellationToken)
     {
         IReadOnlyCollection<FilterGroup> filters = await _publicationsService
-            .GetFiltersV2Async(filterSearchDTO, cancellationToken);
+            .GetFiltersV2Async(filterDtoV2, paginationDTO, searchDTO, cancellationToken);
         
         return Ok(filters);
     }

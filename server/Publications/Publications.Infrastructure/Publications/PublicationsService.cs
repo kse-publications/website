@@ -4,6 +4,7 @@ using Publications.Application.Repositories;
 using Publications.Application.Services;
 using Publications.Domain.Filters;
 using Publications.Domain.Publications;
+using Publications.Infrastructure.Shared;
 
 namespace Publications.Infrastructure.Publications;
 
@@ -21,20 +22,23 @@ public class PublicationsService: IPublicationsService
     }
 
     public async Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
-        PaginationFilterDTO paginationDTO, CancellationToken cancellationToken = default)
+        FilterDTO filterDTO, PaginationDTO paginationDTO,
+        CancellationToken cancellationToken = default)
     {
         PaginatedCollection<PublicationSummary> publications = await 
-            _publicationsQueryRepository.GetAllAsync(paginationDTO, cancellationToken);
+            _publicationsQueryRepository.GetAllAsync(
+                filterDTO, paginationDTO, cancellationToken);
         
         return publications;
     }
 
     public async Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
-        PaginationFilterSearchDTO paginationSearchDTO, 
+        FilterDTO filterDTO, PaginationDTO paginationDTO, SearchDTO searchDTO, 
         CancellationToken cancellationToken = default)
     {
         PaginatedCollection<PublicationSummary> matchedPublications = await 
-            _publicationsQueryRepository.GetBySearchAsync(paginationSearchDTO, cancellationToken);
+            _publicationsQueryRepository.GetBySearchAsync(
+                filterDTO, paginationDTO, searchDTO, cancellationToken);
 
         return matchedPublications;
     }
@@ -55,13 +59,15 @@ public class PublicationsService: IPublicationsService
     }
 
     public async Task<IReadOnlyCollection<FilterGroup>> GetFiltersV2Async(
-        PaginationFilterSearchDtoV2 filterSearchDTO, CancellationToken cancellationToken = default)
+        FilterDTOV2 filterDtoV2, PaginationDTO paginationDTO, SearchDTO searchDTO,
+        CancellationToken cancellationToken = default)
     {
         IReadOnlyCollection<FilterGroup> filterGroups = await
             _publicationsCommandRepository.GetFiltersAsync(cancellationToken);
         
         Dictionary<string, int> filtersValuesWithMatchesCount = await
-            _publicationsQueryRepository.GetFiltersCountAsync(filterSearchDTO, cancellationToken);
+            _publicationsQueryRepository.GetFiltersCountAsync(
+                filterDtoV2, paginationDTO, searchDTO, cancellationToken);
         
         return MatchFiltersCount(filterGroups, filtersValuesWithMatchesCount)
             .OrderBy(fg => fg.Id)
