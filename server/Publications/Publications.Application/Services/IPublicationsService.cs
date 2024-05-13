@@ -7,11 +7,14 @@ namespace Publications.Application.Services;
 public interface IPublicationsService
 {
     Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
-        PaginationFilterDTO paginationDTO,
+        FilterDTO filterDTO,
+        PaginationDTO paginationDTO,
         CancellationToken cancellationToken = default);
     
     Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
-        PaginationFilterSearchDTO paginationSearchDTO,
+        FilterDTO filterDTO,
+        PaginationDTO paginationDTO,
+        SearchDTO searchDTO,
         CancellationToken cancellationToken = default);
     
     Task<Publication?> GetByIdAsync(
@@ -21,6 +24,8 @@ public interface IPublicationsService
         CancellationToken cancellationToken = default);
     
     Task<IReadOnlyCollection<FilterGroup>> GetFiltersV2Async(
-        PaginationFilterSearchDtoV2 filterSearchDTO,
+        FilterDTOV2 filterDtov2,
+        PaginationDTO paginationDTO,
+        SearchDTO searchDTO,
         CancellationToken cancellationToken = default);
 }

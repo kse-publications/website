@@ -9,11 +9,14 @@ namespace Publications.Application.Repositories;
 public interface IPublicationsQueryRepository
 {
     Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
-        PaginationFilterDTO paginationDTO,
+        FilterDTO filterDTO,
+        PaginationDTO paginationDTO,
         CancellationToken cancellationToken = default);
     
     Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
-        PaginationFilterSearchDTO paginationSearchDTO,
+        FilterDTO filterDTO,
+        PaginationDTO paginationDTO,
+        SearchDTO searchDTO,
         CancellationToken cancellationToken = default);
     
     /// <summary>
@@ -21,6 +24,8 @@ public interface IPublicationsQueryRepository
     /// Basically a group by filter id query. 
     /// </summary>
     Task<Dictionary<string, int>> GetFiltersCountAsync(
-        PaginationFilterSearchDtoV2 filterSearchDTO,
+        FilterDTOV2 filterDtov2,
+        PaginationDTO paginationDTO,
+        SearchDTO searchDTO,
         CancellationToken cancellationToken = default);
 }
