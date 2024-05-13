@@ -12,6 +12,15 @@
         ],
         "parameters": [
           {
+            "name": "Filters",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "pattern": "^\\d+(?:-\\d+)*(?:;\\d+(?:-\\d+)*)*;?$",
+              "type": "string"
+            }
+          },
+          {
             "name": "Page",
             "in": "query",
             "style": "form",
@@ -31,15 +40,6 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32"
-            }
-          },
-          {
-            "name": "Filters",
-            "in": "query",
-            "style": "form",
-            "schema": {
-              "pattern": "^\\d+(?:-\\d+)*(?:;\\d+(?:-\\d+)*)*;?$",
-              "type": "string"
             }
           }
         ],
@@ -134,10 +134,11 @@
         ],
         "parameters": [
           {
-            "name": "SearchTerm",
+            "name": "Filters",
             "in": "query",
             "style": "form",
             "schema": {
+              "pattern": "^\\d+(?:-\\d+)*(?:;\\d+(?:-\\d+)*)*;?$",
               "type": "string"
             }
           },
@@ -164,11 +165,10 @@
             }
           },
           {
-            "name": "Filters",
+            "name": "SearchTerm",
             "in": "query",
             "style": "form",
             "schema": {
-              "pattern": "^\\d+(?:-\\d+)*(?:;\\d+(?:-\\d+)*)*;?$",
               "type": "string"
             }
           }
@@ -242,10 +242,11 @@
         ],
         "parameters": [
           {
-            "name": "SearchTerm",
+            "name": "Filters",
             "in": "query",
             "style": "form",
             "schema": {
+              "pattern": "^\\d+:(?:\\d+(?:-\\d+)*)(?:;\\d+:(?:\\d+(?:-\\d+)*))*;?$",
               "type": "string"
             }
           },
@@ -272,11 +273,10 @@
             }
           },
           {
-            "name": "Filters",
+            "name": "SearchTerm",
             "in": "query",
             "style": "form",
             "schema": {
-              "pattern": "^\\d+:(?:\\d+(?:-\\d+)*)(?:;\\d+:(?:\\d+(?:-\\d+)*))*;?$",
               "type": "string"
             }
           }
