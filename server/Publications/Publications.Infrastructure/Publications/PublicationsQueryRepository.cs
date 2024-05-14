@@ -74,11 +74,47 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
                 searchDTO.SearchTerm, searchFields)
             .Filter(filterDTO);
         
+            
         var searchResult = await ft.SearchAsync(Publication.IndexName, 
             new Query(query.Build())
                 .Limit(
                     offset: paginationDTO.PageSize * (paginationDTO.Page - 1),
                     count: paginationDTO.PageSize)
+                .Dialect(3));
+        
+        IReadOnlyCollection<PublicationSummary> publications = searchResult
+            .ToJson()
+            .Select(json => PublicationSummary
+                .FromPublication(JsonSerializer
+                    .Deserialize<Publication[]>(json)!.First()))
+            .ToList()
+            .AsReadOnly();
+        
+        return new PaginatedCollection<PublicationSummary>(
+            Items: publications,
+            TotalCount: (int)searchResult.TotalResults,
+            ResultCount: publications.Count);
+    }
+
+    public async Task<PaginatedCollection<PublicationSummary>> GetByAuthorsAsync(
+        FilterDTO filterDto, PaginationDTO paginationDto, AuthorFilterDTO authorFilterDto,
+        CancellationToken cancellationToken = default)
+    {
+        SearchCommands ft = _db.FT();
+        var authorsID = authorFilterDto.GetParsedAuthorsId();
+        var includeCurrentId = "@Id:[" + Publication.currentPublicationId + "]";
+
+        SearchQuery query = SearchQuery.Where($"(-@Id:{includeCurrentId})");
+        for (int i = 0; i < authorsID.Length; i++)
+        {
+            query.Or($"@Authors_Id:{authorsID[i]}");
+        }
+        
+        var searchResult = await ft.SearchAsync(Publication.IndexName, 
+            new Query(query.Build())
+                .Limit(
+                    offset: paginationDto.PageSize * (paginationDto.Page - 1),
+                    count: paginationDto.PageSize)
                 .Dialect(3));
         
         IReadOnlyCollection<PublicationSummary> publications = searchResult
