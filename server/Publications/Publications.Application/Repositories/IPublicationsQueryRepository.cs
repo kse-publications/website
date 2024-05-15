@@ -33,5 +33,6 @@ public interface IPublicationsQueryRepository
         FilterDTO filterDTO,
         PaginationDTO paginationDTO,
         AuthorFilterDTO authorFilterDto,
+        int currentPublicationId,
         CancellationToken cancellationToken = default);
 }

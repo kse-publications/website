@@ -35,8 +35,32 @@ public class PublicationsController : ControllerBase
             .GetAllAsync(filterDTO, paginationDTO, cancellationToken);
             
         return Ok(publications);
-    } 
+    }
     
+    [HttpGet("{id}/authors")]
+    [IdExtractionFilter]
+    [RequestAnalyticsFilter<Publication>]
+    [ProducesResponseType(typeof(IEnumerable<Publication>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [SwaggerOperation(
+        Summary = "Get authors of a publication by its ID",
+        Description = "Returns a list of authors for the provided publication ID, if found."
+    )]
+    
+    public async Task<IActionResult> GetByAuthors(
+        [FromQuery] FilterDTO filterDTO,
+        [FromQuery] PaginationDTO paginationDTO,
+        [FromQuery] AuthorFilterDTO authorFilterDto,
+        [FromQuery] int currentPublicationId,
+        CancellationToken cancellationToken)
+    {
+        PaginatedCollection<PublicationSummary> recomandsbyauthors = await _publicationsService
+            .GetByAuthorsAsync(filterDTO, paginationDTO, authorFilterDto, currentPublicationId, cancellationToken);
+        var publicationId = (int)(HttpContext.Items["PublicationId"]);
+        return Ok(recomandsbyauthors);
+    }
+    
+        
     [HttpGet("{id}")]
     [IdExtractionFilter]
     [RequestAnalyticsFilter<Publication>]

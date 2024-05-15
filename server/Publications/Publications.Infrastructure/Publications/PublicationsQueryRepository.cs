@@ -10,6 +10,7 @@ using Publications.Domain.Authors;
 using Publications.Domain.Filters;
 using Publications.Domain.Publications;
 using Publications.Domain.Publishers;
+using Publications.Domain.Shared;
 using Publications.Infrastructure.Shared;
 using StackExchange.Redis;
 
@@ -97,14 +98,13 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
     }
 
     public async Task<PaginatedCollection<PublicationSummary>> GetByAuthorsAsync(
-        FilterDTO filterDto, PaginationDTO paginationDto, AuthorFilterDTO authorFilterDto,
+        FilterDTO filterDto, PaginationDTO paginationDto, AuthorFilterDTO authorFilterDto, int publicationId,
         CancellationToken cancellationToken = default)
     {
         SearchCommands ft = _db.FT();
         var authorsID = authorFilterDto.GetParsedAuthorsId();
-        var includeCurrentId = "@Id:[" + Publication.currentPublicationId + "]";
 
-        SearchQuery query = SearchQuery.Where($"(-@Id:{includeCurrentId})");
+        SearchQuery query = SearchQuery.Where($"(-@Id:{publicationId})");
         for (int i = 0; i < authorsID.Length; i++)
         {
             query.Or($"@Authors_Id:{authorsID[i]}");
@@ -115,6 +115,8 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
                 .Limit(
                     offset: paginationDto.PageSize * (paginationDto.Page - 1),
                     count: paginationDto.PageSize)
+                .SetSortBy(
+                    new SortedField($"@{nameof(Publication.Views)}", SortedField.SortOrder.DESC)?.ToString())
                 .Dialect(3));
         
         IReadOnlyCollection<PublicationSummary> publications = searchResult
@@ -177,6 +179,12 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
         return (await Task.WhenAll(aggregationTasks))
             .SelectMany(dict => dict)
             .ToDictionary(pair => pair.Key, pair => pair.Value);
+    }
+
+    public Task<PaginatedCollection<PublicationSummary>> GetByAuthorsAsync(FilterDTO filterDTO, PaginationDTO paginationDTO, AuthorFilterDTO authorFilterDto,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
     }
 
     private static List<PublicationSummary> MapToPublicationSummaries(
