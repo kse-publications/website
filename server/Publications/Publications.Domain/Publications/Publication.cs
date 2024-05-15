@@ -52,7 +52,7 @@ public class Publication: Entity<Publication>
     public static EntityFilter[] GetEntityFilters() =>
     [
         new EntityFilter(groupId: 1, nameof(Type)),
-        new EntityFilter(groupId: 2, nameof(Year)),
+        new EntityFilter(groupId: 2, nameof(Year), SortOrder.Descending),
         new EntityFilter(groupId: 3, nameof(Language))
     ];
     
