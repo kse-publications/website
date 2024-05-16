@@ -28,4 +28,14 @@ public readonly struct SearchFieldName
     {
         return $"(@{_name}:[{numericValue},{numericValue}])";
     }
+    
+    public string NotEqualTo(string searchTerm)
+    {
+        return $"(-@{_name}:{{{searchTerm}}})";
+    }
+    
+    public string NotEqualTo(int numericValue)
+    {
+        return $"(-@{_name}:[{numericValue},{numericValue}])";
+    }
 }

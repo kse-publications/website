@@ -35,7 +35,7 @@ public class PublicationsController : ControllerBase
             .GetAllAsync(filterDTO, paginationDTO, cancellationToken);
             
         return Ok(publications);
-    } 
+    }
     
     [HttpGet("{id}")]
     [IdExtractionFilter]
@@ -56,6 +56,25 @@ public class PublicationsController : ControllerBase
         return publication is null
             ? NotFound($"Publication with ID {id} not found.")
             : Ok(publication); 
+    }
+    
+    [HttpGet("{id}/related-by-authors")]
+    [ProducesResponseType(typeof(PaginatedCollection<PublicationSummary>), StatusCodes.Status200OK)]
+    [SwaggerOperation(
+        Summary = "Get related publications by authors",
+        Description = "Returns a list of publications that share " +
+                      "at least one author with the provided publication."
+    )]
+    public async Task<IActionResult> GetRelatedByAuthors(
+        [FromRoute] int currentPublicationId,
+        [FromQuery] PaginationDTO paginationDTO,
+        [FromQuery] AuthorFilterDTO authorFilterDto,
+        CancellationToken cancellationToken)
+    {
+        PaginatedCollection<PublicationSummary> publications = await _publicationsService
+            .GetRelatedByAuthorsAsync(currentPublicationId, paginationDTO, authorFilterDto, cancellationToken);
+        
+        return Ok(publications);
     }
     
     [HttpGet("search")]

@@ -10,7 +10,6 @@ public abstract class Entity<T> where T: Entity<T>
 {
     [RedisIdField]
     [Indexed(Sortable = true)]
-    [IgnoreInResponse]
     public int Id { get; init; }
 
     [Indexed(Sortable = true)]
