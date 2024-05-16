@@ -27,7 +27,9 @@ export const SearchBackground = () => {
           className={`relative mx-auto max-w-[1160px] px-4 ${isRecent ? 'pb-10 lg:pb-32 lg:pt-6' : 'pb-6'}`}
         >
           <CSSTransition in={isRecent} timeout={400} classNames="slide" unmountOnExit>
-            <p className={`mb-12 text-center text-2xl text-white md:text-4xl lg:mb-[77px] xl:px-8`}>
+            <p
+              className={`mb-12 text-center text-2xl text-white md:text-4xl xl:px-8 ${isRecent ? 'lg:mb-[77px]' : ''}`}
+            >
               KSE Publications is a collection of the major academic and analytical publications
               produced by the KSE community.
             </p>

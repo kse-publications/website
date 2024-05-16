@@ -183,8 +183,9 @@ const SearchContextProvider = ({
     fetchPublications({
       searchText,
       page: currentPage + 1,
+      filters: selectedFilters,
     })
-  }, [searchText, currentPage])
+  }, [searchText, currentPage, selectedFilters])
 
   const value: ISearchContext = {
     loadMoreHandler,
