@@ -1,6 +1,7 @@
 ﻿using Publications.Application.Services;
 using Publications.Domain.Filters;
 using Publications.Domain.Publications;
+using Publications.Domain.Shared.ValueObjects;
 
 namespace Publications.Infrastructure.Services;
 
@@ -11,8 +12,8 @@ public class FiltersService: IFiltersService
     {
         List<Task<FilterGroup>> filtersTasks = Publication
             .GetEntityFilters()
-            .Select(filter => Task.Run(() => GetFilterGroupFromProperty(
-                publications, filter.PropertyName, filter.GroupId)))
+            .Select(filter => Task.Run(() 
+                => GetFilterGroupFromProperty(publications, filter)))
             .ToList();
 
         return (await Task.WhenAll(filtersTasks))
@@ -37,19 +38,19 @@ public class FiltersService: IFiltersService
     }
     
     private FilterGroup GetFilterGroupFromProperty(
-        IEnumerable<Publication> publications, string propertyName, int index)
+        IEnumerable<Publication> publications, EntityFilter entityFilter)
     {
-        var filters = SelectPropertyByName(publications, propertyName)
-            .Distinct()
-            .Select(f => Filter.Create(f.ToString()!))
-            .ToList();
+        var distinctFilterValues = SelectPropertyByName(publications, entityFilter.PropertyName)
+                .Distinct();
 
         return new FilterGroup
         {
-            Id = index,
-            Name = propertyName,
+            Id = entityFilter.GroupId,
+            Name = entityFilter.PropertyName,
             ResourceName = nameof(Publication),
-            Filters = filters.ToArray()
+            Filters = SortFilterValues(distinctFilterValues, entityFilter.SortOrder)
+                .Select(f => Filter.Create(f.ToString()!))
+                .ToArray()
         };
     }
     
@@ -76,5 +77,16 @@ public class FiltersService: IFiltersService
         var propertyInfo = typeof(Publication).GetProperty(propertyName);
 
         return collection.Select(p => propertyInfo!.GetValue(p))!;
+    }
+    
+    private static IEnumerable<object> SortFilterValues(
+        IEnumerable<object> values, SortOrder sortOrder)
+    {
+        return sortOrder switch
+        {
+            SortOrder.Ascending => values.OrderBy(v => v),
+            SortOrder.Descending => values.OrderByDescending(v => v),
+            _ => values
+        };
     }
 }

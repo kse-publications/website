@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select'
+import { captureEvent } from '@/services/posthog/posthog'
 
 interface Filter {
   id: string
@@ -24,7 +25,8 @@ interface SelectItem {
 export const SearchFilters = () => {
   const { filters, selectedFilters, setSelectedFilters } = useSearchContext()
 
-  const handleFilterChange = (value: string, siblingsIds: number[]) => {
+  const handleFilterChange = (value: string, siblingsIds: number[], name: string) => {
+    captureEvent('filter_change', { filter: name, value })
     setSelectedFilters((prev) => {
       if (value === 'reset') {
         return prev.filter((item) => !siblingsIds.includes(item))
@@ -46,7 +48,8 @@ export const SearchFilters = () => {
             onValueChange={(value) =>
               handleFilterChange(
                 value,
-                filter.filters.map(({ id }) => +id)
+                filter.filters.map(({ id }) => +id),
+                filter.name
               )
             }
             value={selectedFilter ? selectedFilter.id.toString() : ''}

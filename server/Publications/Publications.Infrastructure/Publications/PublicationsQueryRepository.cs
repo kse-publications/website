@@ -10,6 +10,7 @@ using Publications.Domain.Authors;
 using Publications.Domain.Filters;
 using Publications.Domain.Publications;
 using Publications.Domain.Publishers;
+using Publications.Domain.Shared;
 using Publications.Infrastructure.Shared;
 using StackExchange.Redis;
 
@@ -81,12 +82,43 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
                     count: paginationDTO.PageSize)
                 .Dialect(3));
         
-        IReadOnlyCollection<PublicationSummary> publications = searchResult
-            .ToJson()
-            .Select(json => PublicationSummary
-                .FromPublication(JsonSerializer
-                    .Deserialize<Publication[]>(json)!.First()))
-            .ToList()
+        var publications = MapToPublicationSummaries(searchResult)
+            .AsReadOnly();
+        
+        return new PaginatedCollection<PublicationSummary>(
+            Items: publications,
+            TotalCount: (int)searchResult.TotalResults,
+            ResultCount: publications.Count);
+    }
+
+    public async Task<PaginatedCollection<PublicationSummary>> GetRelatedByAuthorsAsync(
+        int currentPublicationId, PaginationDTO paginationDto, AuthorFilterDTO authorFilterDto, 
+        CancellationToken cancellationToken = default)
+    {
+        SearchCommands ft = _db.FT();
+        int[] authorsIds = authorFilterDto.GetParsedAuthorsId();
+        
+        SearchFieldName idSearchField = new(nameof(Publication.Id));
+        SearchFieldName authorsIdSearchField = new(PublicationAuthorsId);
+        var query = SearchQuery.Where(
+            idSearchField.NotEqualTo(currentPublicationId));
+
+        var authorsQuery = SearchQuery.MatchAll();
+        foreach (var id in authorsIds)
+        {
+            authorsQuery.Or(authorsIdSearchField.EqualTo(id));
+        }
+        query.And(authorsQuery.Build());
+        
+        SearchResult searchResult = await ft.SearchAsync(Publication.IndexName, 
+            new Query(query.Build())
+                .SetSortBy(nameof(Publication.Views), ascending: false)
+                .Limit(
+                    offset: paginationDto.PageSize * (paginationDto.Page - 1),
+                    count: paginationDto.PageSize)
+                .Dialect(3));
+
+        var publications = MapToPublicationSummaries(searchResult)
             .AsReadOnly();
         
         return new PaginatedCollection<PublicationSummary>(
@@ -157,12 +189,22 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
         }).ToList();
     }
 
+    private static List<PublicationSummary> MapToPublicationSummaries(SearchResult result)
+    {
+        return result
+            .ToJson()
+            .Select(json => PublicationSummary
+                .FromPublication(JsonSerializer
+                    .Deserialize<Publication[]>(json)!.First()))
+            .ToList();
+    }
+
     private static string PublicationAuthorsName => 
         $"{nameof(Publication.Authors)}_{nameof(Author.Name)}";
     
     private static string PublicationPublisherName =>
         $"{nameof(Publication.Publisher)}_{nameof(Publisher.Name)}";
     
-    private static string PublicationFiltersId =>
-        $"{nameof(Publication.Filters)}_{nameof(Filter.Id)}";
+    private static string PublicationAuthorsId =>
+        $"{nameof(Publication.Authors)}_{nameof(Author.Id)}";
 }

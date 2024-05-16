@@ -48,6 +48,14 @@ public class PublicationsService: IPublicationsService
     {
         return await _publicationsCommandRepository.GetByIdAsync(id, cancellationToken);
     }
+    
+    public async Task<PaginatedCollection<PublicationSummary>> GetRelatedByAuthorsAsync(
+        int currentPublicationId, PaginationDTO paginationDto, AuthorFilterDTO authorFilterDto,
+        CancellationToken cancellationToken = default)
+    {
+        return await _publicationsQueryRepository.GetRelatedByAuthorsAsync(
+            currentPublicationId, paginationDto, authorFilterDto, cancellationToken);
+    }
 
     public async Task<IReadOnlyCollection<FilterGroup>> GetFiltersAsync(
         CancellationToken cancellationToken = default)
@@ -93,8 +101,4 @@ public class PublicationsService: IPublicationsService
 
         return filterGroups;
     }
-
-    private static PaginatedCollection<PublicationSummary> EmptyResponse => 
-        new PaginatedCollection<PublicationSummary>(
-            Items: new List<PublicationSummary>(), ResultCount: 0, TotalCount: 0);
 }

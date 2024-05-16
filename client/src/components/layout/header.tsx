@@ -2,6 +2,13 @@ import { Button } from '@/components/ui/button'
 
 import logoLight from '../../assets/images/logo-white.png'
 import MobileMenuDrawer from './mobile-menu'
+import { captureEvent } from '@/services/posthog/posthog'
+
+const menuItems = [
+  { label: 'About', href: '/about' },
+  { label: 'Submissions', href: '/submissions' },
+  { label: 'Team', href: '/team' },
+]
 
 function Header({ light = false }) {
   return (
@@ -13,27 +20,24 @@ function Header({ light = false }) {
 
         <div className="flex items-center justify-center">
           <div className="flex items-center justify-end sm:hidden">
-            <MobileMenuDrawer />
+            <MobileMenuDrawer menuItems={menuItems} />
           </div>
 
           <div
             className={`hidden space-x-5 rounded-full border border-white p-0.5 text-[17px] text-white sm:block`}
           >
-            <a href="/about" aria-label="Go to About page">
-              <Button variant="ghost" className="rounded-full">
-                About
-              </Button>
-            </a>
-            <a href="/submissions" aria-label="Go to Submissions page">
-              <Button variant="ghost" className="rounded-full">
-                Submissions
-              </Button>
-            </a>
-            <a href="/team" aria-label="Go to Team page">
-              <Button variant="ghost" className="rounded-full">
-                Team
-              </Button>
-            </a>
+            {menuItems.map((item) => (
+              <a
+                onClick={() => captureEvent('menu_item_click', { item: item.label })}
+                key={item.label}
+                href={item.href}
+                aria-label={`Go to ${item.label} page`}
+              >
+                <Button variant="ghost" className="rounded-full">
+                  {item.label}
+                </Button>
+              </a>
+            ))}
           </div>
         </div>
       </div>

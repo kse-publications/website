@@ -1,7 +1,10 @@
 ---
 import { ViewTransitions } from 'astro:transitions'
+
 import Header from '@/components/layout/header'
 import LoadingIndicator from '@/components/layout/loading-indicator.astro'
+import PostHog from '@/components/layout/posthog.astro'
+
 import { v4 as uuidv4 } from 'uuid'
 
 interface Props {
@@ -20,6 +23,10 @@ if (!clientUuid) {
     path: '/',
   })
 }
+
+const ENVIRONMENT = import.meta.env.PUBLIC_ENVIRONMENT
+
+const isProduction = ENVIRONMENT === 'production'
 ---
 
 <!doctype html>
@@ -40,6 +47,7 @@ if (!clientUuid) {
     <meta name="generator" content={Astro.generator} />
 
     <title>{title}</title>
+    {isProduction && <PostHog />}
     <ViewTransitions />
     <LoadingIndicator color="#e4e541" height="4px" />
   </head>

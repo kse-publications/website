@@ -38,6 +38,12 @@ export const searchPublications = async ({
   return fetch(url).then((response) => response.json())
 }
 
-export const getPublication = async (id: string): Promise<any> => {
-  return fetch(`${BASE_URL}/publications/${id}`).then((response) => response.json())
+export const getPublication = async (id: string, clientUuid?: string): Promise<any> => {
+  return fetch(`${BASE_URL}/publications/${id}`, {
+    headers: clientUuid
+      ? {
+          'Client-Uuid': clientUuid,
+        }
+      : {},
+  }).then((response) => response.json())
 }
