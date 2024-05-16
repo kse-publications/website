@@ -18,6 +18,7 @@ import type { PaginatedCollection } from '@/types/common/paginated-collection'
 import type { SearchPublicationsQueryParams } from '@/types/common/query-params'
 import type { IFilter } from '@/types/common/fiters'
 import { useDebounce } from 'use-debounce'
+import { captureEvent } from '@/services/posthog/posthog'
 
 interface ISearchContext {
   debouncedSearchText: string
@@ -104,7 +105,10 @@ const SearchContextProvider = ({
     fetchPublications({ searchText, filters: selectedFilters })
 
     updateQuery()
-    setIsRecent(!searchText && !selectedFilters.length)
+
+    const isRecent = !searchText && !selectedFilters.length
+    setIsRecent(isRecent)
+    !isRecent && captureEvent('search', { searchText, filters: selectedFilters })
   }, [debouncedSearchText, selectedFilters])
 
   const updateQuery = useCallback(() => {
