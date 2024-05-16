@@ -1,9 +1,13 @@
+import { useState, useEffect } from 'react'
 import { useSearchContext } from '@/contexts/search-context'
+import type { PublicationSummary } from '@/types/publication-summary/publication-summary'
+
 import { SearchResultItem } from './search-result-item'
 import { SearchSkeleton } from './search-skeleton'
 import { LoadingTrigger } from './search-loading-trigger'
-import type { PublicationSummary } from '@/types/publication-summary/publication-summary'
+
 import { AnimatedHeadLine } from '../ui/animated-headline'
+import Masonry from 'react-masonry-css'
 
 const getParsedResults = (searchResults: PublicationSummary[]) => {
   const leftColumn: PublicationSummary[] = []
@@ -25,6 +29,23 @@ const getParsedResults = (searchResults: PublicationSummary[]) => {
 
 export const SearchResults = () => {
   const { isRecent, error, isLoading, searchResults } = useSearchContext()
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 600)
+  const breakpointColumnsObj = {
+    default: 2,
+    1100: 2,
+    600: 1,
+  }
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 600)
+    }
+
+    window.addEventListener('resize', handleResize)
+    handleResize()
+
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   return (
     <div className="w-full grow bg-[#f0f0f0] pb-4 pt-8">
@@ -37,11 +58,17 @@ export const SearchResults = () => {
         ) : (
           <>
             {searchResults.length === 0 && !isLoading && <div>No publications found</div>}
-            <div id="publications" className="summary-container">
-              {getParsedResults(searchResults).map((publication) => (
-                <SearchResultItem key={publication.slug} publication={publication} />
-              ))}
-            </div>
+
+            <Masonry breakpointCols={breakpointColumnsObj} className="masonry-grid">
+              {isMobile
+                ? searchResults.map((publication) => (
+                    <SearchResultItem key={publication.slug} publication={publication} />
+                  ))
+                : getParsedResults(searchResults).map((publication) => (
+                    <SearchResultItem key={publication.slug} publication={publication} />
+                  ))}
+            </Masonry>
+
             {isLoading && <SearchSkeleton />}
             <LoadingTrigger />
           </>
