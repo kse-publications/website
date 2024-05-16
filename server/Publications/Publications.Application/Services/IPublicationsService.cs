@@ -30,10 +30,9 @@ public interface IPublicationsService
         SearchDTO searchDTO,
         CancellationToken cancellationToken = default);
 
-    Task<PaginatedCollection<PublicationSummary>> GetByAuthorsAsync(
-        FilterDTO filterDto, 
+    Task<PaginatedCollection<PublicationSummary>> GetRelatedByAuthorsAsync(
+        int currentPublicationId,
         PaginationDTO paginationDto, 
         AuthorFilterDTO authorFilterDto, 
-        int currentPublicationId,
         CancellationToken cancellationToken);
 }

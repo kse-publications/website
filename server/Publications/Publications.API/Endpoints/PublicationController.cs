@@ -37,30 +37,6 @@ public class PublicationsController : ControllerBase
         return Ok(publications);
     }
     
-    [HttpGet("{id}/authors")]
-    [IdExtractionFilter]
-    [RequestAnalyticsFilter<Publication>]
-    [ProducesResponseType(typeof(IEnumerable<Publication>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [SwaggerOperation(
-        Summary = "Get authors of a publication by its ID",
-        Description = "Returns a list of authors for the provided publication ID, if found."
-    )]
-    
-    public async Task<IActionResult> GetByAuthors(
-        [FromQuery] FilterDTO filterDTO,
-        [FromQuery] PaginationDTO paginationDTO,
-        [FromQuery] AuthorFilterDTO authorFilterDto,
-        [FromQuery] int currentPublicationId,
-        CancellationToken cancellationToken)
-    {
-        PaginatedCollection<PublicationSummary> recomandsbyauthors = await _publicationsService
-            .GetByAuthorsAsync(filterDTO, paginationDTO, authorFilterDto, currentPublicationId, cancellationToken);
-        var publicationId = (int)(HttpContext.Items["PublicationId"]);
-        return Ok(recomandsbyauthors);
-    }
-    
-        
     [HttpGet("{id}")]
     [IdExtractionFilter]
     [RequestAnalyticsFilter<Publication>]
@@ -80,6 +56,25 @@ public class PublicationsController : ControllerBase
         return publication is null
             ? NotFound($"Publication with ID {id} not found.")
             : Ok(publication); 
+    }
+    
+    [HttpGet("{id}/related-by-authors")]
+    [ProducesResponseType(typeof(PaginatedCollection<PublicationSummary>), StatusCodes.Status200OK)]
+    [SwaggerOperation(
+        Summary = "Get related publications by authors",
+        Description = "Returns a list of publications that share " +
+                      "at least one author with the provided publication."
+    )]
+    public async Task<IActionResult> GetRelatedByAuthors(
+        [FromRoute] int currentPublicationId,
+        [FromQuery] PaginationDTO paginationDTO,
+        [FromQuery] AuthorFilterDTO authorFilterDto,
+        CancellationToken cancellationToken)
+    {
+        PaginatedCollection<PublicationSummary> publications = await _publicationsService
+            .GetRelatedByAuthorsAsync(currentPublicationId, paginationDTO, authorFilterDto, cancellationToken);
+        
+        return Ok(publications);
     }
     
     [HttpGet("search")]

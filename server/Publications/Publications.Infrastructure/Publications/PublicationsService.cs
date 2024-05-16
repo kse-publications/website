@@ -32,16 +32,6 @@ public class PublicationsService: IPublicationsService
         return publications;
     }
 
-    public async Task<PaginatedCollection<PublicationSummary>> GetByAuthorsAsync(
-        FilterDTO filterDto, PaginationDTO paginationDto, AuthorFilterDTO authorFilterDto, int currentPublicationId,
-        CancellationToken cancellationToken = default)
-    {
-        PaginatedCollection<PublicationSummary> recomandsbyauthors = await
-            _publicationsQueryRepository.GetByAuthorsAsync(
-                filterDto, paginationDto, authorFilterDto, currentPublicationId, cancellationToken);
-        return recomandsbyauthors;
-    }
-
     public async Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
         FilterDTO filterDTO, PaginationDTO paginationDTO, SearchDTO searchDTO, 
         CancellationToken cancellationToken = default)
@@ -57,6 +47,14 @@ public class PublicationsService: IPublicationsService
         int id, CancellationToken cancellationToken = default)
     {
         return await _publicationsCommandRepository.GetByIdAsync(id, cancellationToken);
+    }
+    
+    public async Task<PaginatedCollection<PublicationSummary>> GetRelatedByAuthorsAsync(
+        int currentPublicationId, PaginationDTO paginationDto, AuthorFilterDTO authorFilterDto,
+        CancellationToken cancellationToken = default)
+    {
+        return await _publicationsQueryRepository.GetRelatedByAuthorsAsync(
+            currentPublicationId, paginationDto, authorFilterDto, cancellationToken);
     }
 
     public async Task<IReadOnlyCollection<FilterGroup>> GetFiltersAsync(
@@ -103,8 +101,4 @@ public class PublicationsService: IPublicationsService
 
         return filterGroups;
     }
-
-    private static PaginatedCollection<PublicationSummary> EmptyResponse => 
-        new PaginatedCollection<PublicationSummary>(
-            Items: new List<PublicationSummary>(), ResultCount: 0, TotalCount: 0);
 }

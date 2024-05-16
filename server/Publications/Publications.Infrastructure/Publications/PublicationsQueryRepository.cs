@@ -75,7 +75,6 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
                 searchDTO.SearchTerm, searchFields)
             .Filter(filterDTO);
         
-            
         var searchResult = await ft.SearchAsync(Publication.IndexName, 
             new Query(query.Build())
                 .Limit(
@@ -83,12 +82,7 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
                     count: paginationDTO.PageSize)
                 .Dialect(3));
         
-        IReadOnlyCollection<PublicationSummary> publications = searchResult
-            .ToJson()
-            .Select(json => PublicationSummary
-                .FromPublication(JsonSerializer
-                    .Deserialize<Publication[]>(json)!.First()))
-            .ToList()
+        var publications = MapToPublicationSummaries(searchResult)
             .AsReadOnly();
         
         return new PaginatedCollection<PublicationSummary>(
@@ -97,34 +91,34 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
             ResultCount: publications.Count);
     }
 
-    public async Task<PaginatedCollection<PublicationSummary>> GetByAuthorsAsync(
-        FilterDTO filterDto, PaginationDTO paginationDto, AuthorFilterDTO authorFilterDto, int publicationId,
+    public async Task<PaginatedCollection<PublicationSummary>> GetRelatedByAuthorsAsync(
+        int currentPublicationId, PaginationDTO paginationDto, AuthorFilterDTO authorFilterDto, 
         CancellationToken cancellationToken = default)
     {
         SearchCommands ft = _db.FT();
-        var authorsID = authorFilterDto.GetParsedAuthorsId();
-
-        SearchQuery query = SearchQuery.Where($"(-@Id:{publicationId})");
-        for (int i = 0; i < authorsID.Length; i++)
-        {
-            query.Or($"@Authors_Id:{authorsID[i]}");
-        }
+        int[] authorsIds = authorFilterDto.GetParsedAuthorsId();
         
-        var searchResult = await ft.SearchAsync(Publication.IndexName, 
+        SearchFieldName idSearchField = new(nameof(Publication.Id));
+        SearchFieldName authorsIdSearchField = new(PublicationAuthorsId);
+        var query = SearchQuery.Where(
+            idSearchField.NotEqualTo(currentPublicationId));
+
+        var authorsQuery = SearchQuery.MatchAll();
+        foreach (var id in authorsIds)
+        {
+            authorsQuery.Or(authorsIdSearchField.EqualTo(id));
+        }
+        query.And(authorsQuery.Build());
+        
+        SearchResult searchResult = await ft.SearchAsync(Publication.IndexName, 
             new Query(query.Build())
+                .SetSortBy(nameof(Publication.Views), ascending: false)
                 .Limit(
                     offset: paginationDto.PageSize * (paginationDto.Page - 1),
                     count: paginationDto.PageSize)
-                .SetSortBy(
-                    new SortedField($"@{nameof(Publication.Views)}", SortedField.SortOrder.DESC)?.ToString())
                 .Dialect(3));
-        
-        IReadOnlyCollection<PublicationSummary> publications = searchResult
-            .ToJson()
-            .Select(json => PublicationSummary
-                .FromPublication(JsonSerializer
-                    .Deserialize<Publication[]>(json)!.First()))
-            .ToList()
+
+        var publications = MapToPublicationSummaries(searchResult)
             .AsReadOnly();
         
         return new PaginatedCollection<PublicationSummary>(
@@ -181,12 +175,6 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
             .ToDictionary(pair => pair.Key, pair => pair.Value);
     }
 
-    public Task<PaginatedCollection<PublicationSummary>> GetByAuthorsAsync(FilterDTO filterDTO, PaginationDTO paginationDTO, AuthorFilterDTO authorFilterDto,
-        CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
     private static List<PublicationSummary> MapToPublicationSummaries(
         IEnumerable<Dictionary<string, RedisValue>> aggregationResults)
     {
@@ -201,12 +189,22 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
         }).ToList();
     }
 
+    private static List<PublicationSummary> MapToPublicationSummaries(SearchResult result)
+    {
+        return result
+            .ToJson()
+            .Select(json => PublicationSummary
+                .FromPublication(JsonSerializer
+                    .Deserialize<Publication[]>(json)!.First()))
+            .ToList();
+    }
+
     private static string PublicationAuthorsName => 
         $"{nameof(Publication.Authors)}_{nameof(Author.Name)}";
     
     private static string PublicationPublisherName =>
         $"{nameof(Publication.Publisher)}_{nameof(Publisher.Name)}";
     
-    private static string PublicationFiltersId =>
-        $"{nameof(Publication.Filters)}_{nameof(Filter.Id)}";
+    private static string PublicationAuthorsId =>
+        $"{nameof(Publication.Authors)}_{nameof(Author.Id)}";
 }
