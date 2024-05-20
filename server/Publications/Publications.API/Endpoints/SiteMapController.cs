@@ -1,9 +1,11 @@
-﻿using System.Xml.Linq;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Xml.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Publications.Infrastructure.Services;
 
 namespace Publications.API.Endpoints;
 
+[ApiController]
 [Route("sitemap.xml")]
 public class SiteMapController : ControllerBase
 {
@@ -15,9 +17,10 @@ public class SiteMapController : ControllerBase
     }
     
     [HttpGet]
-    public async Task<IActionResult> GetSiteMap([FromQuery(Name = "baseUrl")] string baseUrl)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetSiteMap([FromQuery]BaseUrlDTO urlDTO)
     {
-        XDocument siteMap = await _siteMapService.GetSiteMapXml(baseUrl);
+        XDocument siteMap = await _siteMapService.GetSiteMapXml(urlDTO.BaseUrl);
 
         using MemoryStream memoryStream = new();
         siteMap.Save(memoryStream);
@@ -25,3 +28,10 @@ public class SiteMapController : ControllerBase
         return File(memoryStream.ToArray(), "application/xml");
     }
 }
+
+public record BaseUrlDTO
+{
+    [Required(AllowEmptyStrings = false)] 
+    [Url]
+    public string BaseUrl { get; init; } = null!;
+};
