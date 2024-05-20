@@ -53,7 +53,7 @@ public static class SystemEndpoints
         this IEndpointRouteBuilder endpoints)
     {
         endpoints.MapGet("/sitemap.xml", async (
-            [FromQuery(Name = "base_url")] string baseUrl,
+            [FromQuery(Name = "baseUrl")] string baseUrl,
             [FromServices] SiteMapService siteMapService) =>
         {
             XDocument siteMap = await siteMapService.GetSiteMapXml(baseUrl);

@@ -66,13 +66,13 @@ public class PublicationsController : ControllerBase
                       "at least one author with the provided publication."
     )]
     public async Task<IActionResult> GetRelatedByAuthors(
-        [FromRoute] int currentPublicationId,
+        [FromRoute] int id,
         [FromQuery] PaginationDTO paginationDTO,
         [FromQuery] AuthorFilterDTO authorFilterDto,
         CancellationToken cancellationToken)
     {
         PaginatedCollection<PublicationSummary> publications = await _publicationsService
-            .GetRelatedByAuthorsAsync(currentPublicationId, paginationDTO, authorFilterDto, cancellationToken);
+            .GetRelatedByAuthorsAsync(id, paginationDTO, authorFilterDto, cancellationToken);
         
         return Ok(publications);
     }
