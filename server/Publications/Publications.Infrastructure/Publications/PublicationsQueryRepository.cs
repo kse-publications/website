@@ -7,10 +7,8 @@ using Publications.Application;
 using Publications.Application.DTOs;
 using Publications.Application.Repositories;
 using Publications.Domain.Authors;
-using Publications.Domain.Filters;
 using Publications.Domain.Publications;
 using Publications.Domain.Publishers;
-using Publications.Domain.Shared;
 using Publications.Infrastructure.Shared;
 using StackExchange.Redis;
 
@@ -57,6 +55,20 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
             Items: publications,
             TotalCount: (int)aggregationResult.TotalResults,
             ResultCount: publications.Count);
+    }
+
+    public async Task<IReadOnlyCollection<string>> GetAllSlugsAsync(
+        CancellationToken cancellationToken = default)
+    {
+        SearchCommands ft = _db.FT();
+        AggregationResult aggregationResult = await ft.AggregateAsync(Publication.IndexName,
+            new AggregationRequest(SearchQuery.MatchAll().Build())
+                .Load(new FieldName(nameof(Publication.Slug))));
+        
+        return aggregationResult.GetResults()
+            .Select(result => (string)result[nameof(Publication.Slug)]!)
+            .ToList()
+            .AsReadOnly();
     }
 
 
