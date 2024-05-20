@@ -79,6 +79,7 @@
             "required": true,
             "style": "simple",
             "schema": {
+              "pattern": "^(?:[a-zA-Z0-9]+-)*\\d+$",
               "type": "string"
             }
           }
@@ -134,7 +135,7 @@
         ],
         "parameters": [
           {
-            "name": "currentPublicationId",
+            "name": "id",
             "in": "path",
             "required": true,
             "style": "simple",
@@ -171,15 +172,6 @@
             "style": "form",
             "schema": {
               "pattern": "^\\d+(?:-\\d+)*$",
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "style": "simple",
-            "schema": {
               "type": "string"
             }
           }
@@ -355,6 +347,28 @@
           },
           {
             "name": "SearchTerm",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/sitemap.xml": {
+      "get": {
+        "tags": [
+          "SiteMap"
+        ],
+        "parameters": [
+          {
+            "name": "baseUrl",
             "in": "query",
             "style": "form",
             "schema": {
