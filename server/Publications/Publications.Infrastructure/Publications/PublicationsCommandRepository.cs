@@ -1,5 +1,4 @@
 ﻿using Publications.Application.Repositories;
-using Publications.Domain.Filters;
 using Publications.Domain.Publications;
 using Publications.Infrastructure.Shared;
 using Redis.OM.Contracts;

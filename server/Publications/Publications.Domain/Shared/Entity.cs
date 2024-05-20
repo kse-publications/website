@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using Publications.Domain.Filters;
 using Publications.Domain.Shared.Attributes;
 using Publications.Domain.Shared.Slugs;
 using Redis.OM.Modeling;
@@ -15,15 +14,8 @@ public abstract class Entity<T> where T: Entity<T>
     [Indexed(Sortable = true)]
     public string Slug { get; set; } = string.Empty;
     
-    [Indexed(Sortable = true)]
-    public int Views { get; set; } 
-    
-    [Indexed(JsonPath = "$.Id")]
     [IgnoreInResponse]
-    public Filter[] Filters { get; set; } = Array.Empty<Filter>();
-    
-    [IgnoreInResponse]
-    public Guid NotionId { get; init; }
+    public Guid NotionId { get; init; } = Guid.Empty;
     
     [Indexed]
     [IgnoreInResponse]
@@ -31,17 +23,6 @@ public abstract class Entity<T> where T: Entity<T>
     public DateTime SynchronizedAt { get; set; }
     
     public abstract T UpdateSlug(IWordsService wordsService);
-
-    public T UpdateViews(int views = 1)
-    {
-        if (views < 0)
-        {
-            throw new ArgumentException("Views cannot be negative");
-        }
-        
-        Views = views;
-        return (T)this;
-    }
     
     public T Synchronize()
     {

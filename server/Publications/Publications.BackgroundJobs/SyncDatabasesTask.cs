@@ -4,10 +4,8 @@ using Publications.Application.Repositories;
 using Publications.Application.Services;
 using Publications.BackgroundJobs.Abstractions;
 using Publications.Domain.Authors;
-using Publications.Domain.Filters;
 using Publications.Domain.Publications;
 using Publications.Domain.Publishers;
-using Publications.Domain.Shared;
 
 namespace Publications.BackgroundJobs;
 
@@ -58,9 +56,10 @@ public class SyncDatabasesTask : BaseRetriableTask<SyncDatabasesTask>
         _publications = _filtersService.AssignFiltersToPublicationsAsync(
             _publications!.ToList(), _filters.ToList());
         
-        await _publicationsCommandRepository.InsertOrUpdateAsync(await SetResourceViewsAsync(_publications));
-        await _authorsRepository.InsertOrUpdateAsync(await SetResourceViewsAsync(_authors!));
-        await _publishersRepository.InsertOrUpdateAsync(await SetResourceViewsAsync(_publishers!));
+        await _publicationsCommandRepository
+            .InsertOrUpdateAsync(await SetPublicationsViews(_publications));
+        await _authorsRepository.InsertOrUpdateAsync(_authors!);
+        await _publishersRepository.InsertOrUpdateAsync(_publishers!);
         await _publicationsCommandRepository.ReplaceFiltersAsync(_filters);
         
         await _publicationsCommandRepository.SynchronizeAsync(_syncStartDateTime);
@@ -68,11 +67,10 @@ public class SyncDatabasesTask : BaseRetriableTask<SyncDatabasesTask>
         await _publishersRepository.SynchronizeAsync(_syncStartDateTime);
     }
 
-    private async Task<IReadOnlyCollection<TResource>> SetResourceViewsAsync<TResource>(
-        IEnumerable<TResource> resourceItemsCollection)
-        where TResource : Entity<TResource>
+    private async Task<IReadOnlyCollection<Publication>> SetPublicationsViews(
+        IEnumerable<Publication> resourceItemsCollection)
     {
-        Dictionary<int, int> views = await _requestsRepository.GetResourceViews<TResource>();
+        Dictionary<int, int> views = await _requestsRepository.GetResourceViews<Publication>();
 
         return resourceItemsCollection
             .Select(resource => views.TryGetValue(resource.Id, out int resourceViews)
