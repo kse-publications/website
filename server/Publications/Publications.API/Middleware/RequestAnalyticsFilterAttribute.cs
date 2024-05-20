@@ -3,6 +3,7 @@ using Coravel.Queuing.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Primitives;
+using Publications.API.Serialization;
 using Publications.BackgroundJobs;
 using Publications.Domain.Requests;
 using Publications.Domain.Shared;
@@ -34,13 +35,13 @@ public class RequestAnalyticsFilterAttribute<TResource> : TypeFilterAttribute
                 ContainsClientUuid(context.HttpContext, out string? clientUuid))
             {
                 string resourceName = ResourceHelper.GetResourceName<TResource>();
-            
-                // if the RequestAnalyticsFilter is used after the IdExtractionFilter in the filters pipeline
-                // then the int id will be already extracted from the slug
-                int resourceId = int.Parse(context.ActionArguments["id"]!.ToString()!);
 
-                Request request = new(clientUuid!, resourceName, resourceId);
-                _queue.QueueInvocableWithPayload<StoreRequestAnalyticsTask, Request>(request);
+                if (context.ActionArguments["slug"] is SlugDTO slug)
+                {
+                    int resourceId = slug.GetId();
+                    Request request = new(clientUuid!, resourceName, resourceId);
+                    _queue.QueueInvocableWithPayload<StoreRequestAnalyticsTask, Request>(request);
+                }
             }
             
             await next();

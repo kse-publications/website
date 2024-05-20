@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Publications.API.Middleware;
+using Publications.API.Serialization;
 using Publications.Application;
 using Publications.Application.DTOs;
 using Publications.Application.Services;
 using Publications.Domain.Filters;
 using Publications.Domain.Publications;
+using Publications.Domain.Shared.Slugs;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Publications.API.Endpoints;
@@ -38,7 +40,6 @@ public class PublicationsController : ControllerBase
     }
     
     [HttpGet("{id}")]
-    [IdExtractionFilter]
     [RequestAnalyticsFilter<Publication>]
     [ProducesResponseType(typeof(Publication), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -47,14 +48,13 @@ public class PublicationsController : ControllerBase
         Description = "Returns a single publication with the provided ID, if found."
     )]
     public async Task<IActionResult> GetById(
-        [FromRoute]string id, CancellationToken cancellationToken)
+        [FromRoute]SlugDTO slug, CancellationToken cancellationToken)
     {
-        int parsedId = int.Parse(id);
         Publication? publication = await _publicationsService
-            .GetByIdAsync(parsedId, cancellationToken);
+            .GetByIdAsync(slug.GetId(), cancellationToken);
         
         return publication is null
-            ? NotFound($"Publication with ID {id} not found.")
+            ? NotFound($"Publication with ID '{slug.Slug}' not found.")
             : Ok(publication); 
     }
     

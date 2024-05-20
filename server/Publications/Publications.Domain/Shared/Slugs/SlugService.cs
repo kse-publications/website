@@ -8,13 +8,6 @@ public class SlugService
     private const int MaxWords = 5;
     private const char Separator = '-';
     
-    public static string GetId(string slugValue)
-    {
-        return slugValue
-            .Split(Separator, StringSplitOptions.RemoveEmptyEntries)
-            .Last();
-    }
-    
     public static string Create(
         string name, string id, IsoLanguageCode language, IWordsService wordsService)
     {
