@@ -1,10 +1,8 @@
-﻿using System.Xml.Linq;
-using Coravel.Scheduling.Schedule.Interfaces;
+﻿using Coravel.Scheduling.Schedule.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Publications.Application.Repositories;
 using Publications.BackgroundJobs;
 using Publications.Domain.Publications;
-using Publications.Infrastructure.Services;
 
 namespace Publications.API.Endpoints;
 
@@ -14,8 +12,7 @@ public static class SystemEndpoints
     {
         return endpoints
             .MapSyncEndpoint()
-            .MapGetViewsEndpoint()
-            .MapGetSiteMapEndpoint();
+            .MapGetViewsEndpoint();
     }
     
     private static IEndpointRouteBuilder MapSyncEndpoint(
@@ -45,25 +42,6 @@ public static class SystemEndpoints
             
                 return views;
             });
-        
-        return endpoints;
-    }
-    
-    private static IEndpointRouteBuilder MapGetSiteMapEndpoint(
-        this IEndpointRouteBuilder endpoints)
-    {
-        endpoints.MapGet("/sitemap.xml", async (
-            [FromQuery(Name = "baseUrl")] string baseUrl,
-            [FromServices] SiteMapService siteMapService) =>
-        {
-            XDocument siteMap = await siteMapService.GetSiteMapXml(baseUrl);
-            
-            using MemoryStream memoryStream = new();
-            siteMap.Save(memoryStream);
-            byte[] byteArray = memoryStream.ToArray();
-            
-            return Results.File(byteArray, "application/xml", "sitemap.xml");
-        });
         
         return endpoints;
     }
