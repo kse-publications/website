@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Publications.Application.DTOs;
 
-public class AuthorFilterDTO
+public record AuthorFilterDTO
 {
     [RegularExpression(@"^\d+(?:-\d+)*$", ErrorMessage = "Invalid authors format.")]
     public string Authors { get; init; } = string.Empty;

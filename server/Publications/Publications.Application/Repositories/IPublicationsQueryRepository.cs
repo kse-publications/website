@@ -13,6 +13,12 @@ public interface IPublicationsQueryRepository
         PaginationDTO paginationDTO,
         CancellationToken cancellationToken = default);
     
+    /// <summary>
+    /// Returns the slug of every publication.
+    /// </summary>
+    Task<IReadOnlyCollection<string>> GetAllSlugsAsync(
+        CancellationToken cancellationToken = default);
+    
     Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
         FilterDTO filterDTO,
         PaginationDTO paginationDTO,

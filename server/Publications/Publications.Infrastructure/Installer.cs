@@ -4,14 +4,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Notion.Client;
 using Publications.Application.Repositories;
 using Publications.Application.Services;
-using Publications.Domain.Shared;
 using Publications.Domain.Shared.Slugs;
 using Publications.Infrastructure.Authors;
 using Publications.Infrastructure.Publications;
 using Publications.Infrastructure.Publishers;
 using Publications.Infrastructure.Requests;
 using Publications.Infrastructure.Services;
-using Publications.Infrastructure.Shared;
 using Publications.Infrastructure.Source;
 using Redis.OM;
 using Redis.OM.Contracts;
@@ -81,6 +79,7 @@ public static class Installer
         services.AddScoped<IPublicationsService, PublicationsService>();
         services.AddScoped<IFiltersService, FiltersService>();
         services.AddScoped<IWordsService, WordsService>();
+        services.AddScoped<SiteMapService>();
         
         return services;
     }
