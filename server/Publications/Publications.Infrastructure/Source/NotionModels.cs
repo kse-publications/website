@@ -19,6 +19,7 @@ internal class NotionCollection : Collection
             Icon = Icon,
             Slug = Slug,
             Description = Description,
+            PublicationsCount = PublicationsCount,
             SynchronizedAt = SynchronizedAt
         };
     }

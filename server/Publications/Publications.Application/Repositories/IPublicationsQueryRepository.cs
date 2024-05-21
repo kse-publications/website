@@ -40,4 +40,9 @@ public interface IPublicationsQueryRepository
         PaginationDTO paginationDTO,
         AuthorFilterDTO authorFilterDto,
         CancellationToken cancellationToken = default);
+    
+    Task<PaginatedCollection<PublicationSummary>> GetFromCollectionAsync(
+        int collectionId,
+        PaginationDTO paginationDTO,
+        CancellationToken cancellationToken = default);
 }
