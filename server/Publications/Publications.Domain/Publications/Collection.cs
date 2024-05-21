@@ -25,7 +25,7 @@ public class Collection: Entity<Collection>
 
     public override Collection UpdateSlug(IWordsService wordsService)
     {
-        Slug = SlugService.Create(Name, Id.ToString(), IsoLanguageCode.English, wordsService);
+        Slug = SlugFactory.Create(Name, Id.ToString(), IsoLanguageCode.English, wordsService);
         return this;
     }
 }

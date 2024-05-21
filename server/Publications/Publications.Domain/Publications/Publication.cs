@@ -55,7 +55,7 @@ public class Publication: Entity<Publication>
     
     public override Publication UpdateSlug(IWordsService wordsService)
     {
-        Slug = SlugService.Create(
+        Slug = SlugFactory.Create(
             Title, Id.ToString(), IsoLanguageCode.Create(Language), wordsService);
         
         return this;

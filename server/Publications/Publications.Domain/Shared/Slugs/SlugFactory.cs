@@ -3,7 +3,7 @@ using Publications.Domain.Shared.ValueObjects;
 
 namespace Publications.Domain.Shared.Slugs;
 
-public class SlugService
+public class SlugFactory
 {
     private const int MaxWords = 5;
     private const char Separator = '-';

@@ -17,7 +17,7 @@ public class Publisher: Entity<Publisher>
     
     public override Publisher UpdateSlug(IWordsService wordsService)
     {
-        Slug = SlugService.Create(
+        Slug = SlugFactory.Create(
             Name, Id.ToString(), IsoLanguageCode.English, wordsService);
         
         return this;
