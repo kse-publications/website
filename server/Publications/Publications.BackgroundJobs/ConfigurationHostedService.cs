@@ -26,10 +26,10 @@ public class ConfigurationHostedService: IHostedService
 
         using IServiceScope scope = _serviceProvider.CreateScope();
         var dbConfigurationService = scope.ServiceProvider.GetRequiredService<IDbConfigurationService>();
-        var storeRequestAnalyticsTask = scope.ServiceProvider.GetRequiredService<SyncDatabasesTask>();
+        var syncDatabasesTask = scope.ServiceProvider.GetRequiredService<SyncDatabasesTask>();
         
         await dbConfigurationService.ConfigureAsync();
-        await storeRequestAnalyticsTask.Invoke();
+        await syncDatabasesTask.Invoke();
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
