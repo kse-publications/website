@@ -5,6 +5,107 @@
     "version": "v1"
   },
   "paths": {
+    "/collections": {
+      "get": {
+        "tags": [
+          "Collections"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Collection"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Collection"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Collection"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/collections/{id}": {
+      "get": {
+        "tags": [
+          "Collections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "pattern": "^(?:[a-zA-Z0-9]+-)*\\d+$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "maximum": 101,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Collection"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Collection"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Collection"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/publications": {
       "get": {
         "tags": [
@@ -368,11 +469,13 @@
         ],
         "parameters": [
           {
-            "name": "baseUrl",
+            "name": "BaseUrl",
             "in": "query",
+            "required": true,
             "style": "form",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uri"
             }
           }
         ],
@@ -397,10 +500,6 @@
             "type": "string",
             "nullable": true
           },
-          "views": {
-            "type": "integer",
-            "format": "int32"
-          },
           "name": {
             "type": "string",
             "nullable": true
@@ -408,6 +507,36 @@
           "profileLink": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Collection": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "icon": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "publicationsCount": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -489,10 +618,6 @@
             "type": "string",
             "nullable": true
           },
-          "views": {
-            "type": "integer",
-            "format": "int32"
-          },
           "title": {
             "type": "string",
             "nullable": true
@@ -533,6 +658,17 @@
           },
           "publisher": {
             "$ref": "#/components/schemas/Publisher"
+          },
+          "views": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "collections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Collection"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -601,10 +737,6 @@
           "slug": {
             "type": "string",
             "nullable": true
-          },
-          "views": {
-            "type": "integer",
-            "format": "int32"
           },
           "name": {
             "type": "string",
