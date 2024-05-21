@@ -80,7 +80,6 @@ public static class Installer
         services.AddScoped<IPublicationsService, PublicationsService>();
         services.AddScoped<IFiltersService, FiltersService>();
         services.AddScoped<IWordsService, WordsService>();
-        services.AddScoped<SiteMapService>();
         
         return services;
     }
