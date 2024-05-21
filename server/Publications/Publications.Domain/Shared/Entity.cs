@@ -14,9 +14,6 @@ public abstract class Entity<T> where T: Entity<T>
     [Indexed(Sortable = true)]
     public string Slug { get; set; } = string.Empty;
     
-    [IgnoreInResponse]
-    public Guid NotionId { get; init; } = Guid.Empty;
-    
     [Indexed]
     [IgnoreInResponse]
     [JsonConverter(typeof(UnixTimestampJsonConverter))]
