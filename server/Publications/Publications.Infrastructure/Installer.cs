@@ -66,6 +66,7 @@ public static class Installer
         services.AddScoped<IPublicationsCommandRepository, PublicationsCommandRepository>();
         services.AddScoped<IAuthorsRepository, AuthorsRepository>();
         services.AddScoped<IPublishersRepository, PublishersRepository>();
+        services.AddScoped<ICollectionsRepository, CollectionsRepository>();
         
         services.AddScoped<ISourceRepository, NotionRepository>();
         
@@ -79,7 +80,6 @@ public static class Installer
         services.AddScoped<IPublicationsService, PublicationsService>();
         services.AddScoped<IFiltersService, FiltersService>();
         services.AddScoped<IWordsService, WordsService>();
-        services.AddScoped<SiteMapService>();
         
         return services;
     }

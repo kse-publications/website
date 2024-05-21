@@ -1,47 +1,23 @@
 ﻿using Notion.Client;
-using Publications.Domain.Authors;
 using Publications.Domain.Publications;
-using Publications.Domain.Publishers;
-using Publications.Domain.Shared;
 using Publications.Domain.Shared.Slugs;
 
 namespace Publications.Infrastructure.Source;
 
 public static class NotionModelsMapperExtensions
 {
-    public static Publisher MapToPublisher(this Page page, IWordsService wordsService)
+    internal static NotionPublication MapToPublication(this Page page, 
+        IWordsService wordsService)
     {
-        return new Publisher
+        NotionPublication publication = new()
         {
             Id = (int)((UniqueIdPropertyValue)page.Properties["ID"]).UniqueId.Number!.Value,
-            NotionId = Guid.Parse(page.Id),
-            Name = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText
-        }.UpdateSlug(wordsService).Synchronize();
-    }
-    
-    public static Publication MapToPublication(this Page page,
-        ICollection<Author> authors, ICollection<Publisher> publishers, IWordsService wordsService)
-    {
-        return new Publication
-        {
-            Id = (int)((UniqueIdPropertyValue)page.Properties["ID"]).UniqueId.Number!.Value,
-            NotionId = Guid.Parse(page.Id),
+            NotionId = page.Id,
             Title = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText,
             Type = ((SelectPropertyValue)page.Properties["Type"]).Select.Name,
             Language = ((SelectPropertyValue)page.Properties["Language"]).Select?.Name ?? string.Empty,
             Year = (int)((NumberPropertyValue)page.Properties["Year"]).Number!.Value,
             Link = ((UrlPropertyValue)page.Properties["Link"]).Url,
-
-            Authors = ((RelationPropertyValue)page.Properties["Authors"]).Relation
-                .Select(r => authors.FirstOrDefault(a => a.NotionId == Guid.Parse(r.Id)))
-                .Where(a => a is not null)
-                .ToArray()!,
-
-            Publisher =
-                ((RelationPropertyValue)page.Properties["Publisher"])?.Relation?.FirstOrDefault()?.Id is not null
-                    ? publishers.FirstOrDefault(p => p.NotionId == Guid.Parse(
-                        ((RelationPropertyValue)page.Properties["Publisher"]).Relation[0].Id))!
-                    : null,
 
             Keywords = ((RichTextPropertyValue)page.Properties["Keywords"]).RichText
                 .SelectMany(r => r.PlainText.Split(',',
@@ -50,17 +26,115 @@ public static class NotionModelsMapperExtensions
 
             Abstract = ((RichTextPropertyValue)page.Properties["Abstract"])
                 .RichText.Select(r => r.PlainText).FirstOrDefault()!,
-        }.UpdateSlug(wordsService).Synchronize();
+        };
+        
+        publication
+            .UpdateSlug(wordsService)
+            .Synchronize();
+        
+        return publication;
     }
     
-    public static Author MapToAuthor(this Page page, IWordsService wordsService)
+    internal static NotionPublication LinkAuthors(this NotionPublication publication,
+        Page page, ICollection<NotionAuthor> authors)
     {
-        return new Author
+        publication.Authors = ((RelationPropertyValue)page.Properties["Authors"]).Relation
+            .Select(r => authors.FirstOrDefault(a => a.NotionId == r.Id)?.ToAuthor())
+            .Where(a => a is not null)
+            .ToArray()!;
+        
+        return publication;
+    }
+    
+    internal static NotionPublication LinkPublisher(this NotionPublication publication,
+        Page page, ICollection<NotionPublisher> publishers)
+    {
+        var publisherRelation = ((RelationPropertyValue)page.Properties["Publisher"])?.Relation;
+        if (publisherRelation?.FirstOrDefault()?.Id is not null)
+        {
+            var publisherId = publisherRelation[0].Id;
+            publication.Publisher = publishers
+                .FirstOrDefault(p => p.NotionId == publisherId)?.ToPublisher();
+        } 
+        else
+        {
+            publication.Publisher = null;
+        }
+        
+        return publication;
+    }
+    
+    internal static IEnumerable<Publication> LinkCollections(
+        this IEnumerable<NotionPublication> publications, 
+        ICollection<NotionCollection> collections)
+    {
+        Dictionary<string, NotionPublication> publicationsDictionary = publications
+            .ToDictionary(p => p.NotionId);
+
+        foreach (var collection in collections)
+        {
+            Collection currentCollectionCopy = collection.ToCollection();
+            foreach (var relationId in collection.PublicationsRelation)
+            {
+                if (publicationsDictionary.TryGetValue(relationId.Id, out NotionPublication? publication))
+                {
+                    publication.UpdatableCollections.Add(currentCollectionCopy);
+                }
+            }
+        }
+
+        return publicationsDictionary.Values
+            .Select(p => p.ToPublication());
+    }
+    
+    internal static NotionCollection MapToCollection(this Page page, IWordsService wordsService)
+    {
+        NotionCollection collection = new() 
         {
             Id = (int)((UniqueIdPropertyValue)page.Properties["ID"]).UniqueId.Number!.Value,
-            NotionId = Guid.Parse(page.Id),
+            Icon = ((RichTextPropertyValue)page.Properties["Icon"]).RichText
+                .Select(r => r.PlainText).FirstOrDefault()!,
+            Name = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText,
+            Description = ((RichTextPropertyValue)page.Properties["Description"]).RichText
+                .Select(r => r.PlainText).FirstOrDefault()!,
+            PublicationsRelation = ((RelationPropertyValue)page.Properties["Publications"]).Relation,
+            PublicationsCount = (int)((FormulaPropertyValue)page.Properties["Publications Count"]).Formula.Number!.Value
+        };
+        
+        collection.UpdateSlug(wordsService)
+            .Synchronize();
+        
+        return collection;
+    }
+    
+    internal static NotionAuthor MapToAuthor(this Page page, IWordsService wordsService)
+    {
+        NotionAuthor author = new()
+        {
+            Id = (int)((UniqueIdPropertyValue)page.Properties["ID"]).UniqueId.Number!.Value,
+            NotionId = page.Id,
             Name = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText,
             ProfileLink = ((UrlPropertyValue)page.Properties["Profile link"]).Url
-        }.UpdateSlug(wordsService).Synchronize();
+        };
+        
+        author.UpdateSlug(wordsService)
+            .Synchronize();
+        
+        return author;
+    }
+    
+    internal static NotionPublisher MapToPublisher(this Page page, IWordsService wordsService)
+    {
+        NotionPublisher publisher = new()
+        {
+            Id = (int)((UniqueIdPropertyValue)page.Properties["ID"]).UniqueId.Number!.Value,
+            NotionId = page.Id,
+            Name = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText
+        };
+        
+        publisher.UpdateSlug(wordsService)
+            .Synchronize();
+        
+        return publisher;
     }
 }

@@ -4,7 +4,6 @@ using Publications.Application.Repositories;
 using Publications.Domain.Authors;
 using Publications.Domain.Publications;
 using Publications.Domain.Publishers;
-using Publications.Domain.Shared;
 using Publications.Domain.Shared.Slugs;
 
 namespace Publications.Infrastructure.Source;
@@ -15,10 +14,11 @@ public class NotionRepository: ISourceRepository
     private readonly IWordsService _wordsService;
     private readonly NotionDatabaseOptions _databaseOptions;
 
-    private IReadOnlyCollection<Publisher>? _publishers;
-    private IReadOnlyCollection<Author>? _authors;
+    private IReadOnlyCollection<NotionPublisher>? _publishers;
+    private IReadOnlyCollection<NotionAuthor>? _authors;
     private IReadOnlyCollection<Publication>? _publications;
-
+    private IReadOnlyCollection<NotionCollection>? _collections;
+    
     public NotionRepository(
         INotionClient notionClient, 
         IWordsService wordsService,
@@ -31,26 +31,65 @@ public class NotionRepository: ISourceRepository
 
     public async Task<IReadOnlyCollection<Publication>> GetPublicationsAsync()
     {
-        //TODO: HIGH VOLUME ITERATION 
         if (_publications is not null)
             return _publications;
         
-        var authors = (await GetAuthorsAsync()).ToList();
-        var publishers = (await GetPublishersAsync()).ToList();
+        var authors = (await GetNotionAuthorsAsync()).ToList();
+        var publishers = (await GetNotionPublishersAsync()).ToList();
+        var collections = (await GetNotionCollectionsAsync()).ToList();
         
         PaginatedList<Page> notionPublications = await _notionClient.Databases.QueryAsync(
             _databaseOptions.PublicationsDbId, new DatabasesQueryParameters());
         
         _publications = notionPublications.Results
             .Where(page => page.IsValidPublication())
-            .Select(page => page.MapToPublication(authors, publishers, _wordsService))
+            .Select(page => 
+                page.MapToPublication(_wordsService)
+                    .LinkAuthors(page, authors)
+                    .LinkPublisher(page, publishers))
+            .LinkCollections(collections)
             .ToList()
             .AsReadOnly();
         
         return _publications;
     }
+
+    public async Task<IReadOnlyCollection<Collection>> GetCollectionsAsync()
+    {
+        return (await GetNotionCollectionsAsync())
+            .Select(c => c.ToCollection()).ToList();
+    }
     
     public async Task<IReadOnlyCollection<Author>> GetAuthorsAsync()
+    {
+        return (await GetNotionAuthorsAsync())
+            .Select(a => a.ToAuthor()).ToList();
+    }
+    
+    public async Task<IReadOnlyCollection<Publisher>> GetPublishersAsync()
+    {
+        return (await GetNotionPublishersAsync())
+            .Select(p => p.ToPublisher()).ToList();
+    }
+
+    private async Task<IReadOnlyCollection<NotionCollection>> GetNotionCollectionsAsync()
+    {
+        if (_collections is not null)
+            return _collections;
+        
+        PaginatedList<Page> notionCollections = await _notionClient.Databases.QueryAsync(
+            _databaseOptions.CollectionsDbId, new DatabasesQueryParameters());
+        
+        _collections = notionCollections.Results
+            .Where(page => page.IsValidCollection())
+            .Select(page => page.MapToCollection(_wordsService))
+            .ToList()
+            .AsReadOnly();
+        
+        return _collections;
+    }
+
+    private async Task<IReadOnlyCollection<NotionAuthor>> GetNotionAuthorsAsync()
     {
         if (_authors is not null)
             return _authors;
@@ -67,7 +106,7 @@ public class NotionRepository: ISourceRepository
         return _authors;
     }
     
-    public async Task<IReadOnlyCollection<Publisher>> GetPublishersAsync()
+    private async Task<IReadOnlyCollection<NotionPublisher>> GetNotionPublishersAsync()
     {
         if (_publishers is not null)
             return _publishers;

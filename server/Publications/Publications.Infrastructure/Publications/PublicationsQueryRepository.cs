@@ -139,6 +139,33 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
             ResultCount: publications.Count);
     }
 
+    public async Task<PaginatedCollection<PublicationSummary>> GetFromCollectionAsync(
+        int collectionId,
+        PaginationDTO paginationDTO,
+        CancellationToken cancellationToken = default)
+    {
+        SearchCommands ft = _db.FT();
+        SearchQuery query = SearchQuery
+            .Where(new SearchFieldName(PublicationCollectionsId)
+                .EqualTo(collectionId));
+        
+        SearchResult searchResult = await ft.SearchAsync(Publication.IndexName,
+            new Query(query.Build())
+                .SetSortBy(nameof(Publication.Views), ascending: false)
+                .Limit(
+                    offset: paginationDTO.PageSize * (paginationDTO.Page - 1),
+                    count: paginationDTO.PageSize)
+                .Dialect(3));
+        
+        var publications = MapToPublicationSummaries(searchResult)
+            .AsReadOnly();
+        
+        return new PaginatedCollection<PublicationSummary>(
+            Items: publications,
+            TotalCount: (int)searchResult.TotalResults,
+            ResultCount: publications.Count);
+    }
+
     public async Task<Dictionary<string, int>> GetFiltersCountAsync(
         FilterDTOV2 filterDtoV2, PaginationDTO paginationDTO, SearchDTO searchDTO,
         CancellationToken cancellationToken = default)
@@ -219,4 +246,7 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
     
     private static string PublicationAuthorsId =>
         $"{nameof(Publication.Authors)}_{nameof(Author.Id)}";
+    
+    private static string PublicationCollectionsId =>
+        $"{nameof(Publication.Collections)}_{nameof(Collection.Id)}";
 }

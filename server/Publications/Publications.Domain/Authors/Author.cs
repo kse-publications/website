@@ -20,7 +20,7 @@ public class Author: Entity<Author>
     
     public override Author UpdateSlug(IWordsService wordsService)
     {
-        Slug = SlugService.Create(
+        Slug = SlugFactory.Create(
             Name, Id.ToString(), IsoLanguageCode.English, wordsService);
         
         return this;
