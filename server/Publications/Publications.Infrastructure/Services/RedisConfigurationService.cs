@@ -24,6 +24,7 @@ public class RedisConfigurationService: IDbConfigurationService
         await CreateIndexAsync<Publisher>();
         await CreateIndexAsync<Author>();
         await CreateIndexAsync<FilterGroup>();
+        await CreateIndexAsync<Collection>();
     }
 
     private async Task CreateIndexAsync<T>()
