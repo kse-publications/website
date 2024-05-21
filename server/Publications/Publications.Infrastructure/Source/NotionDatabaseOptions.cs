@@ -8,4 +8,5 @@ public class NotionDatabaseOptions
     public string PublicationsDbId { get; init; } = null!;
     public string AuthorsDbId { get; init; } = null!;
     public string PublishersDbId { get; init; } = null!;
+    public string CollectionsDbId { get; init; } = null!;
 }

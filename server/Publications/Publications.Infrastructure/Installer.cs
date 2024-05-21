@@ -66,6 +66,7 @@ public static class Installer
         services.AddScoped<IPublicationsCommandRepository, PublicationsCommandRepository>();
         services.AddScoped<IAuthorsRepository, AuthorsRepository>();
         services.AddScoped<IPublishersRepository, PublishersRepository>();
+        services.AddScoped<ICollectionsRepository, CollectionsRepository>();
         
         services.AddScoped<ISourceRepository, NotionRepository>();
         
