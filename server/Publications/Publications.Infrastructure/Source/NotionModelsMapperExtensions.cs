@@ -113,12 +113,8 @@ public static class NotionModelsMapperExtensions
         {
             Id = (int)((UniqueIdPropertyValue)page.Properties["ID"]).UniqueId.Number!.Value,
             NotionId = page.Id,
-            Name = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText,
-            ProfileLink = ((UrlPropertyValue)page.Properties["Profile link"]).Url
+            Name = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText
         };
-        
-        author.UpdateSlug(wordsService)
-            .Synchronize();
         
         return author;
     }
@@ -131,9 +127,6 @@ public static class NotionModelsMapperExtensions
             NotionId = page.Id,
             Name = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText
         };
-        
-        publisher.UpdateSlug(wordsService)
-            .Synchronize();
         
         return publisher;
     }

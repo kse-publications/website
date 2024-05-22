@@ -1,6 +1,5 @@
 ﻿using System.Text.Json.Serialization;
 using Publications.Domain.Shared.Attributes;
-using Publications.Domain.Shared.Slugs;
 using Redis.OM.Modeling;
 
 namespace Publications.Domain.Shared;
@@ -18,9 +17,7 @@ public abstract class Entity<T> where T: Entity<T>
     [IgnoreInResponse]
     [JsonConverter(typeof(UnixTimestampJsonConverter))]
     public DateTime SynchronizedAt { get; set; }
-    
-    public abstract T UpdateSlug(IWordsService wordsService);
-    
+
     public T Synchronize()
     {
         SynchronizedAt = DateTime.UtcNow;

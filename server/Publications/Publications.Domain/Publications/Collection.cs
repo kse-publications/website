@@ -23,7 +23,7 @@ public class Collection: Entity<Collection>
     [Indexed(Sortable = true)] 
     public int PublicationsCount { get; set; }
 
-    public override Collection UpdateSlug(IWordsService wordsService)
+    public virtual Collection UpdateSlug(IWordsService wordsService)
     {
         Slug = SlugFactory.Create(Name, Id.ToString(), IsoLanguageCode.English, wordsService);
         return this;

@@ -53,7 +53,7 @@ public class Publication: Entity<Publication>
     [Searchable(JsonPath = "$.Name", Weight = 0.8)]
     public Collection[] Collections { get; set; } = Array.Empty<Collection>();
     
-    public override Publication UpdateSlug(IWordsService wordsService)
+    public virtual Publication UpdateSlug(IWordsService wordsService)
     {
         Slug = SlugFactory.Create(
             Title, Id.ToString(), IsoLanguageCode.Create(Language), wordsService);

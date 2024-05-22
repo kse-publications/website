@@ -14,15 +14,4 @@ public class Author: Entity<Author>
 {
     [Searchable(Weight = 1.0, PhoneticMatcher = "dm:en")]
     public string Name { get; init; } = null!;
-    
-    [Searchable(Weight = 0.6)]
-    public string ProfileLink { get; set; } = string.Empty;
-    
-    public override Author UpdateSlug(IWordsService wordsService)
-    {
-        Slug = SlugFactory.Create(
-            Name, Id.ToString(), IsoLanguageCode.English, wordsService);
-        
-        return this;
-    }
 }
