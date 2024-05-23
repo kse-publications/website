@@ -3,7 +3,7 @@ import { ViewTransitions } from 'astro:transitions'
 
 import Header from '@/components/layout/header'
 import LoadingIndicator from '@/components/layout/loading-indicator.astro'
-import PostHog from '@/components/layout/posthog.astro'
+import PostHog from '@/components/layout/posthog'
 
 import { v4 as uuidv4 } from 'uuid'
 
@@ -47,11 +47,11 @@ const isProduction = ENVIRONMENT === 'production'
     <meta name="generator" content={Astro.generator} />
 
     <title>{title}</title>
-    {isProduction && <PostHog />}
     <ViewTransitions />
     <LoadingIndicator color="#e4e541" height="4px" />
   </head>
   <body class="min-h-screen flex flex-col">
+    {isProduction && <PostHog pageVisitEvent={title} client:only />}
     <Header light={light} client:load />
     <main class={`mx-auto grow w-full flex flex-col ${!fullSize ? 'max-w-[1160px] px-4' : ''}`}>
       <slot />
