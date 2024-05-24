@@ -193,3 +193,17 @@ body {
   opacity: 1;
   transform: translateY(0);
 }
+
+@keyframes growLine {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.line-grow {
+  width: 0;
+  animation: growLine 1s forwards;
+}
