@@ -63,7 +63,7 @@ public class SearchQuery
         
         return this;
     }
-
+    
     public SearchQuery Filter(FilterDTO filterDTO)
     {
         return Filter(this, filterDTO);
@@ -75,44 +75,6 @@ public class SearchQuery
     }
     
     private static SearchQuery Filter(SearchQuery query, FilterDTO filterDTO)
-    {
-        if (filterDTO.GetParsedFilters().Length == 0)
-            return query;
-
-        SearchQuery fullQuery = query.AllowsAll() 
-            ? query.Clear() 
-            : query;
-        
-        SearchQuery filterGroupQuery = new();
-        var filterGroups = filterDTO.GetParsedFilters()
-            .Where(filters => filters.Length != 0);
-        
-        foreach (int[] filters in filterGroups)
-        {
-            filterGroupQuery._sb.Append(FilterQuery(filters.First()));
-            foreach (var filter in filters.Skip(1))
-            {
-                filterGroupQuery.Or(FilterQuery(filter));
-            }
-
-            fullQuery.And(filterGroupQuery.Build());
-            filterGroupQuery.Clear();
-        }
-        
-        return fullQuery;
-    }
-    
-    public SearchQuery Filter(FilterDTOV2 filterDTO)
-    {
-        return Filter(this, filterDTO);
-    }
-    
-    public static SearchQuery CreateWithFilter(FilterDTOV2 filterDTO)
-    {
-        return Filter(MatchAll(), filterDTO);
-    }
-    
-    private static SearchQuery Filter(SearchQuery query, FilterDTOV2 filterDTO)
     {
         if (filterDTO.GetParsedFilters().Keys.Count == 0)
             return query;

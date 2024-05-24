@@ -98,26 +98,17 @@ public class PublicationsController : ControllerBase
     [HttpGet("filters")]
     [ProducesResponseType(typeof(IReadOnlyCollection<FilterGroup>), StatusCodes.Status200OK)]
     [SwaggerOperation(
-        Summary = "Get all filters",
-        Description = "Returns all FilterGroups for publications: Year, Type, Lang etc."
+        Summary = "Get filters for publications",
+        Description = "Returns a list of filters (including matchedPublicationCount)."
     )]
-    public async Task<IActionResult> GetFilters(CancellationToken cancellationToken)
-    {
-        IReadOnlyCollection<FilterGroup> filters = await _publicationsService
-            .GetFiltersAsync(cancellationToken);
-        
-        return Ok(filters);
-    }
-    
-    [HttpGet("filters/v2")]
-    public async Task<IActionResult> GetFiltersWithCount(
-        [FromQuery]FilterDTOV2 filterDtoV2,
+    public async Task<IActionResult> GetFilters(
+        [FromQuery]FilterDTO filterDTO,
         [FromQuery]PaginationDTO paginationDTO,
         [FromQuery]SearchDTO searchDTO,
         CancellationToken cancellationToken)
     {
         IReadOnlyCollection<FilterGroup> filters = await _publicationsService
-            .GetFiltersV2Async(filterDtoV2, paginationDTO, searchDTO, cancellationToken);
+            .GetFiltersAsync(filterDTO, paginationDTO, searchDTO, cancellationToken);
         
         return Ok(filters);
     }

@@ -30,8 +30,7 @@ public interface IPublicationsQueryRepository
     /// Basically a group by filter id query. 
     /// </summary>
     Task<Dictionary<string, int>> GetFiltersCountAsync(
-        FilterDTOV2 filterDtov2,
-        PaginationDTO paginationDTO,
+        FilterDTO filterDTO,
         SearchDTO searchDTO,
         CancellationToken cancellationToken = default);
     

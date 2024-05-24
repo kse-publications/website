@@ -7,45 +7,6 @@ public record FilterDTO
     /// <summary>
     /// Raw filters value from url query.
     /// </summary>
-    [RegularExpression(@"^\d+(?:-\d+)*(?:;\d+(?:-\d+)*)*;?$", ErrorMessage = "Invalid filters format.")]
-    public string Filters { get; init; } = string.Empty;
-    
-    private int[][]? _filterIds;
-    
-    /// <summary>
-    /// Parses the filters string into a jagged array of integers.
-    /// </summary>
-    /// <returns>Array of groups of filter ids.</returns>
-    public int[][] GetParsedFilters()
-    {
-        return _filterIds ??= ParseFilters(Filters);
-    }
-    
-    private static int[][] ParseFilters(string filters)
-    {
-        string[] filterGroups = filters.Split(';', StringSplitOptions.RemoveEmptyEntries);
-        int[][] filterIds = new int[filterGroups.Length][];
-
-        for (int i = 0; i < filterGroups.Length; i++)
-        {
-            string[] filterGroup = filterGroups[i].Split('-');
-            filterIds[i] = new int[filterGroup.Length];
-
-            for (int j = 0; j < filterGroup.Length; j++)
-            {
-                filterIds[i][j] = int.Parse(filterGroup[j]);
-            }
-        }
-
-        return filterIds;
-    }
-}
-
-public record FilterDTOV2
-{
-    /// <summary>
-    /// Raw filters value from url query.
-    /// </summary>
     [RegularExpression(@"^\d+:(?:\d+(?:-\d+)*)(?:;\d+:(?:\d+(?:-\d+)*))*;?$", ErrorMessage = "Invalid filters format.")]
     public string Filters { get; init; } = string.Empty;
     
@@ -60,9 +21,9 @@ public record FilterDTOV2
         return _filterIds ??= ParseFilters(Filters);
     }
 
-    public static FilterDTOV2 CreateFromFilters(Dictionary<int, int[]> filterGroups)
+    public static FilterDTO CreateFromFilters(Dictionary<int, int[]> filterGroups)
     {
-        return new FilterDTOV2 { _filterIds = filterGroups };
+        return new FilterDTO { _filterIds = filterGroups };
     }
     
     private static Dictionary<int, int[]> ParseFilters(string rawFilters)
