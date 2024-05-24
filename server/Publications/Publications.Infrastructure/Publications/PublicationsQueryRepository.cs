@@ -167,7 +167,7 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
     }
 
     public async Task<Dictionary<string, int>> GetFiltersCountAsync(
-        FilterDTOV2 filterDtoV2, PaginationDTO paginationDTO, SearchDTO searchDTO,
+        FilterDTO filterDTO, SearchDTO searchDTO,
         CancellationToken cancellationToken = default)
     {
         SearchCommands ft = _db.FT();
@@ -179,12 +179,12 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
             .GetEntityFilters()
             .Select(async entityFilter =>
             {
-                Dictionary<int, int[]> filtersWithoutCurrentGroup = new(filterDtoV2
+                Dictionary<int, int[]> filtersWithoutCurrentGroup = new(filterDTO
                     .GetParsedFilters());
                 
                 filtersWithoutCurrentGroup.Remove(entityFilter.GroupId);
                 
-                var newFilter = FilterDTOV2.CreateFromFilters(
+                var newFilter = FilterDTO.CreateFromFilters(
                     filtersWithoutCurrentGroup);
                 
                 SearchQuery query = SearchQuery

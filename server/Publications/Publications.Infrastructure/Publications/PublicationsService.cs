@@ -3,7 +3,6 @@ using Publications.Application.DTOs;
 using Publications.Application.Repositories;
 using Publications.Application.Services;
 using Publications.Domain.Publications;
-using Publications.Infrastructure.Shared;
 
 namespace Publications.Infrastructure.Publications;
 
@@ -57,16 +56,7 @@ public class PublicationsService: IPublicationsService
     }
 
     public async Task<IReadOnlyCollection<FilterGroup>> GetFiltersAsync(
-        CancellationToken cancellationToken = default)
-    {
-        return (await _publicationsCommandRepository.GetFiltersAsync(cancellationToken))
-            .OrderBy(fg => fg.Id)
-            .ToList()
-            .AsReadOnly();
-    }
-
-    public async Task<IReadOnlyCollection<FilterGroup>> GetFiltersV2Async(
-        FilterDTOV2 filterDtoV2, PaginationDTO paginationDTO, SearchDTO searchDTO,
+        FilterDTO filterDTO, PaginationDTO paginationDTO, SearchDTO searchDTO,
         CancellationToken cancellationToken = default)
     {
         IReadOnlyCollection<FilterGroup> filterGroups = await
@@ -74,7 +64,7 @@ public class PublicationsService: IPublicationsService
         
         Dictionary<string, int> filtersValuesWithMatchesCount = await
             _publicationsQueryRepository.GetFiltersCountAsync(
-                filterDtoV2, paginationDTO, searchDTO, cancellationToken);
+                filterDTO, searchDTO, cancellationToken);
         
         return MatchFiltersCount(filterGroups, filtersValuesWithMatchesCount)
             .OrderBy(fg => fg.Id)
