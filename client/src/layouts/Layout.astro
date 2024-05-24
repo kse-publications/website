@@ -27,14 +27,33 @@ if (!clientUuid) {
 const ENVIRONMENT = import.meta.env.PUBLIC_ENVIRONMENT
 
 const isProduction = ENVIRONMENT === 'production'
+
+const currentUrl = Astro.request.url
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content="Astro description" />
-    <meta name="viewport" content="width=device-width" />
+    <meta
+      name="description"
+      content="The KSE Publications website presents a collection of the major academic and analytical publications produced by the KSE community. Its main objective is to disseminate KSE's original academic work that is relevant to the fields of political and social sciences in a broader context."
+    />
+    <meta
+      name="keywords"
+      content="KSE, Kyiv School of Economics, academic publications, political sciences, social sciences, research, analytical publications"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta property="og:title" content={title} />
+    <meta
+      property="og:description"
+      content="The KSE Publications website presents a collection of the major academic and analytical publications produced by the KSE community."
+    />
+    <meta property="og:url" content={currentUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/favicons/favicon-32x32.png" />
+    <meta property="og:site_name" content="KSE Publications" />
 
     <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png" />
@@ -49,6 +68,32 @@ const isProduction = ENVIRONMENT === 'production'
     <title>{title}</title>
     <ViewTransitions />
     <LoadingIndicator color="#e4e541" height="4px" />
+
+    <!-- Schema.org Structured Data -->
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "KSE Publications",
+        "url": "https://kse-publications.vercel.app/",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://kse-publications.vercel.app/?searchText={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "KSE Publications",
+        "url": "https://kse-publications.vercel.app/",
+        "description": "The KSE Publications website presents a collection of the major academic and analytical publications produced by the KSE community."
+      }
+    </script>
   </head>
   <body class="min-h-screen flex flex-col">
     {isProduction && <PostHog pageVisitEvent={title} client:only />}
