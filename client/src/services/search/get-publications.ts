@@ -2,12 +2,9 @@ import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '@/config/search-params'
 import type { PaginatedCollection } from '@/types/common/paginated-collection'
 import type { PublicationSummary } from '@/types/publication-summary/publication-summary'
 import type { QueryParams, SearchPublicationsQueryParams } from '@/types/common/query-params'
+import { getFiltersString } from '@/utils/parse-filters'
 
 const BASE_URL = import.meta.env.PUBLIC_API_URL
-
-const getFiltersString = (filters: number[]): string => {
-  return filters.join(';')
-}
 
 export const getInitialPublications = async ({
   page = DEFAULT_PAGE,

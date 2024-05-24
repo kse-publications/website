@@ -1,6 +1,7 @@
 export interface IFilterItem {
   id: number
   value: string
+  matchedPublicationsCount: number
 }
 
 export interface IFilter {
