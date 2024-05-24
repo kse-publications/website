@@ -117,7 +117,7 @@
             "in": "query",
             "style": "form",
             "schema": {
-              "pattern": "^\\d+(?:-\\d+)*(?:;\\d+(?:-\\d+)*)*;?$",
+              "pattern": "^\\d+:(?:\\d+(?:-\\d+)*)(?:;\\d+:(?:\\d+(?:-\\d+)*))*;?$",
               "type": "string"
             }
           },
@@ -312,7 +312,7 @@
             "in": "query",
             "style": "form",
             "schema": {
-              "pattern": "^\\d+(?:-\\d+)*(?:;\\d+(?:-\\d+)*)*;?$",
+              "pattern": "^\\d+:(?:\\d+(?:-\\d+)*)(?:;\\d+:(?:\\d+(?:-\\d+)*))*;?$",
               "type": "string"
             }
           },
@@ -376,44 +376,6 @@
         "tags": [
           "Publications"
         ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FilterGroup"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FilterGroup"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FilterGroup"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/publications/filters/v2": {
-      "get": {
-        "tags": [
-          "Publications"
-        ],
         "parameters": [
           {
             "name": "Filters",
@@ -457,7 +419,33 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FilterGroup"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FilterGroup"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FilterGroup"
+                  }
+                }
+              }
+            }
           }
         }
       }

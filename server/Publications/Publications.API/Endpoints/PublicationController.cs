@@ -96,6 +96,11 @@ public class PublicationsController : ControllerBase
     }
     
     [HttpGet("filters")]
+    [ProducesResponseType(typeof(IReadOnlyCollection<FilterGroup>), StatusCodes.Status200OK)]
+    [SwaggerOperation(
+        Summary = "Get filters for publications",
+        Description = "Returns a list of filters (including matchedPublicationCount)."
+    )]
     public async Task<IActionResult> GetFilters(
         [FromQuery]FilterDTO filterDTO,
         [FromQuery]PaginationDTO paginationDTO,
