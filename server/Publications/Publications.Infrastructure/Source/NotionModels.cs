@@ -63,7 +63,6 @@ internal class NotionPublisher : Publisher
         {
             Id = Id,
             Name = Name,
-            Slug = Slug,
             SynchronizedAt = SynchronizedAt
         };
     }
@@ -79,8 +78,6 @@ internal class NotionAuthor : Author
         {
             Id = Id,
             Name = Name,
-            ProfileLink = ProfileLink,
-            Slug = Slug,
             SynchronizedAt = SynchronizedAt
         };
     }

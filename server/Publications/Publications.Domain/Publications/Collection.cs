@@ -22,8 +22,11 @@ public class Collection: Entity<Collection>
 
     [Indexed(Sortable = true)] 
     public int PublicationsCount { get; set; }
+    
+    [Indexed(Sortable = true)]
+    public string Slug { get; set; } = string.Empty;
 
-    public override Collection UpdateSlug(IWordsService wordsService)
+    public Collection UpdateSlug(IWordsService wordsService)
     {
         Slug = SlugFactory.Create(Name, Id.ToString(), IsoLanguageCode.English, wordsService);
         return this;

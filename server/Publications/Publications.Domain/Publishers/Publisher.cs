@@ -14,12 +14,4 @@ public class Publisher: Entity<Publisher>
 {
     [Searchable(Weight = 1.0, PhoneticMatcher = "dm:en")]
     public string Name { get; init; } = null!;
-    
-    public override Publisher UpdateSlug(IWordsService wordsService)
-    {
-        Slug = SlugFactory.Create(
-            Name, Id.ToString(), IsoLanguageCode.English, wordsService);
-        
-        return this;
-    }   
 }
