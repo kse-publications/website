@@ -116,6 +116,8 @@ public static class NotionModelsMapperExtensions
             Name = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText
         };
         
+        author.Synchronize();
+        
         return author;
     }
     
@@ -127,6 +129,8 @@ public static class NotionModelsMapperExtensions
             NotionId = page.Id,
             Name = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText
         };
+        
+        publisher.Synchronize();
         
         return publisher;
     }

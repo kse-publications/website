@@ -45,6 +45,9 @@ public class Publication: Entity<Publication>
     [Indexed(Sortable = true)]
     public int Views { get; set; } 
     
+    [Indexed(Sortable = true)]
+    public string Slug { get; set; } = string.Empty;
+    
     [Indexed(JsonPath = "$.Id")]
     [IgnoreInResponse]
     public Filter[] Filters { get; set; } = Array.Empty<Filter>();
@@ -53,7 +56,7 @@ public class Publication: Entity<Publication>
     [Searchable(JsonPath = "$.Name", Weight = 0.8)]
     public Collection[] Collections { get; set; } = Array.Empty<Collection>();
     
-    public virtual Publication UpdateSlug(IWordsService wordsService)
+    public Publication UpdateSlug(IWordsService wordsService)
     {
         Slug = SlugFactory.Create(
             Title, Id.ToString(), IsoLanguageCode.Create(Language), wordsService);
