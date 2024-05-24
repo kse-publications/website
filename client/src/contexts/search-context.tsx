@@ -19,14 +19,16 @@ import type { SearchPublicationsQueryParams } from '@/types/common/query-params'
 import type { IFilter } from '@/types/common/fiters'
 import { useDebounce } from 'use-debounce'
 import { captureEvent } from '@/services/posthog/posthog'
+import type { SelectedFilters } from '@/types/common/selected-filters'
+import { getFiltersFromString, getFiltersString } from '@/utils/parse-filters'
 
 interface ISearchContext {
   debouncedSearchText: string
   searchText: string
   setSearchText: Dispatch<SetStateAction<string>>
 
-  selectedFilters: number[]
-  setSelectedFilters: Dispatch<SetStateAction<number[]>>
+  selectedFilters: SelectedFilters
+  setSelectedFilters: Dispatch<SetStateAction<SelectedFilters>>
 
   filters: IFilter[]
 
@@ -70,7 +72,7 @@ const SearchContextProvider = ({
   const [isRecent, setIsRecent] = useState<boolean>(initialIsRecent)
 
   const [searchText, setSearchText] = useState('')
-  const [selectedFilters, setSelectedFilters] = useState<number[]>([])
+  const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>([])
 
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -84,12 +86,7 @@ const SearchContextProvider = ({
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search)
     setSearchText(searchParams.get('searchText') || '')
-    setSelectedFilters(
-      searchParams
-        .get('filters')
-        ?.split(',')
-        .map((filter) => parseInt(filter, 10)) || []
-    )
+    setSelectedFilters(getFiltersFromString(searchParams.get('filters')))
 
     const rehydrateTimeout = setTimeout(() => {
       isInitialPublications.current = false
@@ -117,7 +114,7 @@ const SearchContextProvider = ({
     if (searchText) urlSearchParams.append('searchText', searchText)
     else urlSearchParams.delete('searchText')
 
-    if (selectedFilters.length) urlSearchParams.append('filters', selectedFilters.join(','))
+    if (selectedFilters.length) urlSearchParams.append('filters', getFiltersString(selectedFilters))
     else urlSearchParams.delete('filters')
 
     if (!searchText && !selectedFilters.length) {
