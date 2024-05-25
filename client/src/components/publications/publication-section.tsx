@@ -33,7 +33,8 @@ function PublicationPage({ data }: PublicationPageProps) {
             {data.authors.map((author: any, index: number) => (
               <span key={author.slug}>
                 <a
-                  href={`https://kse-publications.vercel.app/?searchText=${author.name.toLowerCase().replace(/\s/g, '+')}`}
+                  href={`/?searchText=${author.name.toLowerCase().replace(/\s/g, '+')}`}
+                  className="hover:underline"
                 >
                   {author.name}
                 </a>
