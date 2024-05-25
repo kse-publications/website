@@ -13,9 +13,9 @@ public class SlugFactory
     {
         string[] cleanTransliteratedWords = name
             .ToLower()
-            .RemoveSpecialChars()
             .RemoveStopWords(language, wordsService)
             .Transliterate(wordsService)
+            .RemoveSpecialChars()
             .SplitWords();
         
         StringBuilder slug = new();
