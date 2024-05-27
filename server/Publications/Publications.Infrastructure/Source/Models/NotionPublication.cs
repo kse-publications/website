@@ -17,20 +17,14 @@ internal class NotionPublication : Publication
         NotionPublication publication = new()
         {
             NotionId = page.Id,
-            Id = (int)((UniqueIdPropertyValue)page.Properties["ID"]).UniqueId.Number!.Value,
-            Title = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText,
-            Type = ((SelectPropertyValue)page.Properties["Type"]).Select.Name,
-            Language = ((SelectPropertyValue)page.Properties["Language"]).Select?.Name ?? string.Empty,
-            Year = (int)((NumberPropertyValue)page.Properties["Year"]).Number!.Value,
+            Id = page.Properties["ID"].GetId(),
+            Title = page.Properties["Name"].GetName(),
+            Type = page.GetSelectProperty("Type"),
+            Language = page.GetSelectProperty("Language"),
+            Year = (int)page.GetNumberProperty("Year"),
             Link = ((UrlPropertyValue)page.Properties["Link"]).Url,
-
-            Keywords = ((RichTextPropertyValue)page.Properties["Keywords"]).RichText
-                .SelectMany(r => r.PlainText.Split(',',
-                    StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
-                .ToArray(),
-
-            Abstract = ((RichTextPropertyValue)page.Properties["Abstract"])
-                .RichText.Select(r => r.PlainText).FirstOrDefault()!,
+            Keywords = page.GetSeparatedRichTextProperty("Keywords", separator: ','),
+            Abstract = page.GetRichTextProperty("Abstract")
         };
         
         publication

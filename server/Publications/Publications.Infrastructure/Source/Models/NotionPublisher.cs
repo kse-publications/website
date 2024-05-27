@@ -15,8 +15,8 @@ internal class NotionPublisher : Publisher
         NotionPublisher publisher = new()
         {
             NotionId = page.Id,
-            Id = (int)((UniqueIdPropertyValue)page.Properties["ID"]).UniqueId.Number!.Value,
-            Name = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText
+            Id = page.Properties["ID"].GetId(),
+            Name = page.Properties["Name"].GetName()
         };
         
         publisher.Synchronize();

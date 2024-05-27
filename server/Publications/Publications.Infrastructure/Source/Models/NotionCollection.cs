@@ -15,14 +15,13 @@ internal class NotionCollection : Collection
         
         NotionCollection collection = new() 
         {
-            Id = (int)((UniqueIdPropertyValue)page.Properties["ID"]).UniqueId.Number!.Value,
-            Icon = ((RichTextPropertyValue)page.Properties["Icon"]).RichText
-                .Select(r => r.PlainText).FirstOrDefault()!,
-            Name = ((TitlePropertyValue)page.Properties["Name"]).Title[0].PlainText,
-            Description = ((RichTextPropertyValue)page.Properties["Description"]).RichText
-                .Select(r => r.PlainText).FirstOrDefault()!,
+            Id = page.Properties["ID"].GetId(),
+            Icon = page.GetRichTextProperty("Icon"),
+            Name = page.Properties["Name"].GetName(),
+            Description = page.GetRichTextProperty("Description"),
             PublicationsRelation = ((RelationPropertyValue)page.Properties["Publications"]).Relation,
-            PublicationsCount = (int)((FormulaPropertyValue)page.Properties["Publications Count"]).Formula.Number!.Value
+            PublicationsCount = (int)((FormulaPropertyValue)page.Properties["Publications Count"])
+                .Formula.Number!.Value
         };
         
         collection
