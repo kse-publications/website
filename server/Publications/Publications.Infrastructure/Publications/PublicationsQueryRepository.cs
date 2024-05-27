@@ -219,14 +219,19 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
     {
         return aggregationResults.Select(result => new PublicationSummary
         {
-            Slug = (string?)result[nameof(Publication.Slug)] ?? string.Empty,
-            Title = JsonSerializer.Deserialize<string[]>(result[nameof(Publication.Title)]!)
-                ?.First() ?? string.Empty,
-            Type = (string?)result[nameof(Publication.Type)] ?? string.Empty,
-            Year = (int)result[nameof(Publication.Year)],
-            Authors = JsonSerializer.Deserialize<string[]>(result.TryGetValue(PublicationAuthorsName, out RedisValue value) ? (string)value! : "[]")
-                ?.ToArray() ?? Array.Empty<string>(),
-            Publisher = JsonSerializer.Deserialize<string[]>((string?)result[PublicationPublisherName] ?? "[]")
+            Slug = result[nameof(Publication.Slug)]!,
+            Title = JsonSerializer.Deserialize<string[]>(result[nameof(Publication.Title)]!)!.First(),
+            Type = result.TryGetValue(nameof(Publication.Type), out var typeValue) 
+                ? typeValue! : string.Empty,
+            Year = result.TryGetValue(nameof(Publication.Year), out var yearValue) 
+                ? (int)yearValue! : 0,
+            Authors = JsonSerializer
+                .Deserialize<string[]>(result
+                    .TryGetValue(PublicationAuthorsName, out var authorsValue) ? authorsValue! : "[]")
+                ?.ToArray() ?? [],
+            Publisher = JsonSerializer
+                .Deserialize<string[]>(result
+                    .TryGetValue(PublicationPublisherName, out var publisherValue) ? publisherValue! : "[]")
                 ?.First() ?? string.Empty
         }).ToList();
     }
