@@ -5,6 +5,7 @@ using Publications.Domain.Authors;
 using Publications.Domain.Publications;
 using Publications.Domain.Publishers;
 using Publications.Domain.Shared.Slugs;
+using Publications.Infrastructure.Source.Models;
 
 namespace Publications.Infrastructure.Source;
 
@@ -38,20 +39,19 @@ public class NotionRepository: ISourceRepository
         var publishers = (await GetNotionPublishersAsync()).ToList();
         var collections = (await GetNotionCollectionsAsync()).ToList();
         
-        PaginatedList<Page> notionPublications = await _notionClient.Databases.QueryAsync(
-            _databaseOptions.PublicationsDbId, new DatabasesQueryParameters());
-        
-        _publications = notionPublications.Results
-            .Where(page => page.IsValidPublication())
-            .Select(page => 
-                page.MapToPublication(_wordsService)
-                    .LinkAuthors(page, authors)
-                    .LinkPublisher(page, publishers))
-            .LinkCollections(collections)
         List<Page> publicationsPages = await GetAllPagesAsync(_databaseOptions.PublicationsDbId);
+
         IEnumerable<NotionPublication> publications = publicationsPages
+            .Select(page => NotionPublication
+                .MapFromPage(page, _wordsService)?
+                .JoinAuthors(page, authors)
+                .JoinPublisher(page, publishers))
+            .Where(publication => publication is not null)!;
+
+        _publications = NotionPublication
+            .JoinCollections(publications, collections)
             .ToList()
-            .AsReadOnly();
+            .AsReadOnly();;
         
         return _publications;
     }
@@ -85,7 +85,7 @@ public class NotionRepository: ISourceRepository
             .Select(page => NotionCollection.MapFromPage(page, _wordsService))
             .Where(collection => collection is not null)
             .ToList()
-            .AsReadOnly();
+            .AsReadOnly()!;
         
         return _collections;
     }
@@ -101,7 +101,7 @@ public class NotionRepository: ISourceRepository
             .Select(page => NotionAuthor.MapFromPage(page))
             .Where(author => author is not null)
             .ToList()
-            .AsReadOnly();
+            .AsReadOnly()!;
         
         return _authors;
     }
@@ -117,7 +117,7 @@ public class NotionRepository: ISourceRepository
             .Select(page => NotionPublisher.MapFromPage(page))
             .Where(publisher => publisher is not null)
             .ToList()
-            .AsReadOnly();
+            .AsReadOnly()!;
         
         return _publishers;
     }
