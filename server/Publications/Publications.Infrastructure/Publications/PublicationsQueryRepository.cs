@@ -219,12 +219,15 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
     {
         return aggregationResults.Select(result => new PublicationSummary
         {
-            Slug = result[nameof(Publication.Slug)]!,
-            Title = JsonSerializer.Deserialize<string[]>(result[nameof(Publication.Title)]!)!.First(),
-            Type = result[nameof(Publication.Type)]!,
-            Year = (int)result[nameof(Publication.Year)]!,
-            Authors = JsonSerializer.Deserialize<string[]>(result[PublicationAuthorsName]!)!,
-            Publisher = JsonSerializer.Deserialize<string[]>(result[PublicationPublisherName]!)!.First()
+            Slug = (string?)result[nameof(Publication.Slug)] ?? string.Empty,
+            Title = JsonSerializer.Deserialize<string[]>(result[nameof(Publication.Title)]!)
+                ?.First() ?? string.Empty,
+            Type = (string?)result[nameof(Publication.Type)] ?? string.Empty,
+            Year = (int)result[nameof(Publication.Year)],
+            Authors = JsonSerializer.Deserialize<string[]>(result.TryGetValue(PublicationAuthorsName, out RedisValue value) ? (string)value! : "[]")
+                ?.ToArray() ?? Array.Empty<string>(),
+            Publisher = JsonSerializer.Deserialize<string[]>((string?)result[PublicationPublisherName] ?? "[]")
+                ?.First() ?? string.Empty
         }).ToList();
     }
 
