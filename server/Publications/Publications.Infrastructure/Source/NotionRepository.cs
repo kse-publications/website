@@ -48,6 +48,8 @@ public class NotionRepository: ISourceRepository
                     .LinkAuthors(page, authors)
                     .LinkPublisher(page, publishers))
             .LinkCollections(collections)
+        List<Page> publicationsPages = await GetAllPagesAsync(_databaseOptions.PublicationsDbId);
+        IEnumerable<NotionPublication> publications = publicationsPages
             .ToList()
             .AsReadOnly();
         
@@ -77,12 +79,11 @@ public class NotionRepository: ISourceRepository
         if (_collections is not null)
             return _collections;
         
-        PaginatedList<Page> notionCollections = await _notionClient.Databases.QueryAsync(
-            _databaseOptions.CollectionsDbId, new DatabasesQueryParameters());
+        List<Page> collectionsPages = await GetAllPagesAsync(_databaseOptions.CollectionsDbId);
         
-        _collections = notionCollections.Results
-            .Where(page => page.IsValidCollection())
-            .Select(page => page.MapToCollection(_wordsService))
+        _collections = collectionsPages
+            .Select(page => NotionCollection.MapFromPage(page, _wordsService))
+            .Where(collection => collection is not null)
             .ToList()
             .AsReadOnly();
         
@@ -94,12 +95,11 @@ public class NotionRepository: ISourceRepository
         if (_authors is not null)
             return _authors;
         
-        PaginatedList<Page> notionAuthors = await _notionClient.Databases.QueryAsync(
-            _databaseOptions.AuthorsDbId, new DatabasesQueryParameters());
+        List<Page> authorsPages = await GetAllPagesAsync(_databaseOptions.AuthorsDbId);
         
-        _authors = notionAuthors.Results
-            .Where(page => page.IsValidAuthor())
-            .Select(page => page.MapToAuthor(_wordsService))
+        _authors = authorsPages
+            .Select(page => NotionAuthor.MapFromPage(page))
+            .Where(author => author is not null)
             .ToList()
             .AsReadOnly();
         
@@ -111,15 +111,39 @@ public class NotionRepository: ISourceRepository
         if (_publishers is not null)
             return _publishers;
         
-        PaginatedList<Page> notionPublishers = await _notionClient.Databases.QueryAsync(
-            _databaseOptions.PublishersDbId, new DatabasesQueryParameters());
+        List<Page> publishersPages = await GetAllPagesAsync(_databaseOptions.PublishersDbId);
         
-        _publishers = notionPublishers.Results
-            .Where(page => page.IsValidPublisher())
-            .Select(page => page.MapToPublisher(_wordsService))
+        _publishers = publishersPages
+            .Select(page => NotionPublisher.MapFromPage(page))
+            .Where(publisher => publisher is not null)
             .ToList()
             .AsReadOnly();
         
         return _publishers;
+    }
+    
+    private async Task<List<Page>> GetAllPagesAsync(string databaseId)
+    {
+        PaginatedList<Page> currentPage = await _notionClient.Databases.QueryAsync(
+            databaseId, new DatabasesQueryParameters
+            {
+                PageSize = 100
+            });
+        
+        List<Page> pages = [..currentPage.Results];
+
+        while (currentPage.HasMore)
+        {
+            currentPage = await _notionClient.Databases.QueryAsync(
+                databaseId, new DatabasesQueryParameters 
+                {
+                    PageSize = 100,
+                    StartCursor = currentPage.NextCursor
+                });
+            
+            pages.AddRange(currentPage.Results);
+        }
+        
+        return pages;
     }
 }
