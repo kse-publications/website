@@ -231,7 +231,7 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
                 ?.ToArray() ?? [],
             Publisher = JsonSerializer
                 .Deserialize<string[]>(result
-                    .TryGetValue(PublicationAuthorsName, out var publisherValue) ? publisherValue! : "[]")
+                    .TryGetValue(PublicationPublisherName, out var publisherValue) ? publisherValue! : "[]")
                 ?.First() ?? string.Empty
         }).ToList();
     }
