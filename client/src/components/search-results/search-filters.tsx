@@ -1,20 +1,17 @@
 import React, { useState } from 'react'
 import { useSearchContext } from '@/contexts/search-context'
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/select'
 import { captureEvent } from '@/services/posthog/posthog'
 
-interface SelectItem {
-  value: string
-  label: string
-}
+import { ChevronDownIcon } from '@radix-ui/react-icons'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 export const SearchFilters = () => {
   const { filters, selectedFilters, setSelectedFilters } = useSearchContext()
@@ -22,25 +19,33 @@ export const SearchFilters = () => {
   const handleFilterChange = (id: number, inputValue: string, name: string) => {
     captureEvent('filter_change', { filter: name, value: inputValue })
 
-    if (inputValue === 'reset') {
-      setSelectedFilters((prev) => prev.filter((item) => item.id !== id))
-      return
-    }
-
     setSelectedFilters((prev) => {
-      const index = prev.findIndex((item) => item.id === id)
-      const clonedPrev = [...prev]
       const value = +inputValue
 
-      if (index === -1) {
-        return [...clonedPrev, { id, values: [value] }]
+      if (inputValue === 'reset') {
+        return prev.filter((filter) => filter.id !== id)
       }
 
-      clonedPrev[index].values.includes(value)
-        ? (clonedPrev[index].values = clonedPrev[index].values.filter((item) => item !== value))
-        : (clonedPrev[index].values = [value])
+      const index = prev.findIndex((filter) => filter.id === id)
 
-      return clonedPrev
+      if (index === -1) {
+        return [...prev, { id, values: [value] }]
+      } else {
+        const filterGroup = prev[index]
+        const valueIndex = filterGroup.values.indexOf(value)
+
+        if (valueIndex === -1) {
+          filterGroup.values.push(value)
+        } else {
+          filterGroup.values.splice(valueIndex, 1)
+        }
+
+        if (filterGroup.values.length === 0) {
+          prev.splice(index, 1)
+        }
+
+        return [...prev]
+      }
     })
   }
 
@@ -55,29 +60,42 @@ export const SearchFilters = () => {
         }
 
         return (
-          <Select
-            key={filter.id}
-            onValueChange={(value) => handleFilterChange(filter.id, value, filter.name)}
-            value={selectedFilterValue}
-          >
-            <SelectTrigger className="w-full xs:w-[171px]">
-              <SelectValue placeholder={`Filter by ${filter.name.toLowerCase()}`} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup className="w-full">
-                <SelectLabel>Filter by {filter.name.toLowerCase()}</SelectLabel>
-                <SelectItem value={'reset'}>None</SelectItem>
+          <>
+            <DropdownMenu key={filter.id}>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="flex justify-between font-normal xs:w-[171px]">
+                  Filter by {filter.name.toLowerCase()}
+                  <ChevronDownIcon color="grey" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuLabel>Filter by {filter.name.toLowerCase()}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuCheckboxItem
+                  checked={selectedFilterValue.length === 0}
+                  onCheckedChange={() => handleFilterChange(filter.id, 'reset', filter.name)}
+                >
+                  None
+                </DropdownMenuCheckboxItem>
                 {filter.filters.map(({ id, value, matchedPublicationsCount }) => (
-                  <SelectItem key={id} value={id.toString()}>
+                  <DropdownMenuCheckboxItem
+                    key={id}
+                    checked={selectedFilters.some(
+                      (f) => f.id === filter.id && f.values.includes(id)
+                    )}
+                    onCheckedChange={() =>
+                      handleFilterChange(filter.id, id.toString(), filter.name)
+                    }
+                  >
                     <div className="flex w-[150px] justify-between">
                       <span> {value} </span>
                       <span className="font-bold">{matchedPublicationsCount}</span>
                     </div>
-                  </SelectItem>
+                  </DropdownMenuCheckboxItem>
                 ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </>
         )
       })}
     </div>
