@@ -10,15 +10,20 @@ using Publications.Domain.Authors;
 using Publications.Domain.Publications;
 using Publications.Domain.Publishers;
 using Publications.Infrastructure.Shared;
+using Redis.OM;
+using Redis.OM.Contracts;
+using Redis.OM.Searching;
 using StackExchange.Redis;
 
 namespace Publications.Infrastructure.Publications;
 
-public class PublicationsQueryRepository: IPublicationsQueryRepository
+public class PublicationsQueryRepository: EntityRepository<Publication>, IPublicationsQueryRepository
 {
     private readonly IDatabase _db;
 
-    public PublicationsQueryRepository(IConnectionMultiplexer connectionMultiplexer)
+    public PublicationsQueryRepository(
+        IConnectionMultiplexer connectionMultiplexer,
+        IRedisConnectionProvider provider) : base(provider)
     {
         _db = connectionMultiplexer.GetDatabase();
     }
@@ -56,21 +61,6 @@ public class PublicationsQueryRepository: IPublicationsQueryRepository
             TotalCount: (int)aggregationResult.TotalResults,
             ResultCount: publications.Count);
     }
-
-    public async Task<IReadOnlyCollection<string>> GetAllSlugsAsync(
-        CancellationToken cancellationToken = default)
-    {
-        SearchCommands ft = _db.FT();
-        AggregationResult aggregationResult = await ft.AggregateAsync(Publication.IndexName,
-            new AggregationRequest(SearchQuery.MatchAll().Build())
-                .Load(new FieldName(nameof(Publication.Slug))));
-        
-        return aggregationResult.GetResults()
-            .Select(result => (string)result[nameof(Publication.Slug)]!)
-            .ToList()
-            .AsReadOnly();
-    }
-
 
     public async Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
         FilterDTO filterDTO, PaginationDTO paginationDTO, SearchDTO searchDTO,
