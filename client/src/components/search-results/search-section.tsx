@@ -27,7 +27,12 @@ export default function SearchSection({
       <section className="flex grow flex-col">
         <SearchBackground />
         <SearchResults />
-        <ScrollToTop smooth className="flex items-center justify-center" />
+        <ScrollToTop
+          smooth
+          height="15px"
+          className="flex items-center justify-center"
+          style={{ borderRadius: '50%' }}
+        />
       </section>
     </SearchContextProvider>
   )
