@@ -1,4 +1,0 @@
-User-agent: *
-Disallow:
-
-Sitemap: https://publications_api_testing.kse.ua/sitemap.xml?baseUrl=https://kse-publications.vercel.app
