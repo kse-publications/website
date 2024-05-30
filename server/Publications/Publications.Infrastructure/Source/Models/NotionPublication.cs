@@ -24,7 +24,8 @@ internal class NotionPublication : Publication
             Year = (int)page.GetNumberProperty("Year"),
             Link = ((UrlPropertyValue)page.Properties["Link"]).Url,
             Keywords = page.GetSeparatedRichTextProperty("Keywords", separator: ','),
-            Abstract = page.GetRichTextProperty("Abstract")
+            Abstract = page.GetRichTextProperty("Abstract"),
+            LastModifiedAt = page.LastEditedTime
         };
         
         publication

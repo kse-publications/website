@@ -21,7 +21,8 @@ internal class NotionCollection : Collection
             Description = page.GetRichTextProperty("Description"),
             PublicationsRelation = ((RelationPropertyValue)page.Properties["Publications"]).Relation,
             PublicationsCount = (int)((FormulaPropertyValue)page.Properties["Publications Count"])
-                .Formula.Number!.Value
+                .Formula.Number!.Value,
+            LastModifiedAt = page.LastEditedTime
         };
         
         collection
