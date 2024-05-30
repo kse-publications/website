@@ -11,10 +11,23 @@ namespace Publications.API.Endpoints;
 public class SiteMapController : ControllerBase
 {
     private readonly IPublicationsQueryRepository _publicationsRepository;
-
-    public SiteMapController(IPublicationsQueryRepository publicationsRepository)
+    private readonly ICollectionsRepository _collectionsRepository;
+    
+    private const string Schema = "http://www.sitemaps.org/schemas/sitemap/0.9";
+    private static readonly Dictionary<string, double> StaticPages = new()
+    {
+        {"/", 1.0},
+        { "/about", 0.9 },
+        { "/submissions", 0.9 },
+        { "/team", 0.9 }
+    };
+    
+    public SiteMapController(
+        IPublicationsQueryRepository publicationsRepository, 
+        ICollectionsRepository collectionsRepository)
     {
         _publicationsRepository = publicationsRepository;
+        _collectionsRepository = collectionsRepository;
     }
     
     [HttpGet]
@@ -34,26 +47,58 @@ public class SiteMapController : ControllerBase
     
     private async Task<XDocument> GetSiteMapXml(string baseUrl)
     {
-        IReadOnlyCollection<string> slugs = await _publicationsRepository.GetAllSlugsAsync();
-        
-        const string schema = "http://www.sitemaps.org/schemas/sitemap/0.9";
-        IEnumerable<XElement> urls = slugs
-            .Select(slug => 
-                new XElement((XNamespace)schema + "url", 
-                    new XElement((XNamespace)schema + "loc", GetUrl(baseUrl, slug))));
-        
-        XElement xml = new((XNamespace)schema + "urlset", urls);
+        var publicationsMetadata = await _publicationsRepository
+            .GetAllSiteMapMetadataAsync();
+        var collectionsMetadata = await _collectionsRepository
+            .GetAllSiteMapMetadataAsync();
+
+        IEnumerable<IEnumerable<XElement>> urls =
+        [
+            StaticPages.Select(page 
+                => CreateStaticResourceXmlUrl(resourceUrl: baseUrl + page.Key, priority: page.Value)),
+            publicationsMetadata.Select(meta 
+                => CreateDynamicResourceXmlUrl(GetPublicationUrl(baseUrl, meta.Id), meta.LastModifiedAt)),
+            collectionsMetadata.Select(meta 
+                => CreateDynamicResourceXmlUrl(GetCollectionUrl(baseUrl, meta.Id), meta.LastModifiedAt))
+        ];
+
+        XElement xml = new((XNamespace)Schema + "urlset", urls.SelectMany(x => x));
 
         return new XDocument(xml);
     }
     
-    private static string GetUrl(string baseUrl, string slug)
-        => $"{baseUrl}/publications/{slug}";
+    private static XElement CreateStaticResourceXmlUrl(string resourceUrl, double priority)
+    {
+        return new XElement((XNamespace)Schema + "url",
+                new XElement((XNamespace)Schema + "loc", resourceUrl),
+                new XElement((XNamespace)Schema + "priority", priority));
+    }
+    
+    private static XElement CreateDynamicResourceXmlUrl(
+        string resourceUrl, DateTime lastModifiedAt, double priority = 0.8)
+    {
+        return new XElement((XNamespace)Schema + "url",
+                new XElement((XNamespace)Schema + "loc", resourceUrl),
+                new XElement((XNamespace)Schema + "lastmod", lastModifiedAt.ToString("yyyy-MM-dd")),
+                new XElement((XNamespace)Schema + "priority", priority));
+    }
+    
+    private static string GetPublicationUrl(string baseUrl, int id)
+        => $"{baseUrl}/publications/{id}";
+    
+    private static string GetCollectionUrl(string baseUrl, int id)
+        => $"{baseUrl}/collections/{id}";
 }
 
 public record BaseUrlDTO
 {
-    [Required(AllowEmptyStrings = false)] 
+    private string _baseUrl;
+    
+    [Required(AllowEmptyStrings = false)]
     [Url]
-    public string BaseUrl { get; init; } = null!;
+    public string BaseUrl
+    {
+        get => _baseUrl;
+        init => _baseUrl = value.TrimEnd('/');
+    }
 };
