@@ -14,6 +14,11 @@ public abstract class Entity<T> where T: Entity<T>
     [IgnoreInResponse]
     [JsonConverter(typeof(UnixTimestampJsonConverter))]
     public DateTime SynchronizedAt { get; set; }
+    
+    [Indexed]
+    [IgnoreInResponse]
+    [JsonConverter(typeof(UnixTimestampJsonConverter))]
+    public DateTime LastModifiedAt { get; set; }
 
     public void Synchronize()
     {

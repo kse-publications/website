@@ -1,6 +1,8 @@
-﻿using Publications.Application.Repositories;
+﻿using Publications.Application;
+using Publications.Application.Repositories;
 using Publications.Domain.Shared;
 using Redis.OM;
+using Redis.OM.Aggregation;
 using Redis.OM.Contracts;
 using Redis.OM.Searching;
 
@@ -10,10 +12,12 @@ public class EntityRepository<TEntity> : IEntityRepository<TEntity>
     where TEntity : Entity<TEntity>
 {
     private readonly IRedisCollection<TEntity> _collection;
+    private readonly RedisAggregationSet<TEntity> _aggregationSet;
 
     public EntityRepository(IRedisConnectionProvider connectionProvider)
     {
         _collection = connectionProvider.RedisCollection<TEntity>();
+        _aggregationSet = connectionProvider.AggregationSet<TEntity>();
     }
     
     public async Task<IReadOnlyCollection<TEntity>> GetAllAsync(
@@ -48,5 +52,18 @@ public class EntityRepository<TEntity> : IEntityRepository<TEntity>
             .ToListAsync();
         
         await _collection.DeleteAsync(entitiesToDelete);
+    }
+    
+    public virtual async Task<IReadOnlyCollection<SiteMapResourceMetadata>> GetAllSiteMapMetadataAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return (await _aggregationSet
+                .Load(e => e.RecordShell!.Id)
+                .Load(e => e.RecordShell!.LastModifiedAt)
+                .ToListAsync())
+            .Select(e => e.Hydrate())
+            .Select(e => new SiteMapResourceMetadata(e.Id, e.LastModifiedAt))
+            .ToList()
+            .AsReadOnly();
     }
 }

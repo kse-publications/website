@@ -16,7 +16,7 @@ public interface IPublicationsQueryRepository
     /// <summary>
     /// Returns the slug of every publication.
     /// </summary>
-    Task<IReadOnlyCollection<string>> GetAllSlugsAsync(
+    Task<IReadOnlyCollection<SiteMapResourceMetadata>> GetAllSiteMapMetadataAsync(
         CancellationToken cancellationToken = default);
     
     Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(

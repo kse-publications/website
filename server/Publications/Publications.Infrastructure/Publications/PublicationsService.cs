@@ -19,39 +19,33 @@ public class PublicationsService: IPublicationsService
         _publicationsCommandRepository = publicationsCommandRepository;
     }
 
-    public async Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
+    public Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
         FilterDTO filterDTO, PaginationDTO paginationDTO,
         CancellationToken cancellationToken = default)
     {
-        PaginatedCollection<PublicationSummary> publications = await 
-            _publicationsQueryRepository.GetAllAsync(
-                filterDTO, paginationDTO, cancellationToken);
-        
-        return publications;
+       return _publicationsQueryRepository.GetAllAsync(
+           filterDTO, paginationDTO, cancellationToken);
     }
 
-    public async Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
+    public Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
         FilterDTO filterDTO, PaginationDTO paginationDTO, SearchDTO searchDTO, 
         CancellationToken cancellationToken = default)
     {
-        PaginatedCollection<PublicationSummary> matchedPublications = await 
-            _publicationsQueryRepository.GetBySearchAsync(
-                filterDTO, paginationDTO, searchDTO, cancellationToken);
-
-        return matchedPublications;
+        return _publicationsQueryRepository.GetBySearchAsync(
+            filterDTO, paginationDTO, searchDTO, cancellationToken);
     }
 
-    public async Task<Publication?> GetByIdAsync(
+    public Task<Publication?> GetByIdAsync(
         int id, CancellationToken cancellationToken = default)
     {
-        return await _publicationsCommandRepository.GetByIdAsync(id, cancellationToken);
+        return _publicationsCommandRepository.GetByIdAsync(id, cancellationToken);
     }
     
-    public async Task<PaginatedCollection<PublicationSummary>> GetRelatedByAuthorsAsync(
+    public Task<PaginatedCollection<PublicationSummary>> GetRelatedByAuthorsAsync(
         int currentPublicationId, PaginationDTO paginationDto, AuthorFilterDTO authorFilterDto,
         CancellationToken cancellationToken = default)
     {
-        return await _publicationsQueryRepository.GetRelatedByAuthorsAsync(
+        return _publicationsQueryRepository.GetRelatedByAuthorsAsync(
             currentPublicationId, paginationDto, authorFilterDto, cancellationToken);
     }
 
