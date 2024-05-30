@@ -51,18 +51,26 @@ export const SearchFilters = () => {
   return (
     <div className="flex flex-wrap justify-center gap-6">
       {(filters || []).map((filter) => {
-        let selectedFilterValue = ''
+        let selectedFilterValue = null
         const selectedFilter = selectedFilters.find((item) => item.id === filter.id)
 
         if (selectedFilter) {
-          selectedFilterValue = selectedFilter.values[0].toString()
+          selectedFilterValue = filter.filters
+            .map(({ id, value }) => selectedFilter?.values.includes(id) && value)
+            .filter((f) => f !== false)
+            .join(', ')
         }
 
         return (
           <DropdownMenu key={filter.id}>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex justify-between font-normal xs:w-[171px]">
-                Filter by {filter.name.toLowerCase()}
+              <Button
+                variant="outline"
+                className="flex justify-between overflow-hidden font-normal xs:w-[171px]"
+              >
+                {selectedFilterValue
+                  ? selectedFilterValue
+                  : 'Filter by ' + filter.name.toLowerCase()}
                 <ChevronDownIcon color="grey" />
               </Button>
             </DropdownMenuTrigger>
@@ -71,12 +79,13 @@ export const SearchFilters = () => {
                 Filter by {filter.name.toLowerCase()}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuCheckboxItem
-                checked={selectedFilterValue.length === 0}
-                onCheckedChange={() => handleFilterChange(filter.id, 'reset', filter.name)}
-              >
-                None
-              </DropdownMenuCheckboxItem>
+              {selectedFilterValue && (
+                <DropdownMenuCheckboxItem
+                  onCheckedChange={() => handleFilterChange(filter.id, 'reset', filter.name)}
+                >
+                  Reset
+                </DropdownMenuCheckboxItem>
+              )}
               {filter.filters.map(({ id, value, matchedPublicationsCount }) => (
                 <DropdownMenuCheckboxItem
                   key={id}
