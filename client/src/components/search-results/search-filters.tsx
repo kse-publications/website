@@ -1,4 +1,3 @@
-import React, { useState } from 'react'
 import { useSearchContext } from '@/contexts/search-context'
 import { captureEvent } from '@/services/posthog/posthog'
 
@@ -60,42 +59,38 @@ export const SearchFilters = () => {
         }
 
         return (
-          <>
-            <DropdownMenu key={filter.id}>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="flex justify-between font-normal xs:w-[171px]">
-                  Filter by {filter.name.toLowerCase()}
-                  <ChevronDownIcon color="grey" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>Filter by {filter.name.toLowerCase()}</DropdownMenuLabel>
-                <DropdownMenuSeparator />
+          <DropdownMenu key={filter.id}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="flex justify-between font-normal xs:w-[171px]">
+                Filter by {filter.name.toLowerCase()}
+                <ChevronDownIcon color="grey" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel className="pl-8">
+                Filter by {filter.name.toLowerCase()}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuCheckboxItem
+                checked={selectedFilterValue.length === 0}
+                onCheckedChange={() => handleFilterChange(filter.id, 'reset', filter.name)}
+              >
+                None
+              </DropdownMenuCheckboxItem>
+              {filter.filters.map(({ id, value, matchedPublicationsCount }) => (
                 <DropdownMenuCheckboxItem
-                  checked={selectedFilterValue.length === 0}
-                  onCheckedChange={() => handleFilterChange(filter.id, 'reset', filter.name)}
+                  key={id}
+                  checked={selectedFilters.some((f) => f.id === filter.id && f.values.includes(id))}
+                  onCheckedChange={() => handleFilterChange(filter.id, id.toString(), filter.name)}
                 >
-                  None
+                  <div className="flex w-[150px] justify-between">
+                    <span> {value} </span>
+                    <span className="text-gray-500">{matchedPublicationsCount}</span>
+                  </div>
                 </DropdownMenuCheckboxItem>
-                {filter.filters.map(({ id, value, matchedPublicationsCount }) => (
-                  <DropdownMenuCheckboxItem
-                    key={id}
-                    checked={selectedFilters.some(
-                      (f) => f.id === filter.id && f.values.includes(id)
-                    )}
-                    onCheckedChange={() =>
-                      handleFilterChange(filter.id, id.toString(), filter.name)
-                    }
-                  >
-                    <div className="flex w-[150px] justify-between">
-                      <span> {value} </span>
-                      <span className="font-bold">{matchedPublicationsCount}</span>
-                    </div>
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         )
       })}
     </div>

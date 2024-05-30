@@ -21,6 +21,7 @@ import { useDebounce } from 'use-debounce'
 import { captureEvent } from '@/services/posthog/posthog'
 import type { SelectedFilters } from '@/types/common/selected-filters'
 import { getFiltersFromString, getFiltersString } from '@/utils/parse-filters'
+import { getFilters } from '@/services/filters/filters'
 
 interface ISearchContext {
   debouncedSearchText: string
@@ -73,6 +74,7 @@ const SearchContextProvider = ({
 
   const [searchText, setSearchText] = useState('')
   const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>([])
+  const [filters, setFilters] = useState<IFilter[]>(initialFilters)
 
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -100,6 +102,10 @@ const SearchContextProvider = ({
 
     setSearchResults([])
     fetchPublications({ searchText, filters: selectedFilters })
+    fetchFilters({
+      filters: selectedFilters,
+      searchText,
+    })
 
     updateQuery()
 
@@ -131,6 +137,19 @@ const SearchContextProvider = ({
   const currentPage = useMemo(
     () => Math.ceil(searchResults.length / DEFAULT_PAGE_SIZE),
     [searchResults]
+  )
+
+  const fetchFilters = useCallback(
+    async ({ filters, searchText }: { filters: SelectedFilters; searchText: string }) => {
+      try {
+        const newFilters = await getFilters({ filters, searchText })
+        setFilters(newFilters)
+      } catch (error) {
+        console.error(error)
+        error instanceof Error && setError(error.message)
+      }
+    },
+    []
   )
 
   const fetchPublications = useCallback(
@@ -191,7 +210,7 @@ const SearchContextProvider = ({
     setSearchText,
     debouncedSearchText,
 
-    filters: initialFilters,
+    filters,
 
     selectedFilters,
     setSelectedFilters,
