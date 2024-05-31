@@ -6,7 +6,6 @@ using Publications.Application.DTOs;
 using Publications.Application.Services;
 using Publications.Domain.Filters;
 using Publications.Domain.Publications;
-using Publications.Domain.Shared.Slugs;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Publications.API.Endpoints;
@@ -40,7 +39,7 @@ public class PublicationsController : ControllerBase
     }
     
     [HttpGet("{id}")]
-    [RequestAnalyticsFilter<Publication>]
+    [TypeFilter(typeof(RequestAnalyticsFilter<Publication>))]
     [ProducesResponseType(typeof(Publication), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(
@@ -78,11 +77,12 @@ public class PublicationsController : ControllerBase
     }
     
     [HttpGet("search")]
+    [TypeFilter(typeof(SearchAnalyticsFilter))]
     [ProducesResponseType(typeof(PaginatedCollection<PublicationSummary>),StatusCodes.Status200OK)]
     [SwaggerOperation(
-        Summary = "FTS, prefix match, fuzzy search publications",
+        Summary = "FTS & prefix match of publications",
         Description = "Searches for the SearchTerm in the publications' " +
-                      "Title, Abstract, and Keywords, Publisher.Name, Author.Name."
+                      "Title, Abstract, Publisher.Name, Authors.Name."
     )]
     public async Task<IActionResult> GetBySearch(
         [FromQuery]FilterDTO filterDTO,
