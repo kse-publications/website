@@ -1,5 +1,5 @@
 ﻿using Notion.Client;
-using Publications.Domain.Authors;
+using Publications.Domain.Publications;
 
 namespace Publications.Infrastructure.Source.Models;
 
@@ -12,16 +12,12 @@ internal class NotionAuthor : Author
         if (!IsValidPage(page))
             return null;
         
-        NotionAuthor author = new()
+        return new NotionAuthor
         {
             NotionId = page.Id,
             Id = page.Properties["ID"].GetId(),
             Name = page.Properties["Name"].GetName()
         };
-        
-        author.Synchronize();
-        
-        return author;
     }
     
     private static bool IsValidPage(Page authorPage)
@@ -36,7 +32,6 @@ internal class NotionAuthor : Author
         {
             Id = Id,
             Name = Name,
-            SynchronizedAt = SynchronizedAt
         };
     }
 }

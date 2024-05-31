@@ -3,6 +3,7 @@ using Publications.API.Serialization;
 using Publications.Application;
 using Publications.Application.DTOs;
 using Publications.Application.Repositories;
+using Publications.Domain.Collections;
 using Publications.Domain.Publications;
 using Swashbuckle.AspNetCore.Annotations;
 

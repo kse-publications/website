@@ -2,10 +2,11 @@
 using Microsoft.Extensions.Options;
 using Publications.Application.Repositories;
 using Publications.Application.Services;
+using Publications.Application.Statistics;
 using Publications.BackgroundJobs.Abstractions;
-using Publications.Domain.Authors;
+using Publications.Domain.Collections;
+using Publications.Domain.Filters;
 using Publications.Domain.Publications;
-using Publications.Domain.Publishers;
 
 namespace Publications.BackgroundJobs;
 
@@ -15,17 +16,14 @@ public class SyncDatabasesTask(
     ISourceRepository sourceRepository,
     IPublicationsCommandRepository publicationsCommandRepository,
     ICollectionsRepository collectionsRepository,
-    IAuthorsRepository authorsRepository,
-    IPublishersRepository publishersRepository,
     IFiltersService filtersService,
-    IRequestsRepository requestsRepository)
+    IRequestsRepository requestsRepository,
+    IStatisticsRepository statisticsRepository)
     : BaseRetriableTask<SyncDatabasesTask>(taskLogger, options.Value)
 {
     private readonly DateTime _syncStartDateTime = DateTime.UtcNow;
     
     private IReadOnlyCollection<Publication>? _publications;
-    private IReadOnlyCollection<Author>? _authors;
-    private IReadOnlyCollection<Publisher>? _publishers;
     private IReadOnlyCollection<FilterGroup>? _filters;
     private IReadOnlyCollection<Collection>? _collections;
     
@@ -33,8 +31,6 @@ public class SyncDatabasesTask(
     {
         _collections = await sourceRepository.GetCollectionsAsync();
         _publications = await sourceRepository.GetPublicationsAsync();
-        _authors = await sourceRepository.GetAuthorsAsync();
-        _publishers = await sourceRepository.GetPublishersAsync();
     }
 
     protected override async Task OnSuccessAsync()
@@ -46,14 +42,11 @@ public class SyncDatabasesTask(
         await collectionsRepository.InsertOrUpdateAsync(_collections!);
         await publicationsCommandRepository
             .InsertOrUpdateAsync(await SetPublicationsViews(_publications));
-        await authorsRepository.InsertOrUpdateAsync(_authors!);
-        await publishersRepository.InsertOrUpdateAsync(_publishers!);
         await publicationsCommandRepository.ReplaceFiltersAsync(_filters);
 
         await collectionsRepository.SynchronizeAsync(_syncStartDateTime);
         await publicationsCommandRepository.SynchronizeAsync(_syncStartDateTime);
-        await authorsRepository.SynchronizeAsync(_syncStartDateTime);
-        await publishersRepository.SynchronizeAsync(_syncStartDateTime);
+        await statisticsRepository.SetTotalPublicationsCountAsync(_publications.Count);
     }
 
     private async Task<IReadOnlyCollection<Publication>> SetPublicationsViews(

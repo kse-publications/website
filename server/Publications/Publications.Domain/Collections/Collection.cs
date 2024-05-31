@@ -3,7 +3,7 @@ using Publications.Domain.Shared.Slugs;
 using Publications.Domain.Shared.ValueObjects;
 using Redis.OM.Modeling;
 
-namespace Publications.Domain.Publications;
+namespace Publications.Domain.Collections;
 
 /// <summary>
 /// Represents a logically grouped set of publications.

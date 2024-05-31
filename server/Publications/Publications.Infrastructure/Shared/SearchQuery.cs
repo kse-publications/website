@@ -103,7 +103,7 @@ public class SearchQuery
     }
     
     private static string FilterQuery(int filterId) =>
-        new SearchFieldName($"{nameof(Publication.Filters)}_{nameof(Domain.Publications.Filter.Id)}")
+        new SearchFieldName($"{nameof(Publication.Filters)}_{nameof(Domain.Filters.Filter.Id)}")
             .EqualTo(filterId);
 
     public SearchQuery Search(

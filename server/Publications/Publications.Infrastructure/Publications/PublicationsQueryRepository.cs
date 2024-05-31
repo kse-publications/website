@@ -6,9 +6,8 @@ using NRedisStack.Search.Aggregation;
 using Publications.Application;
 using Publications.Application.DTOs;
 using Publications.Application.Repositories;
-using Publications.Domain.Authors;
+using Publications.Domain.Collections;
 using Publications.Domain.Publications;
-using Publications.Domain.Publishers;
 using Publications.Infrastructure.Shared;
 using Redis.OM;
 using Redis.OM.Contracts;
@@ -73,8 +72,7 @@ public class PublicationsQueryRepository: EntityRepository<Publication>, IPublic
             .ToArray();
 
         SearchQuery query = SearchQuery
-            .CreateWithSearch(
-                searchDTO.SearchTerm, searchFields)
+            .CreateWithSearch(searchDTO.SearchTerm, searchFields)
             .Filter(filterDTO);
         
         var searchResult = await ft.SearchAsync(Publication.IndexName, 
