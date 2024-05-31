@@ -72,8 +72,7 @@ public class PublicationsQueryRepository: EntityRepository<Publication>, IPublic
             .ToArray();
 
         SearchQuery query = SearchQuery
-            .CreateWithSearch(
-                searchDTO.SearchTerm, searchFields)
+            .CreateWithSearch(searchDTO.SearchTerm, searchFields)
             .Filter(filterDTO);
         
         var searchResult = await ft.SearchAsync(Publication.IndexName, 

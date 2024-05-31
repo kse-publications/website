@@ -4,11 +4,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Notion.Client;
 using Publications.Application.Repositories;
 using Publications.Application.Services;
+using Publications.Application.Statistics;
 using Publications.Domain.Shared.Slugs;
 using Publications.Infrastructure.Publications;
 using Publications.Infrastructure.Requests;
 using Publications.Infrastructure.Services;
 using Publications.Infrastructure.Source;
+using Publications.Infrastructure.Statistics;
 using Redis.OM;
 using Redis.OM.Contracts;
 using StackExchange.Redis;
@@ -67,6 +69,7 @@ public static class Installer
         services.AddScoped<ISourceRepository, NotionRepository>();
         
         services.AddScoped<IRequestsRepository, RequestsRepository>();
+        services.AddScoped<IStatisticsRepository, StatisticsRepository>();
         
         return services;
     }

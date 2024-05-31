@@ -21,6 +21,7 @@ public static class Installer
         services.AddScheduler();
         
         services.AddTransient<StoreRequestAnalyticsTask>();
+        services.AddTransient<IncrementTotalSearchesTask>();
         services.AddQueue();
         return services;
     }

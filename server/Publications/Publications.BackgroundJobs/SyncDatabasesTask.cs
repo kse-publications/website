@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using Publications.Application.Repositories;
 using Publications.Application.Services;
+using Publications.Application.Statistics;
 using Publications.BackgroundJobs.Abstractions;
 using Publications.Domain.Collections;
 using Publications.Domain.Filters;
@@ -16,7 +17,8 @@ public class SyncDatabasesTask(
     IPublicationsCommandRepository publicationsCommandRepository,
     ICollectionsRepository collectionsRepository,
     IFiltersService filtersService,
-    IRequestsRepository requestsRepository)
+    IRequestsRepository requestsRepository,
+    IStatisticsRepository statisticsRepository)
     : BaseRetriableTask<SyncDatabasesTask>(taskLogger, options.Value)
 {
     private readonly DateTime _syncStartDateTime = DateTime.UtcNow;
@@ -44,6 +46,7 @@ public class SyncDatabasesTask(
 
         await collectionsRepository.SynchronizeAsync(_syncStartDateTime);
         await publicationsCommandRepository.SynchronizeAsync(_syncStartDateTime);
+        await statisticsRepository.SetTotalPublicationsCountAsync(_publications.Count);
     }
 
     private async Task<IReadOnlyCollection<Publication>> SetPublicationsViews(
