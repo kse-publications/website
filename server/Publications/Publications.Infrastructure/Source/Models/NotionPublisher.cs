@@ -12,16 +12,12 @@ internal class NotionPublisher : Publisher
         if (!IsValidPage(page))
             return null;
         
-        NotionPublisher publisher = new()
+        return new NotionPublisher
         {
             NotionId = page.Id,
             Id = page.Properties["ID"].GetId(),
             Name = page.Properties["Name"].GetName()
         };
-        
-        publisher.Synchronize();
-        
-        return publisher;
     }
     
     private static bool IsValidPage(Page publisherPage)
@@ -36,7 +32,6 @@ internal class NotionPublisher : Publisher
         {
             Id = Id,
             Name = Name,
-            SynchronizedAt = SynchronizedAt
         };
     }
 }

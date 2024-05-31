@@ -9,9 +9,8 @@ namespace Publications.Domain.Publishers;
 /// <summary>
 /// Represents a publisher of a <see cref="Publication"/>. 
 /// </summary>
-[Document(IndexName = "publisher-idx",StorageType = StorageType.Json, Prefixes = ["publisher"])]
-public class Publisher: Entity<Publisher>
+public class Publisher
 {
-    [Searchable(Weight = 1.0, PhoneticMatcher = "dm:en")]
+    public int Id { get; init; }
     public string Name { get; init; } = null!;
 }

@@ -9,7 +9,7 @@ using Redis.OM.Modeling;
 namespace Publications.Domain.Publications;
 
 /// <summary>
-/// Aggregate root that represents a publication.
+/// Aggregate root of Publications aggregate.
 /// </summary>
 [Document(IndexName = "publication-idx", StorageType = StorageType.Json, Prefixes = ["publication"])]
 public class Publication: Entity<Publication>
