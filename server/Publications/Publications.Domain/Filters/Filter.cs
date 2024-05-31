@@ -2,7 +2,7 @@
 using System.Text;
 using Redis.OM.Modeling;
 
-namespace Publications.Domain.Publications;
+namespace Publications.Domain.Filters;
 
 public class Filter
 {

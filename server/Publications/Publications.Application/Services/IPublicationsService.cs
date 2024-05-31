@@ -1,4 +1,5 @@
 ﻿using Publications.Application.DTOs;
+using Publications.Domain.Filters;
 using Publications.Domain.Publications;
 
 namespace Publications.Application.Services;

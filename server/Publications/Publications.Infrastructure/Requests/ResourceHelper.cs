@@ -1,6 +1,4 @@
-﻿using Publications.Domain.Authors;
-using Publications.Domain.Publications;
-using Publications.Domain.Publishers;
+﻿using Publications.Domain.Publications;
 
 namespace Publications.Infrastructure.Requests;
 

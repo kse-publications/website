@@ -1,5 +1,5 @@
 ﻿using Notion.Client;
-using Publications.Domain.Authors;
+using Publications.Domain.Publications;
 
 namespace Publications.Infrastructure.Source.Models;
 

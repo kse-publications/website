@@ -1,4 +1,5 @@
-﻿using Publications.Domain.Publications;
+﻿using Publications.Domain.Filters;
+using Publications.Domain.Publications;
 
 namespace Publications.Application.Repositories;
 

@@ -1,4 +1,5 @@
 ﻿using Notion.Client;
+using Publications.Domain.Collections;
 using Publications.Domain.Publications;
 using Publications.Domain.Shared.Slugs;
 

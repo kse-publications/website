@@ -1,9 +1,8 @@
 ﻿using Microsoft.Extensions.Options;
 using Notion.Client;
 using Publications.Application.Repositories;
-using Publications.Domain.Authors;
+using Publications.Domain.Collections;
 using Publications.Domain.Publications;
-using Publications.Domain.Publishers;
 using Publications.Domain.Shared.Slugs;
 using Publications.Infrastructure.Source.Models;
 

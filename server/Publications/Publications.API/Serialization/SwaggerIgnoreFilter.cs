@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
-using Publications.Domain.Shared.Attributes;
+using Publications.Domain.Shared.Serialization;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Publications.API.Serialization;

@@ -4,6 +4,7 @@ using Publications.API.Serialization;
 using Publications.Application;
 using Publications.Application.DTOs;
 using Publications.Application.Services;
+using Publications.Domain.Filters;
 using Publications.Domain.Publications;
 using Publications.Domain.Shared.Slugs;
 using Swashbuckle.AspNetCore.Annotations;

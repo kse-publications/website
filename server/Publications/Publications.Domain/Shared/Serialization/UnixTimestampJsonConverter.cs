@@ -2,7 +2,7 @@
 using System.Text.Json.Serialization;
 using JsonException = System.Text.Json.JsonException;
 
-namespace Publications.Domain.Shared;
+namespace Publications.Domain.Shared.Serialization;
 
 public class UnixTimestampJsonConverter : JsonConverter<DateTime>
 {

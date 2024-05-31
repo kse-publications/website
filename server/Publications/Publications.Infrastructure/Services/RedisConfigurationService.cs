@@ -1,6 +1,8 @@
 ﻿using NRedisStack;
 using NRedisStack.RedisStackCommands;
 using Publications.Application.Services;
+using Publications.Domain.Collections;
+using Publications.Domain.Filters;
 using Publications.Domain.Publications;
 using Redis.OM;
 using Redis.OM.Contracts;

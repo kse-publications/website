@@ -3,6 +3,8 @@ using Microsoft.Extensions.Options;
 using Publications.Application.Repositories;
 using Publications.Application.Services;
 using Publications.BackgroundJobs.Abstractions;
+using Publications.Domain.Collections;
+using Publications.Domain.Filters;
 using Publications.Domain.Publications;
 
 namespace Publications.BackgroundJobs;

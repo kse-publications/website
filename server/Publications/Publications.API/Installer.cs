@@ -4,9 +4,8 @@ using Microsoft.OpenApi.Models;
 using Publications.API.Middleware;
 using Publications.API.Serialization;
 using Publications.Application;
-using Publications.Domain.Authors;
+using Publications.Domain.Filters;
 using Publications.Domain.Publications;
-using Publications.Domain.Publishers;
 
 namespace Publications.API;
 

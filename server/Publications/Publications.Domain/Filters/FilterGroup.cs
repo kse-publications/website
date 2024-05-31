@@ -1,7 +1,7 @@
-﻿using Publications.Domain.Shared.Attributes;
+﻿using Publications.Domain.Shared.Serialization;
 using Redis.OM.Modeling;
 
-namespace Publications.Domain.Publications;
+namespace Publications.Domain.Filters;
 
 [Document(IndexName = "filtergroup-idx", StorageType = StorageType.Json, Prefixes = ["filter-group"])]
 public class FilterGroup
