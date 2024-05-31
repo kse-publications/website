@@ -1,6 +1,7 @@
 ﻿using Coravel.Scheduling.Schedule.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Publications.Application.Repositories;
+using Publications.Application.Statistics;
 using Publications.BackgroundJobs;
 using Publications.Domain.Publications;
 
@@ -12,7 +13,8 @@ public static class SystemEndpoints
     {
         return endpoints
             .MapSyncEndpoint()
-            .MapGetViewsEndpoint();
+            .MapGetViewsEndpoint()
+            .MapGetOverallStatsEndpoint();
     }
     
     private static IEndpointRouteBuilder MapSyncEndpoint(
@@ -41,6 +43,19 @@ public static class SystemEndpoints
                     .GetResourceViews<Publication>();
             
                 return views;
+            });
+        
+        return endpoints;
+    }
+
+    private static IEndpointRouteBuilder MapGetOverallStatsEndpoint(
+        this IEndpointRouteBuilder endpoints)
+    {
+        endpoints.MapGet("/stats/overall", 
+            async ([FromServices] IStatisticsRepository statisticsRepository) =>
+            {
+                var stats = await statisticsRepository.GetOverallStatsAsync();
+                return stats;
             });
         
         return endpoints;
