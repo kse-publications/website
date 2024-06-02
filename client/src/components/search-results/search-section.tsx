@@ -4,6 +4,7 @@ import type { PaginatedCollection } from '@/types/common/paginated-collection'
 import type { PublicationSummary } from '@/types/publication-summary/publication-summary'
 import type { IFilter } from '@/types/common/fiters'
 import { SearchBackground } from './search-background'
+import ScrollToTop from 'react-scroll-to-top'
 
 interface SearchSectionProps {
   initialPublications: PaginatedCollection<PublicationSummary>
@@ -26,6 +27,12 @@ export default function SearchSection({
       <section className="flex grow flex-col">
         <SearchBackground />
         <SearchResults />
+        <ScrollToTop
+          smooth
+          height="15px"
+          className="flex items-center justify-center"
+          style={{ borderRadius: '50%' }}
+        />
       </section>
     </SearchContextProvider>
   )

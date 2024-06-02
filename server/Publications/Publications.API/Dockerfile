@@ -18,6 +18,8 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "Publications.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
+ENV ASPNETCORE_ENVIRONMENT ""
+ENV Notion__AuthToken ""
 WORKDIR /app
 COPY --from=publish /app/publish .
 RUN mkdir ./sqlite_db

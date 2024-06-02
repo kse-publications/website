@@ -6,7 +6,9 @@ import Layout from '@/layouts/Layout.astro'
 
 const { id } = Astro.params as { id: string }
 
-const data = await getPublication(id).catch((error) => {
+const clientUuid = Astro.cookies.get('client-uuid')
+
+const data = await getPublication(id, clientUuid?.value).catch((error) => {
   console.log(error)
 })
 ---

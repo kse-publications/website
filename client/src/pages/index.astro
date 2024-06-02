@@ -7,20 +7,20 @@ import type { PaginatedCollection } from '@/types/common/paginated-collection'
 import type { PublicationSummary } from '@/types/publication-summary/publication-summary'
 import { DEFAULT_PAGE } from '@/config/search-params'
 import { getFilters } from '@/services/filters/filters'
-
-const filters = await getFilters()
+import { getFiltersFromString } from '@/utils/parse-filters'
 
 let initialPublications: PaginatedCollection<PublicationSummary>
 const searchParams = Astro.url.searchParams
 
 const searchText = searchParams.get('searchText')
-const selectedFilters =
-  searchParams
-    .get('filters')
-    ?.split(',')
-    .map((filter) => parseInt(filter, 10)) || []
+const selectedFilters = getFiltersFromString(searchParams.get('filters'))
 
 const isRecent = !searchText && !selectedFilters.length
+
+const filters = await getFilters({
+  filters: selectedFilters,
+  searchText: searchText || '',
+})
 
 if (!searchText) {
   initialPublications = await getInitialPublications({
@@ -42,6 +42,6 @@ if (!searchText) {
     filters={filters}
     initialPublications={initialPublications}
     isRecent={isRecent}
-    client:load
+    client:only
   />
 </Layout>

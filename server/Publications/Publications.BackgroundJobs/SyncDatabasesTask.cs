@@ -2,61 +2,57 @@
 using Microsoft.Extensions.Options;
 using Publications.Application.Repositories;
 using Publications.Application.Services;
+using Publications.Application.Statistics;
 using Publications.BackgroundJobs.Abstractions;
-using Publications.Domain.Shared;
+using Publications.Domain.Collections;
+using Publications.Domain.Filters;
+using Publications.Domain.Publications;
 
 namespace Publications.BackgroundJobs;
 
-public class SyncDatabasesTask : BaseRetriableTask<SyncDatabasesTask>
+public class SyncDatabasesTask(
+    ILogger<SyncDatabasesTask> taskLogger,
+    IOptions<RetriableTaskOptions> options,
+    ISourceRepository sourceRepository,
+    IPublicationsCommandRepository publicationsCommandRepository,
+    ICollectionsRepository collectionsRepository,
+    IFiltersService filtersService,
+    IRequestsRepository requestsRepository,
+    IStatisticsRepository statisticsRepository)
+    : BaseRetriableTask<SyncDatabasesTask>(taskLogger, options.Value)
 {
-    private readonly ISourceRepository _sourceRepository;
-    private readonly IPublicationsRepository _publicationsRepository;
-    private readonly IAuthorsRepository _authorsRepository;
-    private readonly IPublishersRepository _publishersRepository;
-    private readonly IFiltersService _filtersService;
-    private readonly IFiltersRepository _filtersRepository;
-    private readonly IRequestsRepository _requestsRepository;
-
-    public SyncDatabasesTask(
-        ILogger<SyncDatabasesTask> taskLogger,
-        ISourceRepository sourceRepository,
-        IOptions<RetriableTaskOptions> options, 
-        IPublicationsRepository publicationsRepository,
-        IAuthorsRepository authorsRepository, 
-        IPublishersRepository publishersRepository,
-        IFiltersRepository filtersRepository, 
-        IFiltersService filtersService,
-        IRequestsRepository requestsRepository) : base(taskLogger, options.Value)
-    {
-        _sourceRepository = sourceRepository;
-        _publicationsRepository = publicationsRepository;
-        _authorsRepository = authorsRepository;
-        _publishersRepository = publishersRepository;
-        _filtersRepository = filtersRepository;
-        _filtersService = filtersService;
-        _requestsRepository = requestsRepository;
-    }
-
+    private readonly DateTime _syncStartDateTime = DateTime.UtcNow;
+    
+    private IReadOnlyCollection<Publication>? _publications;
+    private IReadOnlyCollection<FilterGroup>? _filters;
+    private IReadOnlyCollection<Collection>? _collections;
+    
     protected override async Task DoRetriableTaskAsync()
     {
-        var publications = await _sourceRepository.GetPublicationsAsync();
-        var authors = await _sourceRepository.GetAuthorsAsync();
-        var publishers = await _sourceRepository.GetPublishersAsync();
-        var filters = await _filtersService.GetFiltersForPublicationsAsync(publications);
-
-        publications = await _filtersService.AssignFiltersToPublicationsAsync(
-            publications.ToList(), filters.ToList());
-        await _publicationsRepository.InsertOrUpdateAsync(await SetResourceViewsAsync(publications));
-        await _authorsRepository.InsertOrUpdateAsync(await SetResourceViewsAsync(authors));
-        await _publishersRepository.InsertOrUpdateAsync(await SetResourceViewsAsync(publishers));
-        await _filtersRepository.InsertOrUpdateAsync(filters);
+        _collections = await sourceRepository.GetCollectionsAsync();
+        _publications = await sourceRepository.GetPublicationsAsync();
     }
 
-    private async Task<IReadOnlyCollection<TResource>> SetResourceViewsAsync<TResource>(
-        IReadOnlyCollection<TResource> resourceItemsCollection)
-        where TResource : Entity<TResource>
+    protected override async Task OnSuccessAsync()
     {
-        Dictionary<int, int> views = await _requestsRepository.GetResourceViews<TResource>();
+        _filters = await filtersService.GetFiltersForPublicationsAsync(_publications!);
+        _publications = filtersService.AssignFiltersToPublicationsAsync(
+            _publications!.ToList(), _filters.ToList());
+
+        await collectionsRepository.InsertOrUpdateAsync(_collections!);
+        await publicationsCommandRepository
+            .InsertOrUpdateAsync(await SetPublicationsViews(_publications));
+        await publicationsCommandRepository.ReplaceFiltersAsync(_filters);
+
+        await collectionsRepository.SynchronizeAsync(_syncStartDateTime);
+        await publicationsCommandRepository.SynchronizeAsync(_syncStartDateTime);
+        await statisticsRepository.SetTotalPublicationsCountAsync(_publications.Count);
+    }
+
+    private async Task<IReadOnlyCollection<Publication>> SetPublicationsViews(
+        IEnumerable<Publication> resourceItemsCollection)
+    {
+        Dictionary<int, int> views = await requestsRepository.GetResourceViews<Publication>();
 
         return resourceItemsCollection
             .Select(resource => views.TryGetValue(resource.Id, out int resourceViews)

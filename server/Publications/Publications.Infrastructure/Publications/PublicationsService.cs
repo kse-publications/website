@@ -2,64 +2,87 @@
 using Publications.Application.DTOs;
 using Publications.Application.Repositories;
 using Publications.Application.Services;
+using Publications.Domain.Filters;
 using Publications.Domain.Publications;
 
 namespace Publications.Infrastructure.Publications;
 
 public class PublicationsService: IPublicationsService
 {
-    private readonly IPublicationsRepository _publicationsRepository;
+    private readonly IPublicationsQueryRepository _publicationsQueryRepository;
+    private readonly IPublicationsCommandRepository _publicationsCommandRepository;
 
-    public PublicationsService(IPublicationsRepository publicationsRepository)
+    public PublicationsService(
+        IPublicationsQueryRepository publicationsQueryRepository,
+        IPublicationsCommandRepository publicationsCommandRepository)
     {
-        _publicationsRepository = publicationsRepository;
+        _publicationsQueryRepository = publicationsQueryRepository;
+        _publicationsCommandRepository = publicationsCommandRepository;
     }
 
-    public async Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
-        PaginationFilterDTO paginationDTO, CancellationToken cancellationToken = default)
-    {
-        PaginatedCollection<Publication> publications = await _publicationsRepository
-            .GetAllAsync(paginationDTO, cancellationToken);
-        
-        return GetPublicationsSummaries(publications);
-    }
-
-    public async Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
-        PaginationFilterSearchDTO paginationSearchDTO, 
+    public Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
+        FilterDTO filterDTO, PaginationDTO paginationDTO,
         CancellationToken cancellationToken = default)
     {
-        const int minSearchTermLength = 2;
-        
-        if (paginationSearchDTO.SearchTerm.Length < minSearchTermLength)
-            return EmptyResponse;
-        
-        PaginatedCollection<Publication> matchedPublications = await _publicationsRepository
-            .GetBySearchAsync(paginationSearchDTO, cancellationToken);
-        
-        return GetPublicationsSummaries(matchedPublications);
+       return _publicationsQueryRepository.GetAllAsync(
+           filterDTO, paginationDTO, cancellationToken);
     }
 
-    public async Task<Publication?> GetByIdAsync(
+    public Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
+        FilterDTO filterDTO, PaginationDTO paginationDTO, SearchDTO searchDTO, 
+        CancellationToken cancellationToken = default)
+    {
+        return _publicationsQueryRepository.GetBySearchAsync(
+            filterDTO, paginationDTO, searchDTO, cancellationToken);
+    }
+
+    public Task<Publication?> GetByIdAsync(
         int id, CancellationToken cancellationToken = default)
     {
-        return await _publicationsRepository.GetByIdAsync(id, cancellationToken);
-    }
-
-    private static PaginatedCollection<PublicationSummary> GetPublicationsSummaries(
-        PaginatedCollection<Publication> publications)
-    {
-        IReadOnlyCollection<PublicationSummary> summaries = publications.Items
-            .Select(PublicationSummary.FromPublication)
-            .ToList()
-            .AsReadOnly();
-        
-        return new PaginatedCollection<PublicationSummary>(
-            Items: summaries,
-            ResultCount: publications.ResultCount,
-            TotalCount: publications.TotalCount);
+        return _publicationsCommandRepository.GetByIdAsync(id, cancellationToken);
     }
     
-    private static PaginatedCollection<PublicationSummary> EmptyResponse => 
-        new PaginatedCollection<PublicationSummary>(
-            Items: new List<PublicationSummary>(), ResultCount: 0, TotalCount: 0);
+    public Task<PaginatedCollection<PublicationSummary>> GetRelatedByAuthorsAsync(
+        int currentPublicationId, PaginationDTO paginationDto, AuthorFilterDTO authorFilterDto,
+        CancellationToken cancellationToken = default)
+    {
+        return _publicationsQueryRepository.GetRelatedByAuthorsAsync(
+            currentPublicationId, paginationDto, authorFilterDto, cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<FilterGroup>> GetFiltersAsync(
+        FilterDTO filterDTO, PaginationDTO paginationDTO, SearchDTO searchDTO,
+        CancellationToken cancellationToken = default)
+    {
+        IReadOnlyCollection<FilterGroup> filterGroups = await
+            _publicationsCommandRepository.GetFiltersAsync(cancellationToken);
+        
+        Dictionary<string, int> filtersValuesWithMatchesCount = await
+            _publicationsQueryRepository.GetFiltersWithMatchedCountAsync(
+                filterDTO, searchDTO, cancellationToken);
+        
+        return MatchFiltersCount(filterGroups, filtersValuesWithMatchesCount)
+            .OrderBy(fg => fg.Id)
+            .ToList()
+            .AsReadOnly();
+    }
+    
+    private static IReadOnlyCollection<FilterGroup> MatchFiltersCount(
+        IReadOnlyCollection<FilterGroup> filterGroups,
+        Dictionary<string, int> filtersValuesWithMatchesCount)
+    {
+        foreach (FilterGroup filterGroup in filterGroups)
+        {
+            foreach (Filter filter in filterGroup.Filters)
+            {
+                if (filtersValuesWithMatchesCount.
+                    TryGetValue(filter.Value, out int matchesCount))
+                {
+                    filter.MatchedPublicationsCount = matchesCount;
+                }
+            }
+        }
+
+        return filterGroups;
+    }
 }

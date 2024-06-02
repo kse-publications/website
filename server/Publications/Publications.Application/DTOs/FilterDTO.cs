@@ -7,28 +7,46 @@ public record FilterDTO
     /// <summary>
     /// Raw filters value from url query.
     /// </summary>
-    [RegularExpression(@"^\d+(?:-\d+)*(?:;\d+(?:-\d+)*)*;?$", ErrorMessage = "Invalid filters format.")]
+    [RegularExpression(@"^\d+:(?:\d+(?:-\d+)*)(?:;\d+:(?:\d+(?:-\d+)*))*;?$", ErrorMessage = "Invalid filters format.")]
     public string Filters { get; init; } = string.Empty;
     
-    private int[][]? _filterIds;
-    public int[][] GetParsedFilters()
+    private Dictionary<int, int[]>? _filterIds;
+    
+    /// <summary>
+    /// Parses the filters string into a dictionary of group ids and filter ids.
+    /// </summary>
+    /// <returns>Key: group id, Value: filter ids array</returns>
+    public Dictionary<int, int[]> GetParsedFilters()
     {
         return _filterIds ??= ParseFilters(Filters);
     }
-    
-    private static int[][] ParseFilters(string filters)
+
+    public static FilterDTO CreateFromFilters(Dictionary<int, int[]> filterGroups)
     {
-        string[] filterGroups = filters.Split(';', StringSplitOptions.RemoveEmptyEntries);
-        int[][] filterIds = new int[filterGroups.Length][];
+        return new FilterDTO { _filterIds = filterGroups };
+    }
+    
+    private static Dictionary<int, int[]> ParseFilters(string rawFilters)
+    {
+        const char groupSeparator = ';';
+        const char filterSeparator = '-';
+        const char groupIdSeparator = ':';
+        
+        Dictionary<int, int[]> filterIds = [];
+        string[] filterGroups = rawFilters.Split(
+            groupSeparator, StringSplitOptions.RemoveEmptyEntries);
 
-        for (int i = 0; i < filterGroups.Length; i++)
+        foreach (var group in filterGroups)
         {
-            string[] filterGroup = filterGroups[i].Split('-');
-            filterIds[i] = new int[filterGroup.Length];
+            string[] groupAndFilters = group.Split(groupIdSeparator);
+            int groupId = int.Parse(groupAndFilters[0]);
 
-            for (int j = 0; j < filterGroup.Length; j++)
+            string[] filters = groupAndFilters[1].Split(filterSeparator);
+            filterIds[groupId] = new int[filters.Length];
+
+            for (int j = 0; j < filters.Length; j++)
             {
-                filterIds[i][j] = int.Parse(filterGroup[j]);
+                filterIds[groupId][j] = int.Parse(filters[j]);
             }
         }
 

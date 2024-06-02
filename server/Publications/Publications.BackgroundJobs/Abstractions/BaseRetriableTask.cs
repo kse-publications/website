@@ -40,7 +40,14 @@ public abstract class BaseRetriableTask<TTask>: BaseLoggableTask<TTask>
                 throw;
             }
         }
+        
+        await OnSuccessAsync();
     }
 
     protected abstract Task DoRetriableTaskAsync();
+    
+    protected virtual Task OnSuccessAsync()
+    {
+        return Task.CompletedTask;
+    }
 }

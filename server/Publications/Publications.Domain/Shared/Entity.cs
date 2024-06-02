@@ -1,5 +1,5 @@
-﻿using Publications.Domain.Filters;
-using Publications.Domain.Shared.Attributes;
+﻿using System.Text.Json.Serialization;
+using Publications.Domain.Shared.Serialization;
 using Redis.OM.Modeling;
 
 namespace Publications.Domain.Shared;
@@ -7,32 +7,22 @@ namespace Publications.Domain.Shared;
 public abstract class Entity<T> where T: Entity<T>
 {
     [RedisIdField]
-    [Indexed]
-    [IgnoreInResponse]
+    [Indexed(Sortable = true)]
     public int Id { get; init; }
     
+    [Indexed]
     [IgnoreInResponse]
-    public Guid NotionId { get; init; }
+    [JsonConverter(typeof(UnixTimestampJsonConverter))]
+    public DateTime SynchronizedAt { get; set; }
+    
+    [Indexed]
+    [IgnoreInResponse]
+    [JsonConverter(typeof(UnixTimestampJsonConverter))]
+    public DateTime LastModifiedAt { get; set; }
 
-    public string Slug { get; set; } = string.Empty;
-    
-    [Indexed(Sortable = true)]
-    public int Views { get; set; } 
-    
-    [Indexed(JsonPath = "$.Id")]
-    public Filter[] Filters { get; set; } = Array.Empty<Filter>();
-    
-    public abstract T UpdateSlug(IWordsService wordsService);
-
-    public T UpdateViews(int views = 1)
+    public void Synchronize()
     {
-        if (views < 0)
-        {
-            throw new ArgumentException("Views cannot be negative");
-        }
-        
-        Views = views;
-        return (T)this;
+        SynchronizedAt = DateTime.UtcNow;
     }
     
     public static string IndexName => $"{typeof(T).Name.ToLower()}-idx";

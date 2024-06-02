@@ -4,16 +4,16 @@ using Microsoft.Extensions.DependencyInjection;
 using Notion.Client;
 using Publications.Application.Repositories;
 using Publications.Application.Services;
-using Publications.Domain.Shared;
-using Publications.Infrastructure.Authors;
-using Publications.Infrastructure.Filters;
+using Publications.Application.Statistics;
+using Publications.Domain.Shared.Slugs;
 using Publications.Infrastructure.Publications;
-using Publications.Infrastructure.Publishers;
 using Publications.Infrastructure.Requests;
-using Publications.Infrastructure.Shared;
+using Publications.Infrastructure.Services;
 using Publications.Infrastructure.Source;
+using Publications.Infrastructure.Statistics;
 using Redis.OM;
 using Redis.OM.Contracts;
+using StackExchange.Redis;
 
 namespace Publications.Infrastructure;
 
@@ -35,8 +35,15 @@ public static class Installer
     private static IServiceCollection AddRedis(this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddSingleton<IRedisConnectionProvider>(new RedisConnectionProvider(
-            connectionString: configuration.GetConnectionString("Redis")!));
+        var connectionMultiplexer = ConnectionMultiplexer
+            .Connect(configuration.GetConnectionString("Redis")!);
+        
+        services.AddSingleton<IConnectionMultiplexer>(connectionMultiplexer);
+        
+        services.AddSingleton<IRedisConnectionProvider>(
+            new RedisConnectionProvider(connectionMultiplexer));
+        
+        services.AddTransient<IDbConfigurationService, RedisConfigurationService>();
         
         return services;
     }
@@ -44,26 +51,30 @@ public static class Installer
     private static IServiceCollection AddNotionClient(this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.Configure<NotionDatabaseOptions>(
-            configuration.GetSection("Notion:Databases"));
+        services.AddOptionsWithValidateOnStart<NotionDatabaseOptions>()
+            .ValidateDataAnnotations()
+            .Bind(configuration.GetSection("Notion:Databases"));
+        
+        string? authToken = configuration["Notion:AuthToken"];
+        if (string.IsNullOrWhiteSpace(authToken))
+            throw new InvalidOperationException("Notion AuthToken was not provided.");
         
         services.AddScoped<INotionClient>(provider => NotionClientFactory.Create(
-            new ClientOptions{ AuthToken = configuration["Notion:AuthToken"] }));
+            new ClientOptions{ AuthToken = authToken }));
         
         return services;
     }
     
     private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
-        services.AddScoped<IPublicationsRepository, PublicationsRepository>();
-        services.AddScoped<IAuthorsRepository, AuthorsRepository>();
-        services.AddScoped<IPublishersRepository, PublishersRepository>();
+        services.AddScoped<IPublicationsQueryRepository, PublicationsQueryRepository>();
+        services.AddScoped<IPublicationsCommandRepository, PublicationsCommandRepository>();
+        services.AddScoped<ICollectionsRepository, CollectionsRepository>();
         
         services.AddScoped<ISourceRepository, NotionRepository>();
         
         services.AddScoped<IRequestsRepository, RequestsRepository>();
-
-        services.AddScoped<IFiltersRepository, FiltersRepository>();
+        services.AddScoped<IStatisticsRepository, StatisticsRepository>();
         
         return services;
     }

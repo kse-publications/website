@@ -1,4 +1,4 @@
-﻿using Publications.Domain.Shared.Attributes;
+﻿using Publications.Domain.Shared.Serialization;
 using Redis.OM.Modeling;
 
 namespace Publications.Domain.Filters;

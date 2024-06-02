@@ -32,7 +32,12 @@ function PublicationPage({ data }: PublicationPageProps) {
             <h4 className="text-l scroll-m-20 font-semibold tracking-tight">Authors:</h4>{' '}
             {data.authors.map((author: any, index: number) => (
               <span key={author.slug}>
-                {author.name}
+                <a
+                  href={`/?searchText=${author.name.toLowerCase().replace(/\s/g, '+')}`}
+                  className="hover:underline"
+                >
+                  {author.name}
+                </a>
                 {index < data.authors.length - 1 ? ', ' : ''}{' '}
               </span>
             ))}

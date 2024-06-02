@@ -18,14 +18,18 @@ import type { PaginatedCollection } from '@/types/common/paginated-collection'
 import type { SearchPublicationsQueryParams } from '@/types/common/query-params'
 import type { IFilter } from '@/types/common/fiters'
 import { useDebounce } from 'use-debounce'
+import { captureEvent } from '@/services/posthog/posthog'
+import type { SelectedFilters } from '@/types/common/selected-filters'
+import { getFiltersFromString, getFiltersString } from '@/utils/parse-filters'
+import { getFilters } from '@/services/filters/filters'
 
 interface ISearchContext {
   debouncedSearchText: string
   searchText: string
   setSearchText: Dispatch<SetStateAction<string>>
 
-  selectedFilters: number[]
-  setSelectedFilters: Dispatch<SetStateAction<number[]>>
+  selectedFilters: SelectedFilters
+  setSelectedFilters: Dispatch<SetStateAction<SelectedFilters>>
 
   filters: IFilter[]
 
@@ -69,7 +73,8 @@ const SearchContextProvider = ({
   const [isRecent, setIsRecent] = useState<boolean>(initialIsRecent)
 
   const [searchText, setSearchText] = useState('')
-  const [selectedFilters, setSelectedFilters] = useState<number[]>([])
+  const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>([])
+  const [filters, setFilters] = useState<IFilter[]>(initialFilters)
 
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -83,12 +88,7 @@ const SearchContextProvider = ({
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search)
     setSearchText(searchParams.get('searchText') || '')
-    setSelectedFilters(
-      searchParams
-        .get('filters')
-        ?.split(',')
-        .map((filter) => parseInt(filter, 10)) || []
-    )
+    setSelectedFilters(getFiltersFromString(searchParams.get('filters')))
 
     const rehydrateTimeout = setTimeout(() => {
       isInitialPublications.current = false
@@ -102,9 +102,16 @@ const SearchContextProvider = ({
 
     setSearchResults([])
     fetchPublications({ searchText, filters: selectedFilters })
+    fetchFilters({
+      filters: selectedFilters,
+      searchText,
+    })
 
     updateQuery()
-    setIsRecent(!searchText && !selectedFilters.length)
+
+    const isRecent = !searchText && !selectedFilters.length
+    setIsRecent(isRecent)
+    !isRecent && captureEvent('search', { searchText, filters: selectedFilters })
   }, [debouncedSearchText, selectedFilters])
 
   const updateQuery = useCallback(() => {
@@ -113,7 +120,7 @@ const SearchContextProvider = ({
     if (searchText) urlSearchParams.append('searchText', searchText)
     else urlSearchParams.delete('searchText')
 
-    if (selectedFilters.length) urlSearchParams.append('filters', selectedFilters.join(','))
+    if (selectedFilters.length) urlSearchParams.append('filters', getFiltersString(selectedFilters))
     else urlSearchParams.delete('filters')
 
     if (!searchText && !selectedFilters.length) {
@@ -130,6 +137,19 @@ const SearchContextProvider = ({
   const currentPage = useMemo(
     () => Math.ceil(searchResults.length / DEFAULT_PAGE_SIZE),
     [searchResults]
+  )
+
+  const fetchFilters = useCallback(
+    async ({ filters, searchText }: { filters: SelectedFilters; searchText: string }) => {
+      try {
+        const newFilters = await getFilters({ filters, searchText })
+        setFilters(newFilters)
+      } catch (error) {
+        console.error(error)
+        error instanceof Error && setError(error.message)
+      }
+    },
+    []
   )
 
   const fetchPublications = useCallback(
@@ -179,8 +199,9 @@ const SearchContextProvider = ({
     fetchPublications({
       searchText,
       page: currentPage + 1,
+      filters: selectedFilters,
     })
-  }, [searchText, currentPage])
+  }, [searchText, currentPage, selectedFilters])
 
   const value: ISearchContext = {
     loadMoreHandler,
@@ -189,7 +210,7 @@ const SearchContextProvider = ({
     setSearchText,
     debouncedSearchText,
 
-    filters: initialFilters,
+    filters,
 
     selectedFilters,
     setSelectedFilters,
