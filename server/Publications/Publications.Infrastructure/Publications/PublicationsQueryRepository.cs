@@ -154,7 +154,7 @@ public class PublicationsQueryRepository: EntityRepository<Publication>, IPublic
             ResultCount: publications.Count);
     }
 
-    public async Task<Dictionary<string, int>> GetFiltersCountAsync(
+    public async Task<Dictionary<string, int>> GetFiltersWithMatchedCountAsync(
         FilterDTO filterDTO, SearchDTO searchDTO,
         CancellationToken cancellationToken = default)
     {
@@ -182,8 +182,7 @@ public class PublicationsQueryRepository: EntityRepository<Publication>, IPublic
                 var result = await ft.AggregateAsync(Publication.IndexName,
                     new AggregationRequest(query.Build())
                         .Load(new FieldName(entityFilter.PropertyName))
-                        .GroupBy($"@{entityFilter.PropertyName}", 
-                            Reducers.Count().As("count"))
+                        .GroupBy($"@{entityFilter.PropertyName}", Reducers.Count().As("count"))
                         .Dialect(3));
 
                 return result.GetResults()
