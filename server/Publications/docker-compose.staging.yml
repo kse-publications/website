@@ -1,27 +1,27 @@
 ﻿
 services:
   publications.api:
-    image: publications.api:production
-    container_name: publications.api.production
+    image: publications.api:staging
+    container_name: publications.api.staging
     build:
       context: .
       dockerfile: Publications.API/Dockerfile
     restart: on-failure
     ports:
-      - "8080:8080"
-      - "8081:8081"
+      - "3000:8080"
+      - "3001:8081"
     depends_on:
       redis:
         condition: service_healthy
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=Staging
       - Notion__AuthToken=${NOTION_AUTH_TOKEN}
     volumes:
-      - sqlite-data-production:/app/sqlite_db
+      - sqlite-data-staging:/app/sqlite_db
 
   redis:
     image: redis/redis-stack
-    container_name: redis.production
+    container_name: redis.staging
     restart: on-failure
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
@@ -29,8 +29,8 @@ services:
       timeout: 10s
       retries: 5
     volumes:
-      - redis-data-production:/data
+      - redis-data-staging:/data
 
 volumes:
-  redis-data-production:
-  sqlite-data-production:
+  redis-data-staging:
+  sqlite-data-staging:

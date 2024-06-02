@@ -58,7 +58,7 @@ public class PublicationsService: IPublicationsService
             _publicationsCommandRepository.GetFiltersAsync(cancellationToken);
         
         Dictionary<string, int> filtersValuesWithMatchesCount = await
-            _publicationsQueryRepository.GetFiltersCountAsync(
+            _publicationsQueryRepository.GetFiltersWithMatchedCountAsync(
                 filterDTO, searchDTO, cancellationToken);
         
         return MatchFiltersCount(filterGroups, filtersValuesWithMatchesCount)

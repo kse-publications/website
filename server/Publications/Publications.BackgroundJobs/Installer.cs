@@ -14,8 +14,9 @@ public static class Installer
     {
         services.AddHostedService<ConfigurationHostedService>();
 
-        services.Configure<RetriableTaskOptions>(
-            configuration.GetSection("BackgroundTasks:SyncDatabasesTask"));
+        services
+            .AddOptions<RetriableTaskOptions>()
+            .Bind(configuration.GetSection("BackgroundTasks:SyncDatabasesTask"));
         
         services.AddTransient<SyncDatabasesTask>();
         services.AddScheduler();
