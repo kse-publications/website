@@ -22,10 +22,14 @@ jobs:
 
     - name: Deploy to VPS Staging
       if: github.ref == 'refs/heads/main'
+      env:
+        VPS_IP: ${{ secrets.VPS_IP }}
       run: |
-        sshpass -p "${{ secrets.VPS_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP}} "~/staging/deploy.staging.sh"
+        sshpass -p "${{ secrets.VPS_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@$VPS_IP "~/staging/deploy.staging.sh"
 
     - name: Deploy to VPS Production
       if: github.ref == 'refs/heads/published'
+      env:
+        VPS_IP: ${{ secrets.VPS_IP }}
       run: |
-        sshpass -p "${{ secrets.VPS_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP}} "~/production/deploy.production.sh"
+        sshpass -p "${{ secrets.VPS_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@$VPS_IP "~/production/deploy.production.sh"
