@@ -2,9 +2,7 @@ name: Deploy to VPS
 
 on:
   push:
-    branches:
-      - main
-      - published
+    branches: [ "main", "published" ]
 
 jobs:
   deploy:
@@ -17,16 +15,17 @@ jobs:
     - name: Install sshpass
       run: sudo apt-get install -y sshpass
 
+    - name: Prepare known_hosts
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan -H ${{ secrets.VPS_IP }} >> ~/.ssh/known_hosts
+
     - name: Deploy to VPS Staging
       if: github.ref == 'refs/heads/main'
-      env:
-        VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
       run: |
-        sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP}} "~/staging/deploy.staging.sh"
+        sshpass -p "${{ secrets.VPS_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP}} "~/staging/deploy.staging.sh"
 
     - name: Deploy to VPS Production
       if: github.ref == 'refs/heads/published'
-      env:
-        VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
       run: |
-        sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP}} "~/production/deploy.production.sh"
+        sshpass -p "${{ secrets.VPS_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP}} "~/production/deploy.production.sh"
