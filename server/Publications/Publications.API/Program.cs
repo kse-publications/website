@@ -27,8 +27,6 @@ var app = builder.Build();
         app.UseSwaggerUI();
     }
     
-    app.Services.UpdateDatabase();
-    
     app.Services.UseBackgroundJobs(app.GetFeatureFlagsMonitor());
     
     app.UseCorsPolicies();

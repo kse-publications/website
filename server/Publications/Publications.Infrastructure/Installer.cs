@@ -43,7 +43,7 @@ public static class Installer
         services.AddSingleton<IRedisConnectionProvider>(
             new RedisConnectionProvider(connectionMultiplexer));
         
-        services.AddTransient<IDbConfigurationService, RedisConfigurationService>();
+        services.AddTransient<IDbConfigurationService, DbConfigurationService>();
         
         return services;
     }
@@ -97,12 +97,5 @@ public static class Installer
         });
         
         return services;
-    }
-
-    public static void UpdateDatabase(this IServiceProvider serviceProvider)
-    {
-        using var scope = serviceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<RequestsHistoryDbContext>();
-        dbContext.Database.Migrate();
     }
 }
