@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Publications.Application.Statistics;
 
-namespace Publications.BackgroundJobs;
+namespace Publications.BackgroundJobs.Tasks;
 
 public class IncrementTotalSearchesTask: IInvocable
 {
@@ -12,7 +12,9 @@ public class IncrementTotalSearchesTask: IInvocable
     public static bool IsQueued { get; private set; }
     public static int SearchesCount { get; private set; }
     
-    public IncrementTotalSearchesTask(IStatisticsRepository statisticsRepository, ILogger<IncrementTotalSearchesTask> logger)
+    public IncrementTotalSearchesTask(
+        IStatisticsRepository statisticsRepository,
+        ILogger<IncrementTotalSearchesTask> logger)
     {
         _statisticsRepository = statisticsRepository;
         _logger = logger;
@@ -20,10 +22,17 @@ public class IncrementTotalSearchesTask: IInvocable
 
     public async Task Invoke()
     {
-        await _statisticsRepository.IncrementTotalSearchesAsync(SearchesCount);
-        IsQueued = false;
-        SearchesCount = 0;
-        _logger.LogInformation("Total searches count incremented.");
+        try
+        {
+            await _statisticsRepository.IncrementTotalSearchesAsync(SearchesCount);
+            IsQueued = false;
+            SearchesCount = 0;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed to increment total searches.");
+            throw;
+        }
     }
     
     public static void Enqueue()
