@@ -1,0 +1,34 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [ "main", "published" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Install sshpass
+      run: sudo apt-get install -y sshpass
+
+    - name: Deploy to VPS Staging
+      if: github.ref == 'refs/heads/main'
+      env:
+        VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
+        VPS_IP: ${{ secrets.VPS_IP }}
+        VPS_USER: ${{ secrets.VPS_USER }}
+      run: |
+        sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_IP "~/staging/deploy.staging.sh"
+
+    - name: Deploy to VPS Production
+      if: github.ref == 'refs/heads/published'
+      env:
+        VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
+        VPS_IP: ${{ secrets.VPS_IP }}
+        VPS_USER: ${{ secrets.VPS_USER }}
+      run: |
+        sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_IP "~/production/deploy.production.sh"

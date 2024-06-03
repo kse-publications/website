@@ -15,13 +15,13 @@ const breakpointColumnsObj = {
 }
 
 export const SearchResults = () => {
-  const { isRecent, error, isLoading, searchResults } = useSearchContext()
+  const { isRecent, error, isLoading, searchResults, totalResults } = useSearchContext()
 
   return (
     <div className="w-full grow bg-[#f0f0f0] pb-4 pt-8">
       <div className="mx-auto max-w-[1160px] px-4">
         <AnimatedHeadLine>
-          {isRecent ? 'Recent publications' : 'Found in publications'}
+          {isRecent ? 'Recent publications' : `Found ${totalResults} publications`}
         </AnimatedHeadLine>
         {error ? (
           <div className="text-red-500">Error: {error}</div>

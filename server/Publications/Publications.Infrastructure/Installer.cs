@@ -51,11 +51,16 @@ public static class Installer
     private static IServiceCollection AddNotionClient(this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.Configure<NotionDatabaseOptions>(
-            configuration.GetSection("Notion:Databases"));
+        services.AddOptionsWithValidateOnStart<NotionDatabaseOptions>()
+            .ValidateDataAnnotations()
+            .Bind(configuration.GetSection("Notion:Databases"));
+        
+        string? authToken = configuration["Notion:AuthToken"];
+        if (string.IsNullOrWhiteSpace(authToken))
+            throw new InvalidOperationException("Notion AuthToken was not provided.");
         
         services.AddScoped<INotionClient>(provider => NotionClientFactory.Create(
-            new ClientOptions{ AuthToken = configuration["Notion:AuthToken"] }));
+            new ClientOptions{ AuthToken = authToken }));
         
         return services;
     }

@@ -1,4 +1,3 @@
-import React, { useState } from 'react'
 import { useSearchContext } from '@/contexts/search-context'
 import { captureEvent } from '@/services/posthog/posthog'
 
@@ -52,50 +51,55 @@ export const SearchFilters = () => {
   return (
     <div className="flex flex-wrap justify-center gap-6">
       {(filters || []).map((filter) => {
-        let selectedFilterValue = ''
+        let selectedFilterValue = null
         const selectedFilter = selectedFilters.find((item) => item.id === filter.id)
 
         if (selectedFilter) {
-          selectedFilterValue = selectedFilter.values[0].toString()
+          selectedFilterValue = filter.filters
+            .map(({ id, value }) => selectedFilter?.values.includes(id) && value)
+            .filter((f) => f !== false)
+            .join(', ')
         }
 
         return (
-          <>
-            <DropdownMenu key={filter.id}>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="flex justify-between font-normal xs:w-[171px]">
-                  Filter by {filter.name.toLowerCase()}
-                  <ChevronDownIcon color="grey" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>Filter by {filter.name.toLowerCase()}</DropdownMenuLabel>
-                <DropdownMenuSeparator />
+          <DropdownMenu key={filter.id}>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="flex justify-between overflow-hidden font-normal xs:w-[171px]"
+              >
+                {selectedFilterValue
+                  ? selectedFilterValue
+                  : 'Filter by ' + filter.name.toLowerCase()}
+                <ChevronDownIcon color="grey" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel className="pl-8">
+                Filter by {filter.name.toLowerCase()}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {selectedFilterValue && (
                 <DropdownMenuCheckboxItem
-                  checked={selectedFilterValue.length === 0}
                   onCheckedChange={() => handleFilterChange(filter.id, 'reset', filter.name)}
                 >
-                  None
+                  Reset
                 </DropdownMenuCheckboxItem>
-                {filter.filters.map(({ id, value, matchedPublicationsCount }) => (
-                  <DropdownMenuCheckboxItem
-                    key={id}
-                    checked={selectedFilters.some(
-                      (f) => f.id === filter.id && f.values.includes(id)
-                    )}
-                    onCheckedChange={() =>
-                      handleFilterChange(filter.id, id.toString(), filter.name)
-                    }
-                  >
-                    <div className="flex w-[150px] justify-between">
-                      <span> {value} </span>
-                      <span className="font-bold">{matchedPublicationsCount}</span>
-                    </div>
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </>
+              )}
+              {filter.filters.map(({ id, value, matchedPublicationsCount }) => (
+                <DropdownMenuCheckboxItem
+                  key={id}
+                  checked={selectedFilters.some((f) => f.id === filter.id && f.values.includes(id))}
+                  onCheckedChange={() => handleFilterChange(filter.id, id.toString(), filter.name)}
+                >
+                  <div className="flex w-[150px] justify-between">
+                    <span> {value} </span>
+                    <span className="text-gray-500">{matchedPublicationsCount}</span>
+                  </div>
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         )
       })}
     </div>

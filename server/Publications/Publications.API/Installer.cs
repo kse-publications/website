@@ -62,7 +62,8 @@ public static class Installer
     public static void ConfigureFeatureFlags(this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.Configure<FeatureFlags>(configuration.GetSection("FeatureFlags"));
+        services.AddOptions<FeatureFlags>()
+            .Bind(configuration.GetSection("FeatureFlags"));
     }
     
     public static IOptionsMonitor<FeatureFlags> GetFeatureFlagsMonitor(this WebApplication app)

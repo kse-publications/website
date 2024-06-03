@@ -29,7 +29,7 @@ public interface IPublicationsQueryRepository
     /// Returns the number of publications that match each filter, if it would be applied.
     /// Basically a group by filter id query. 
     /// </summary>
-    Task<Dictionary<string, int>> GetFiltersCountAsync(
+    Task<Dictionary<string, int>> GetFiltersWithMatchedCountAsync(
         FilterDTO filterDTO,
         SearchDTO searchDTO,
         CancellationToken cancellationToken = default);
