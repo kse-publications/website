@@ -1,0 +1,14 @@
+services:
+  client:
+    image: client:production
+    container_name: client.production
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - PUBLIC_HOST_URL=${PUBLIC_HOST_URL}
+        - PUBLIC_API_URL=${PUBLIC_API_URL}
+        - PUBLIC_ENVIRONMENT=${PUBLIC_ENVIRONMENT}
+        - ASTRO_ADAPTER=${ASTRO_ADAPTER}
+    ports:
+      - '4321:4321'
