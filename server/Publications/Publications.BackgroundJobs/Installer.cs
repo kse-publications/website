@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Publications.Application;
 using Publications.BackgroundJobs.Abstractions;
+using Publications.BackgroundJobs.Tasks;
 
 namespace Publications.BackgroundJobs;
 

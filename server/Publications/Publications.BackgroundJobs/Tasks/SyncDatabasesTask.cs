@@ -8,14 +8,15 @@ using Publications.Domain.Collections;
 using Publications.Domain.Filters;
 using Publications.Domain.Publications;
 
-namespace Publications.BackgroundJobs;
+namespace Publications.BackgroundJobs.Tasks;
 
 public class SyncDatabasesTask(
     ILogger<SyncDatabasesTask> taskLogger,
     IOptions<RetriableTaskOptions> options,
     ISourceRepository sourceRepository,
-    IPublicationsCommandRepository publicationsCommandRepository,
+    IPublicationsRepository publicationsRepository,
     ICollectionsRepository collectionsRepository,
+    IFiltersRepository filtersRepository,
     IFiltersService filtersService,
     IRequestsRepository requestsRepository,
     IStatisticsRepository statisticsRepository)
@@ -40,12 +41,12 @@ public class SyncDatabasesTask(
             _publications!.ToList(), _filters.ToList());
 
         await collectionsRepository.InsertOrUpdateAsync(_collections!);
-        await publicationsCommandRepository
+        await publicationsRepository
             .InsertOrUpdateAsync(await SetPublicationsViews(_publications));
-        await publicationsCommandRepository.ReplaceFiltersAsync(_filters);
+        await filtersRepository.ReplaceWithNewAsync(_filters);
 
         await collectionsRepository.SynchronizeAsync(_syncStartDateTime);
-        await publicationsCommandRepository.SynchronizeAsync(_syncStartDateTime);
+        await publicationsRepository.SynchronizeAsync(_syncStartDateTime);
         await statisticsRepository.SetTotalPublicationsCountAsync(_publications.Count);
     }
 

@@ -67,8 +67,8 @@ public static class Installer
     
     private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
-        services.AddScoped<IPublicationsQueryRepository, PublicationsQueryRepository>();
-        services.AddScoped<IPublicationsCommandRepository, PublicationsCommandRepository>();
+        services.AddScoped<IPublicationsRepository, PublicationsRepository>();
+        services.AddScoped<IFiltersRepository, FiltersRepository>();
         services.AddScoped<ICollectionsRepository, CollectionsRepository>();
         
         services.AddScoped<ISourceRepository, NotionRepository>();

@@ -10,6 +10,9 @@ public interface IEntityRepository<TEntity>
         int resourceId,
         CancellationToken cancellationToken = default);
     
+    Task<IReadOnlyCollection<SiteMapResourceMetadata>> GetSiteMapMetadataAsync(
+        CancellationToken cancellationToken = default);
+    
     Task InsertOrUpdateAsync(
         IEnumerable<TEntity> entities,
         CancellationToken cancellationToken = default);
