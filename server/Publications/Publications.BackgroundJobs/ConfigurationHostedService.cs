@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Publications.Application;
 using Publications.Application.Services;
+using Publications.BackgroundJobs.Tasks;
 
 namespace Publications.BackgroundJobs;
 

@@ -20,12 +20,6 @@ public class EntityRepository<TEntity> : IEntityRepository<TEntity>
         _aggregationSet = connectionProvider.AggregationSet<TEntity>();
     }
     
-    public async Task<IReadOnlyCollection<TEntity>> GetAllAsync(
-        CancellationToken cancellationToken = default)
-    {
-        return (await _collection.ToListAsync()).AsReadOnly();
-    }
-    
     public async Task<TEntity?> GetByIdAsync(
         int resourceId, 
         CancellationToken cancellationToken = default)
@@ -54,15 +48,15 @@ public class EntityRepository<TEntity> : IEntityRepository<TEntity>
         await _collection.DeleteAsync(entitiesToDelete);
     }
     
-    public virtual async Task<IReadOnlyCollection<SiteMapResourceMetadata>> GetAllSiteMapMetadataAsync(
+    public virtual async Task<IReadOnlyCollection<SiteMapResourceMetadata>> GetSiteMapMetadataAsync(
         CancellationToken cancellationToken = default)
     {
         return (await _aggregationSet
-                .Load(e => e.RecordShell!.Id)
+                .Load(e => e.RecordShell!.Slug)
                 .Load(e => e.RecordShell!.LastModifiedAt)
                 .ToListAsync())
             .Select(e => e.Hydrate())
-            .Select(e => new SiteMapResourceMetadata(e.Id, e.LastModifiedAt))
+            .Select(e => new SiteMapResourceMetadata(e.Slug, e.LastModifiedAt))
             .ToList()
             .AsReadOnly();
     }
