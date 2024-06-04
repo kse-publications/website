@@ -2,10 +2,10 @@
 
 public class SiteMapResourceMetadata
 {
-    public int Id { get; set; }
+    public string Id { get; set; }
     public DateTime LastModifiedAt { get; set; }
     
-    public SiteMapResourceMetadata(int id, DateTime lastModifiedAt)
+    public SiteMapResourceMetadata(string id, DateTime lastModifiedAt)
     {
         Id = id;
         LastModifiedAt = lastModifiedAt;

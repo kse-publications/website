@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Publications.Application.Repositories;
 using Publications.Domain.Requests;
 
-namespace Publications.BackgroundJobs;
+namespace Publications.BackgroundJobs.Tasks;
 
 public class StoreRequestAnalyticsTask: IInvocable, IInvocableWithPayload<Request>
 {

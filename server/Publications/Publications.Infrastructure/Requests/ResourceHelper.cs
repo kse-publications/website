@@ -1,4 +1,5 @@
-﻿using Publications.Domain.Publications;
+﻿using Publications.Domain.Collections;
+using Publications.Domain.Publications;
 
 namespace Publications.Infrastructure.Requests;
 
@@ -14,8 +15,7 @@ public class ResourceHelper
         return resourceName switch
         {
             "publications" => typeof(Publication),
-            "authors" => typeof(Author),
-            "publishers" => typeof(Publisher),
+            "collections" => typeof(Collection),
             _ => throw new ArgumentException("Invalid resource name")
         };
     }

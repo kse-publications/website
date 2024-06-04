@@ -10,7 +10,7 @@ namespace Publications.API.Endpoints;
 [Route("sitemap.xml")]
 public class SiteMapController : ControllerBase
 {
-    private readonly IPublicationsQueryRepository _publicationsRepository;
+    private readonly IPublicationsRepository _publicationsRepository;
     private readonly ICollectionsRepository _collectionsRepository;
     
     private const string Schema = "http://www.sitemaps.org/schemas/sitemap/0.9";
@@ -23,7 +23,7 @@ public class SiteMapController : ControllerBase
     };
     
     public SiteMapController(
-        IPublicationsQueryRepository publicationsRepository, 
+        IPublicationsRepository publicationsRepository, 
         ICollectionsRepository collectionsRepository)
     {
         _publicationsRepository = publicationsRepository;
@@ -48,16 +48,18 @@ public class SiteMapController : ControllerBase
     private async Task<XDocument> GetSiteMapXml(string baseUrl)
     {
         var publicationsMetadata = await _publicationsRepository
-            .GetAllSiteMapMetadataAsync();
+            .GetSiteMapMetadataAsync();
         var collectionsMetadata = await _collectionsRepository
-            .GetAllSiteMapMetadataAsync();
+            .GetSiteMapMetadataAsync();
 
         IEnumerable<IEnumerable<XElement>> urls =
         [
             StaticPages.Select(page 
                 => CreateStaticResourceXmlUrl(resourceUrl: baseUrl + page.Key, priority: page.Value)),
+            
             publicationsMetadata.Select(meta 
                 => CreateDynamicResourceXmlUrl(GetPublicationUrl(baseUrl, meta.Id), meta.LastModifiedAt)),
+            
             collectionsMetadata.Select(meta 
                 => CreateDynamicResourceXmlUrl(GetCollectionUrl(baseUrl, meta.Id), meta.LastModifiedAt))
         ];
@@ -83,10 +85,10 @@ public class SiteMapController : ControllerBase
                 new XElement((XNamespace)Schema + "priority", priority));
     }
     
-    private static string GetPublicationUrl(string baseUrl, int id)
+    private static string GetPublicationUrl(string baseUrl, string id)
         => $"{baseUrl}/publications/{id}";
     
-    private static string GetCollectionUrl(string baseUrl, int id)
+    private static string GetCollectionUrl(string baseUrl, string id)
         => $"{baseUrl}/collections/{id}";
 }
 

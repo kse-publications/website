@@ -6,7 +6,7 @@ namespace Publications.Application.Repositories;
 /// <summary>
 /// Contract for a repository that manages <see cref="Publication"/>s.
 /// </summary>
-public interface IPublicationsQueryRepository
+public interface IPublicationsRepository : IEntityRepository<Publication>
 {
     Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
         FilterDTO filterDTO,
@@ -14,32 +14,28 @@ public interface IPublicationsQueryRepository
         CancellationToken cancellationToken = default);
     
     /// <summary>
-    /// Returns the slug of every publication.
+    /// Returns publications that match the provided search and filter criteria.
     /// </summary>
-    Task<IReadOnlyCollection<SiteMapResourceMetadata>> GetAllSiteMapMetadataAsync(
-        CancellationToken cancellationToken = default);
-    
     Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
         FilterDTO filterDTO,
         PaginationDTO paginationDTO,
         SearchDTO searchDTO,
         CancellationToken cancellationToken = default);
-    
+
     /// <summary>
-    /// Returns the number of publications that match each filter, if it would be applied.
-    /// Basically a group by filter id query. 
+    /// Returns paginated collection of publications
+    /// that have one or more authors in common with the provided publication.
     /// </summary>
-    Task<Dictionary<string, int>> GetFiltersWithMatchedCountAsync(
-        FilterDTO filterDTO,
-        SearchDTO searchDTO,
-        CancellationToken cancellationToken = default);
-    
     Task<PaginatedCollection<PublicationSummary>> GetRelatedByAuthorsAsync(
         int currentPublicationId,
         PaginationDTO paginationDTO,
         AuthorFilterDTO authorFilterDto,
         CancellationToken cancellationToken = default);
     
+    /// <summary>
+    /// Returns paginated collection of publications
+    /// that are part of the provided collection.
+    /// </summary>
     Task<PaginatedCollection<PublicationSummary>> GetFromCollectionAsync(
         int collectionId,
         PaginationDTO paginationDTO,

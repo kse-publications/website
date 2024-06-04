@@ -10,19 +10,16 @@ using Publications.Domain.Collections;
 using Publications.Domain.Publications;
 using Publications.Infrastructure.Shared;
 using Redis.OM;
-using Redis.OM.Contracts;
-using Redis.OM.Searching;
 using StackExchange.Redis;
 
 namespace Publications.Infrastructure.Publications;
 
-public class PublicationsQueryRepository: EntityRepository<Publication>, IPublicationsQueryRepository
+public class PublicationsRepository: EntityRepository<Publication>, IPublicationsRepository
 {
     private readonly IDatabase _db;
 
-    public PublicationsQueryRepository(
-        IConnectionMultiplexer connectionMultiplexer,
-        IRedisConnectionProvider provider) : base(provider)
+    public PublicationsRepository(IConnectionMultiplexer connectionMultiplexer) 
+        : base(new RedisConnectionProvider(connectionMultiplexer))
     {
         _db = connectionMultiplexer.GetDatabase();
     }
@@ -46,9 +43,7 @@ public class PublicationsQueryRepository: EntityRepository<Publication>, IPublic
                 .SortBy(
                     new SortedField($"@{nameof(Publication.Year)}", SortedField.SortOrder.DESC),
                     new SortedField($"@{nameof(Publication.Id)}", SortedField.SortOrder.DESC))
-                .Limit(
-                    offset: paginationDTO.PageSize * (paginationDTO.Page - 1),
-                    count: paginationDTO.PageSize)
+                .Paginate(paginationDTO.Page, paginationDTO.PageSize)
                 .Dialect(3));
         
         IReadOnlyCollection<PublicationSummary> publications = 
@@ -77,9 +72,7 @@ public class PublicationsQueryRepository: EntityRepository<Publication>, IPublic
         
         var searchResult = await ft.SearchAsync(Publication.IndexName, 
             new Query(query.Build())
-                .Limit(
-                    offset: paginationDTO.PageSize * (paginationDTO.Page - 1),
-                    count: paginationDTO.PageSize)
+                .Paginate(paginationDTO.Page, paginationDTO.PageSize)
                 .Dialect(3));
         
         var publications = MapToPublicationSummaries(searchResult)
@@ -113,9 +106,7 @@ public class PublicationsQueryRepository: EntityRepository<Publication>, IPublic
         SearchResult searchResult = await ft.SearchAsync(Publication.IndexName, 
             new Query(query.Build())
                 .SetSortBy(nameof(Publication.Views), ascending: false)
-                .Limit(
-                    offset: paginationDto.PageSize * (paginationDto.Page - 1),
-                    count: paginationDto.PageSize)
+                .Paginate(paginationDto.Page, paginationDto.PageSize)
                 .Dialect(3));
 
         var publications = MapToPublicationSummaries(searchResult)
@@ -140,9 +131,7 @@ public class PublicationsQueryRepository: EntityRepository<Publication>, IPublic
         SearchResult searchResult = await ft.SearchAsync(Publication.IndexName,
             new Query(query.Build())
                 .SetSortBy(nameof(Publication.Views), ascending: false)
-                .Limit(
-                    offset: paginationDTO.PageSize * (paginationDTO.Page - 1),
-                    count: paginationDTO.PageSize)
+                .Paginate(paginationDTO.Page, paginationDTO.PageSize)
                 .Dialect(3));
         
         var publications = MapToPublicationSummaries(searchResult)
@@ -152,53 +141,6 @@ public class PublicationsQueryRepository: EntityRepository<Publication>, IPublic
             Items: publications,
             TotalCount: (int)searchResult.TotalResults,
             ResultCount: publications.Count);
-    }
-
-    public async Task<Dictionary<string, int>> GetFiltersWithMatchedCountAsync(
-        FilterDTO filterDTO, SearchDTO searchDTO,
-        CancellationToken cancellationToken = default)
-    {
-        SearchCommands ft = _db.FT();
-        SearchFieldName[] searchFields = Publication.GetSearchableFields()
-            .Select(fieldName => new SearchFieldName(fieldName))
-            .ToArray();
-        
-        List<Task<Dictionary<string, int>>> aggregationTasks = Publication
-            .GetEntityFilters()
-            .Select(async entityFilter =>
-            {
-                Dictionary<int, int[]> filtersWithoutCurrentGroup = new(filterDTO
-                    .GetParsedFilters());
-                
-                filtersWithoutCurrentGroup.Remove(entityFilter.GroupId);
-                
-                var newFilter = FilterDTO.CreateFromFilters(
-                    filtersWithoutCurrentGroup);
-                
-                SearchQuery query = SearchQuery
-                    .CreateWithSearch(searchDTO.SearchTerm, searchFields)
-                    .Filter(newFilter);
-                
-                var result = await ft.AggregateAsync(Publication.IndexName,
-                    new AggregationRequest(query.Build())
-                        .Load(new FieldName(entityFilter.PropertyName))
-                        .GroupBy($"@{entityFilter.PropertyName}", Reducers.Count().As("count"))
-                        .Dialect(3));
-
-                return result.GetResults()
-                    .Select(dict => new
-                    {
-                        Value = dict[entityFilter.PropertyName].ToString(),
-                        Count = (int)dict["count"]
-                    })
-                    .ToDictionary(x => x.Value, x => x.Count);  
-            })
-            .ToList();
-
-
-        return (await Task.WhenAll(aggregationTasks))
-            .SelectMany(dict => dict)
-            .ToDictionary(pair => pair.Key, pair => pair.Value);
     }
 
     private static List<PublicationSummary> MapToPublicationSummaries(
