@@ -6,10 +6,14 @@ interface PostHogProps {
   pageVisitEvent: string
 }
 
+const POSTHOG_API_KEY = import.meta.env.PUBLIC_POSTHOG_API_KEY
+const POSTHOG_HOST = import.meta.env.PUBLIC_POSTHOG_HOST
+
 const PostHog = ({ pageVisitEvent }: PostHogProps) => {
   useEffect(() => {
-    posthog.init('phc_2fJTznUxuaQsrIG2RYq2Kak7qdLDGMeLK84imLOnaTM', {
-      api_host: 'https://eu.i.posthog.com',
+    console.log('PostHog', POSTHOG_API_KEY, POSTHOG_HOST)
+    posthog.init(POSTHOG_API_KEY, {
+      api_host: POSTHOG_HOST,
     })
 
     window.posthog = posthog
