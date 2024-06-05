@@ -7,12 +7,16 @@ import { LoadingTrigger } from './search-loading-trigger'
 
 import { AnimatedHeadLine } from '../ui/animated-headline'
 import Masonry from 'react-masonry-css'
+import { AnimatedCardWrapper } from '../ui/animated-card-wrapper'
+import { Skeleton } from '../ui/skeleton'
 
 const breakpointColumnsObj = {
   default: 2,
   1100: 2,
   600: 1,
 }
+
+const SKELETON_CARDS_COUNT = 4
 
 export const SearchResults = () => {
   const { isRecent, error, isLoading, searchResults, totalResults } = useSearchContext()
@@ -33,9 +37,20 @@ export const SearchResults = () => {
               {searchResults.map((publication) => (
                 <SearchResultItem key={publication.slug} publication={publication} />
               ))}
+              {isLoading &&
+                Array.from({ length: SKELETON_CARDS_COUNT }).map((_, index) => (
+                  <AnimatedCardWrapper key={index}>
+                    <div className="mb-4 flex h-6 gap-2">
+                      <Skeleton className="h-6 w-14" />
+                      <Skeleton className="h-6 w-40" />
+                    </div>
+                    <Skeleton className="mb-2 h-14 w-full" />
+                    <Skeleton className="mb-1 h-4 w-1/2" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </AnimatedCardWrapper>
+                ))}
             </Masonry>
 
-            {isLoading && <SearchSkeleton />}
             <LoadingTrigger />
           </>
         )}
