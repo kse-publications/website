@@ -13,6 +13,7 @@ const PostHog = ({ pageVisitEvent }: PostHogProps) => {
   useEffect(() => {
     posthog.init(POSTHOG_API_KEY, {
       api_host: POSTHOG_HOST,
+      ui_host: 'https://eu.posthog.com'
     })
 
     window.posthog = posthog
