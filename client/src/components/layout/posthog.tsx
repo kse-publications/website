@@ -11,7 +11,6 @@ const POSTHOG_HOST = import.meta.env.PUBLIC_POSTHOG_HOST
 
 const PostHog = ({ pageVisitEvent }: PostHogProps) => {
   useEffect(() => {
-    console.log('PostHog', POSTHOG_API_KEY, POSTHOG_HOST)
     posthog.init(POSTHOG_API_KEY, {
       api_host: POSTHOG_HOST,
     })
