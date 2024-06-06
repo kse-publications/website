@@ -76,6 +76,22 @@ public class PublicationsController : ControllerBase
         return Ok(publications);
     }
     
+    [HttpGet("{id}/similar")]
+    [ProducesResponseType(typeof(IReadOnlyCollection<PublicationSummary>), StatusCodes.Status200OK)]
+    [SwaggerOperation(
+        Summary = "Get similar publications",
+        Description = "Finds k nearest publications using vector similarity search."
+    )]
+    public async Task<IActionResult> GetSimilar(
+        [FromRoute] int id,
+        CancellationToken cancellationToken)
+    {
+        IReadOnlyCollection<PublicationSummary> publications = await _publicationsService
+            .GetSimilarAsync(id, cancellationToken);
+        
+        return Ok(publications);
+    }
+    
     [HttpGet("search")]
     [TypeFilter(typeof(SearchAnalyticsFilter))]
     [ProducesResponseType(typeof(PaginatedCollection<PublicationSummary>),StatusCodes.Status200OK)]

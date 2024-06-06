@@ -118,6 +118,29 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             ResultCount: publications.Count);
     }
 
+    public async Task<IReadOnlyCollection<PublicationSummary>> GetSimilarAsync(
+        int currentPublicationId, 
+        CancellationToken cancellationToken = default)
+    {
+        Publication? currentPublication = await GetByIdAsync(currentPublicationId, cancellationToken);
+        if (currentPublication is null)
+        {
+            return Array.Empty<PublicationSummary>();
+        }
+
+        var ft = _db.FT();
+        string idFilter = new SearchFieldName(nameof(Publication.Id)).NotEqualTo(currentPublication.Id);
+        
+        var searchResult = await ft.SearchAsync(Publication.IndexName,
+            new Query($"({idFilter})=>[KNN $K @{nameof(Publication.SimilarityVector)} $BLOB as similarity_score]")
+                .AddParam("K", 6)
+                .AddParam("BLOB", currentPublication.SimilarityVector.Embedding!)
+                .SetSortBy("similarity_score", ascending: false)
+                .Dialect(3));
+
+        return MapToPublicationSummaries(searchResult).AsReadOnly();
+    }
+
     public async Task<PaginatedCollection<PublicationSummary>> GetFromCollectionAsync(
         int collectionId,
         PaginationDTO paginationDTO,
@@ -150,10 +173,8 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         {
             Slug = result[nameof(Publication.Slug)]!,
             Title = JsonSerializer.Deserialize<string[]>(result[nameof(Publication.Title)]!)!.First(),
-            Type = result.TryGetValue(nameof(Publication.Type), out var typeValue) 
-                ? typeValue! : string.Empty,
-            Year = result.TryGetValue(nameof(Publication.Year), out var yearValue) 
-                ? (int)yearValue! : 0,
+            Type = result.TryGetValue(nameof(Publication.Type), out var typeValue) ? typeValue! : string.Empty,
+            Year = result.TryGetValue(nameof(Publication.Year), out var yearValue) ? (int)yearValue! : 0,
             Authors = JsonSerializer
                 .Deserialize<string[]>(result
                     .TryGetValue(PublicationAuthorsName, out var authorsValue) ? authorsValue! : "[]")

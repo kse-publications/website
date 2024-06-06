@@ -49,6 +49,14 @@ public class PublicationsService: IPublicationsService
         return _publicationsRepository.GetRelatedByAuthorsAsync(
             currentPublicationId, paginationDto, authorFilterDto, cancellationToken);
     }
+    
+    public Task<IReadOnlyCollection<PublicationSummary>> GetSimilarAsync(
+        int currentPublicationId,
+        CancellationToken cancellationToken = default)
+    {
+        return _publicationsRepository.GetSimilarAsync(
+            currentPublicationId,  cancellationToken);
+    } 
 
     public async Task<IReadOnlyCollection<FilterGroup>> GetFiltersAsync(
         FilterDTO filterDTO, PaginationDTO paginationDTO, SearchDTO searchDTO,

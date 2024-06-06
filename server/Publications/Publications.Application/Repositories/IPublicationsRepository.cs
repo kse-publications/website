@@ -32,6 +32,10 @@ public interface IPublicationsRepository : IEntityRepository<Publication>
         AuthorFilterDTO authorFilterDto,
         CancellationToken cancellationToken = default);
     
+    Task<IReadOnlyCollection<PublicationSummary>> GetSimilarAsync(
+        int currentPublicationId,
+        CancellationToken cancellationToken = default);
+    
     /// <summary>
     /// Returns paginated collection of publications
     /// that are part of the provided collection.
