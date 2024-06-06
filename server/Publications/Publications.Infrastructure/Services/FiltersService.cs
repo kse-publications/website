@@ -22,7 +22,7 @@ public class FiltersService: IFiltersService
             .AsReadOnly();
     }
     
-    public IReadOnlyCollection<Publication> AssignFiltersToPublicationsAsync(
+    public IList<Publication> AssignFiltersToPublicationsAsync(
         ICollection<Publication> publications, ICollection<FilterGroup> filters)
     {
         foreach (Publication publication in publications)
@@ -32,9 +32,7 @@ public class FiltersService: IFiltersService
                 .ToArray();
         }
 
-        return publications
-            .ToList()
-            .AsReadOnly();
+        return publications.ToList();
     }
     
     private FilterGroup GetFilterGroupFromProperty(

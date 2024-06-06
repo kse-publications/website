@@ -17,16 +17,17 @@ public abstract class Entity<T> where T: Entity<T>
     [Indexed]
     [IgnoreInResponse]
     [JsonConverter(typeof(UnixTimestampJsonConverter))]
-    public DateTime SynchronizedAt { get; set; }
+    public DateTime LastSynchronizedAt { get; set; }
     
     [Indexed]
     [IgnoreInResponse]
     [JsonConverter(typeof(UnixTimestampJsonConverter))]
     public DateTime LastModifiedAt { get; set; }
 
-    public void Synchronize()
+    public T Synchronize()
     {
-        SynchronizedAt = DateTime.UtcNow;
+        LastSynchronizedAt = DateTime.UtcNow;
+        return (T)this;
     }
 
     public abstract T UpdateSlug(IWordsService wordsService);

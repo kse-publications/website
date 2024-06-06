@@ -102,6 +102,8 @@ public class Publication: Entity<Publication>
         $"{nameof(Authors)}_{nameof(Author.Name)}",
         $"{nameof(Publisher)}_{nameof(Publisher.Name)}"
     ];
+    
+    public static string GetKey(int id) => $"publication:{id}";
 
     private string GetSimilarityValue() =>
         Title + " " + 

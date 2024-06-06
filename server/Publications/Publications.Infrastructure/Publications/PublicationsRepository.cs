@@ -166,6 +166,19 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             ResultCount: publications.Count);
     }
 
+    public async Task UpdatePropertyValueAsync(
+        int publicationId,
+        string propertyName, 
+        string newValue,
+        CancellationToken cancellationToken = default)
+    {
+        var json = _db.JSON();
+        
+        await json.SetAsync(
+            key: Publication.GetKey(publicationId), 
+            $"$.{propertyName}", newValue);
+    }
+
     private static List<PublicationSummary> MapToPublicationSummaries(
         IEnumerable<Dictionary<string, RedisValue>> aggregationResults)
     {

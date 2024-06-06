@@ -26,28 +26,13 @@ public class EntityRepository<TEntity> : IEntityRepository<TEntity>
     {
         return await _collection.FindByIdAsync(resourceId.ToString());
     }
-    
-    public virtual async Task InsertOrUpdateAsync(
-        IEnumerable<TEntity> entities, 
+
+    public async Task<IReadOnlyCollection<TEntity>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
-        await _collection.InsertAsync(entities);
+        return (await _collection.ToListAsync()).AsReadOnly();
     }
-    
-    /// <summary>
-    /// Deletes entities that were last synchronized before the given date.
-    /// </summary>
-    public virtual async Task SynchronizeAsync(
-        DateTime lastSyncDateTime, 
-        CancellationToken cancellationToken = default)
-    {
-        var entitiesToDelete = await _collection
-            .Where(e => e.SynchronizedAt < lastSyncDateTime)
-            .ToListAsync();
-        
-        await _collection.DeleteAsync(entitiesToDelete);
-    }
-    
+
     public virtual async Task<IReadOnlyCollection<SiteMapResourceMetadata>> GetSiteMapMetadataAsync(
         CancellationToken cancellationToken = default)
     {
@@ -59,5 +44,33 @@ public class EntityRepository<TEntity> : IEntityRepository<TEntity>
             .Select(e => new SiteMapResourceMetadata(e.Slug, e.LastModifiedAt))
             .ToList()
             .AsReadOnly();
+    }
+    
+    public virtual async Task InsertOrUpdateAsync(
+        IEnumerable<TEntity> entities, 
+        CancellationToken cancellationToken = default)
+    {
+        await _collection.InsertAsync(entities);
+    }
+    
+    public virtual async Task DeleteAsync(
+        IEnumerable<TEntity> entities, 
+        CancellationToken cancellationToken = default)
+    {
+        await _collection.DeleteAsync(entities);
+    }
+    
+    /// <summary>
+    /// Deletes entities that were last synchronized before the given date.
+    /// </summary>
+    public virtual async Task SynchronizeAsync(
+        DateTime lastSyncDateTime, 
+        CancellationToken cancellationToken = default)
+    {
+        var entitiesToDelete = await _collection
+            .Where(e => e.LastSynchronizedAt < lastSyncDateTime)
+            .ToListAsync();
+        
+        await _collection.DeleteAsync(entitiesToDelete);
     }
 }

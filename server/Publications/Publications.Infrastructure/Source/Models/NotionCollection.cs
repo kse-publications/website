@@ -1,6 +1,5 @@
 ﻿using Notion.Client;
 using Publications.Domain.Collections;
-using Publications.Domain.Publications;
 using Publications.Domain.Shared.Slugs;
 
 namespace Publications.Infrastructure.Source.Models;
@@ -50,7 +49,7 @@ internal class NotionCollection : Collection
             Slug = Slug,
             Description = Description,
             PublicationsCount = PublicationsCount,
-            SynchronizedAt = SynchronizedAt
+            LastSynchronizedAt = LastSynchronizedAt
         };
     }
 }

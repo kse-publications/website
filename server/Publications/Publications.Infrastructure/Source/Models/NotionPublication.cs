@@ -15,7 +15,7 @@ internal class NotionPublication : Publication
         if (!IsValidPage(page))
             return null;
         
-        NotionPublication publication = new()
+        return new NotionPublication()
         {
             NotionId = page.Id,
             Id = page.Properties["ID"].GetId(),
@@ -29,12 +29,6 @@ internal class NotionPublication : Publication
             LastModifiedAt = page.LastEditedTime
         };
         
-        publication
-            .UpdateSlug(wordsService)
-            .UpdateVectors(wordsService)
-            .Synchronize();
-        
-        return publication;
     }
     
     private static bool IsValidPage(Page publicationPage)
@@ -128,7 +122,7 @@ internal class NotionPublication : Publication
             Filters = Filters,
             Collections = _updatableCollections.ToArray(),
             Slug = Slug,
-            SynchronizedAt = SynchronizedAt,
+            LastSynchronizedAt = LastSynchronizedAt,
             LastModifiedAt = LastModifiedAt
         };
     }

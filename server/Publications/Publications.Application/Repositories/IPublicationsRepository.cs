@@ -44,4 +44,10 @@ public interface IPublicationsRepository : IEntityRepository<Publication>
         int collectionId,
         PaginationDTO paginationDTO,
         CancellationToken cancellationToken = default);
+    
+    Task UpdatePropertyValueAsync(
+        int publicationId,
+        string propertyName,
+        string newValue,
+        CancellationToken cancellationToken = default);
 }
