@@ -14,7 +14,7 @@ public class EntityRepository<TEntity> : IEntityRepository<TEntity>
     private readonly IRedisCollection<TEntity> _collection;
     private readonly RedisAggregationSet<TEntity> _aggregationSet;
 
-    public EntityRepository(IRedisConnectionProvider connectionProvider)
+    protected EntityRepository(IRedisConnectionProvider connectionProvider)
     {
         _collection = connectionProvider.RedisCollection<TEntity>();
         _aggregationSet = connectionProvider.AggregationSet<TEntity>();

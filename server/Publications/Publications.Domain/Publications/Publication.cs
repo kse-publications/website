@@ -4,7 +4,9 @@ using Publications.Domain.Shared;
 using Publications.Domain.Shared.Serialization;
 using Publications.Domain.Shared.Slugs;
 using Publications.Domain.Shared.ValueObjects;
+using Redis.OM;
 using Redis.OM.Modeling;
+using Redis.OM.Vectorizers.AllMiniLML6V2;
 
 namespace Publications.Domain.Publications;
 
@@ -16,6 +18,11 @@ public class Publication: Entity<Publication>
 {
     [Searchable(Weight = 1.0)]
     public string Title { get; set; } = null!;
+    
+    [Indexed(DistanceMetric = DistanceMetric.COSINE, Algorithm = VectorAlgorithm.HNSW)]
+    [SentenceVectorizer]
+    [IgnoreInResponse]
+    public Vector<string> SimilarityVector { get; set; }
     
     [Indexed(Sortable = true)]
     public string Type { get; set;} = null!;
@@ -72,6 +79,15 @@ public class Publication: Entity<Publication>
         return this;
     }
     
+    public Publication UpdateVectors(IWordsService wordsService)
+    {
+        SimilarityVector = Vector.Of(wordsService
+            .Transliterate(GetSimilarityValue())
+            .RemoveSpecialChars());
+        
+        return this;
+    }
+    
     public static EntityFilter[] GetEntityFilters() =>
     [
         new EntityFilter(groupId: 1, nameof(Type)),
@@ -86,4 +102,10 @@ public class Publication: Entity<Publication>
         $"{nameof(Authors)}_{nameof(Author.Name)}",
         $"{nameof(Publisher)}_{nameof(Publisher.Name)}"
     ];
+
+    private string GetSimilarityValue() =>
+        Title + " " + 
+        Abstract + " " +
+        string.Join(" ", Keywords) + " " + 
+        string.Join(" ", Collections.Select(c => c.Name));
 }

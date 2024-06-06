@@ -49,6 +49,7 @@ public class NotionRepository: ISourceRepository
 
         _publications = NotionPublication
             .JoinCollections(publications, collections)
+            .Select(p => p.ToPublication())
             .ToList()
             .AsReadOnly();;
         

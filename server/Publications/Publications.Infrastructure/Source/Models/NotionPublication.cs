@@ -31,6 +31,7 @@ internal class NotionPublication : Publication
         
         publication
             .UpdateSlug(wordsService)
+            .UpdateVectors(wordsService)
             .Synchronize();
         
         return publication;
@@ -114,6 +115,7 @@ internal class NotionPublication : Publication
         {
             Id = Id,
             Title = Title,
+            SimilarityVector = SimilarityVector,
             Type = Type,
             Language = Language,
             Year = Year,
@@ -126,7 +128,8 @@ internal class NotionPublication : Publication
             Filters = Filters,
             Collections = _updatableCollections.ToArray(),
             Slug = Slug,
-            SynchronizedAt = SynchronizedAt
+            SynchronizedAt = SynchronizedAt,
+            LastModifiedAt = LastModifiedAt
         };
     }
 }
