@@ -2,8 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Publications.Application;
-using Publications.BackgroundJobs.Abstractions;
+using Publications.BackgroundJobs.Options;
 using Publications.BackgroundJobs.Tasks;
 
 namespace Publications.BackgroundJobs;
@@ -16,8 +15,8 @@ public static class Installer
         services.AddHostedService<ConfigurationHostedService>();
 
         services
-            .AddOptions<RetriableTaskOptions>()
-            .Bind(configuration.GetSection("BackgroundTasks:SyncDatabasesTask"));
+            .AddOptions<DbSynchronizationOptions>()
+            .Bind(configuration.GetSection("DbSynchronizationOptions"));
         
         services.AddTransient<SyncDatabasesTask>();
         services.AddScheduler();
@@ -28,14 +27,15 @@ public static class Installer
         return services;
     }
     
-    public static void UseBackgroundJobs(this IServiceProvider serviceProvider, 
-        IOptionsMonitor<FeatureFlags> optionsMonitor)
+    public static void UseBackgroundJobs(this IServiceProvider serviceProvider)
     {
+        var optionsMonitor = serviceProvider.GetRequiredService<IOptionsMonitor<DbSynchronizationOptions>>();
         serviceProvider.UseScheduler(scheduler =>
         {
             scheduler.Schedule<SyncDatabasesTask>()
-                .Hourly()
-                .When(() => Task.FromResult(optionsMonitor.CurrentValue.SyncDatabases))
+                .Cron(optionsMonitor.CurrentValue.Interval)
+                .RunOnceAtStart()
+                .When(() => Task.FromResult(optionsMonitor.CurrentValue.SyncEnabled))
                 .PreventOverlapping(nameof(SyncDatabasesTask));
         });
     }

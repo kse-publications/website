@@ -1,9 +1,7 @@
 ﻿using System.Text.Json;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Publications.API.Middleware;
 using Publications.API.Serialization;
-using Publications.Application;
 using Publications.Domain.Filters;
 using Publications.Domain.Publications;
 
@@ -57,18 +55,6 @@ public static class Installer
                         .AllowCredentials();
                 });
         });
-    }
-    
-    public static void ConfigureFeatureFlags(this IServiceCollection services,
-        IConfiguration configuration)
-    {
-        services.AddOptions<FeatureFlags>()
-            .Bind(configuration.GetSection("FeatureFlags"));
-    }
-    
-    public static IOptionsMonitor<FeatureFlags> GetFeatureFlagsMonitor(this WebApplication app)
-    {
-        return app.Services.GetRequiredService<IOptionsMonitor<FeatureFlags>>();
     }
     
     public static void UseCorsPolicies(this WebApplication app)

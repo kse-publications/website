@@ -4,6 +4,7 @@ using Publications.Application.Repositories;
 using Publications.Application.Services;
 using Publications.Application.Statistics;
 using Publications.BackgroundJobs.Abstractions;
+using Publications.BackgroundJobs.Options;
 using Publications.Domain.Collections;
 using Publications.Domain.Filters;
 using Publications.Domain.Publications;
@@ -12,7 +13,7 @@ namespace Publications.BackgroundJobs.Tasks;
 
 public class SyncDatabasesTask(
     ILogger<SyncDatabasesTask> taskLogger,
-    IOptions<RetriableTaskOptions> options,
+    IOptionsSnapshot<DbSynchronizationOptions> options,
     ISourceRepository sourceRepository,
     IPublicationsRepository publicationsRepository,
     ICollectionsRepository collectionsRepository,
@@ -20,46 +21,90 @@ public class SyncDatabasesTask(
     IFiltersService filtersService,
     IRequestsRepository requestsRepository,
     IStatisticsRepository statisticsRepository)
-    : BaseRetriableTask<SyncDatabasesTask>(taskLogger, options.Value)
+    : BaseRetriableTask<SyncDatabasesTask>(taskLogger, options.Value.RetryOptions)
 {
-    private readonly DateTime _syncStartDateTime = DateTime.UtcNow;
-    
-    private IReadOnlyCollection<Publication>? _publications;
-    private IReadOnlyCollection<FilterGroup>? _filters;
-    private IReadOnlyCollection<Collection>? _collections;
+    private IReadOnlyCollection<Publication>? _sourcePublications;
+    private IReadOnlyCollection<FilterGroup>? _sourceFilters;
+    private IReadOnlyCollection<Collection>? _sourceCollections;
+    private IReadOnlyCollection<Publication>? _localPublications;
     
     protected override async Task DoRetriableTaskAsync()
     {
-        _collections = await sourceRepository.GetCollectionsAsync();
-        _publications = await sourceRepository.GetPublicationsAsync();
+        _sourceCollections = await sourceRepository.GetCollectionsAsync();
+        _sourcePublications = await sourceRepository.GetPublicationsAsync();
+        _localPublications = await publicationsRepository.GetAllAsync();
     }
 
     protected override async Task OnSuccessAsync()
     {
-        _filters = await filtersService.GetFiltersForPublicationsAsync(_publications!);
-        _publications = filtersService.AssignFiltersToPublicationsAsync(
-            _publications!.ToList(), _filters.ToList());
+        _sourceFilters = await filtersService.GetFiltersForPublicationsAsync(_sourcePublications!);
 
-        await collectionsRepository.InsertOrUpdateAsync(_collections!);
-        await publicationsRepository
-            .InsertOrUpdateAsync(await SetPublicationsViews(_publications));
-        await filtersRepository.ReplaceWithNewAsync(_filters);
+        await DeletePublicationsNotInSourceAsync();
+        
+        List<Publication> newOrUpdatedPublications = FindNewOrUpdatedPublications(
+            options.Value.ForceUpdateAll.Enabled);
+        
+        newOrUpdatedPublications = filtersService
+            .AssignFiltersToPublicationsAsync(newOrUpdatedPublications, _sourceFilters.ToList())
+            .Select(p => p.Synchronize())
+            .ToList();
+            
+        await publicationsRepository.InsertOrUpdateAsync(newOrUpdatedPublications);
+        await UpdatePublicationsViews(newOrUpdatedPublications);
+        await collectionsRepository.InsertOrUpdateAsync(_sourceCollections!);
+        await filtersRepository.ReplaceWithNewAsync(_sourceFilters);
+        await statisticsRepository.SetTotalPublicationsCountAsync(_sourcePublications!.Count);
+    }
+    
+    private async Task DeletePublicationsNotInSourceAsync()
+    {
+        var sourcePublicationsDict = _sourcePublications!.ToDictionary(p => p.Id);
 
-        await collectionsRepository.SynchronizeAsync(_syncStartDateTime);
-        await publicationsRepository.SynchronizeAsync(_syncStartDateTime);
-        await statisticsRepository.SetTotalPublicationsCountAsync(_publications.Count);
+        List<Publication> publicationsToDelete = _localPublications!
+            .Where(p => !sourcePublicationsDict.TryGetValue(p.Id, out _))
+            .ToList();
+
+        await publicationsRepository.DeleteAsync(publicationsToDelete);
     }
 
-    private async Task<IReadOnlyCollection<Publication>> SetPublicationsViews(
-        IEnumerable<Publication> resourceItemsCollection)
+    private List<Publication> FindNewOrUpdatedPublications(bool forceUpdateAllEnabled)
+    {
+        if (options.Value.ForceUpdateAll.Enabled)
+        { 
+            return _sourcePublications!.ToList();
+        }
+        
+        var localIdsHashSet = _localPublications!.Select(p => p.Id).ToHashSet();
+        var sourcePublicationsDict = _sourcePublications!.ToDictionary(p => p.Id);
+
+        // updated publications
+        List<Publication> newOrUpdatedPublications = _localPublications!
+            .Where(p =>
+                sourcePublicationsDict.TryGetValue(p.Id, out _) &&
+                p.LastSynchronizedAt < sourcePublicationsDict[p.Id].LastModifiedAt)
+            .Select(p => sourcePublicationsDict[p.Id])
+            .ToList();
+            
+        // new publications
+        newOrUpdatedPublications.AddRange(_sourcePublications!
+            .Where(p => !localIdsHashSet.Contains(p.Id)));
+        
+        return newOrUpdatedPublications;
+    }
+
+    private async Task UpdatePublicationsViews(IEnumerable<Publication> publications)
     {
         Dictionary<int, int> views = await requestsRepository.GetResourceViews<Publication>();
 
-        return resourceItemsCollection
-            .Select(resource => views.TryGetValue(resource.Id, out int resourceViews)
-                ? resource.UpdateViews(resourceViews)
-                : resource)
-            .ToList()
-            .AsReadOnly();
+        foreach (var publication in publications)
+        {
+            if (!views.TryGetValue(publication.Id, out var viewsCount))
+                continue;
+            
+            await publicationsRepository.UpdatePropertyValueAsync(
+                publication.Id, 
+                nameof(Publication.Views),
+                newValue: viewsCount.ToString());
+        }
     }
 }
