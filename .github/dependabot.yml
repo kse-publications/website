@@ -4,8 +4,6 @@ updates:
     directory: "/client/"
     schedule:
       interval: "weekly"
-    labels:
-      - "npm dependencies"
     reviewers:
       - "marchellodev"
       - "DmytroKolisnyk2"
@@ -15,8 +13,6 @@ updates:
     directory: "/server/Publications/"
     schedule:
       interval: "weekly"
-    labels:
-      - "nuget dependencies"
     reviewers:
       - "marchellodev"
       - "PrudiusVladislav"
