@@ -16,7 +16,7 @@ const breakpointColumnsObj = {
   600: 1,
 }
 
-const SKELETON_CARDS_COUNT = 4
+const SKELETON_CARDS_COUNT = 5
 
 export const SearchResults = () => {
   const { isRecent, error, isLoading, searchResults, totalResults } = useSearchContext()
