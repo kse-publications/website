@@ -1,0 +1,23 @@
+version: 2
+updates:
+  - package-ecosystem: "npm" 
+    directory: "/client/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "npm dependencies"
+    reviewers:
+      - "marchellodev"
+      - "DmytroKolisnyk2"
+      - "yeontannie"
+
+  - package-ecosystem: "nuget"
+    directory: "/server/Publications/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "nuget dependencies"
+    reviewers:
+      - "marchellodev"
+      - "PrudiusVladislav"
+      - "Pivdenna"
