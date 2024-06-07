@@ -48,6 +48,10 @@ export const SearchFilters = () => {
     })
   }
 
+  const preventClose = (e: Event) => {
+    e.preventDefault()
+  }
+
   return (
     <div className="flex flex-wrap justify-center gap-6">
       {(filters || []).map((filter) => {
@@ -82,6 +86,7 @@ export const SearchFilters = () => {
               {selectedFilterValue && (
                 <DropdownMenuCheckboxItem
                   onCheckedChange={() => handleFilterChange(filter.id, 'reset', filter.name)}
+                  onSelect={preventClose}
                 >
                   Reset
                 </DropdownMenuCheckboxItem>
@@ -89,6 +94,7 @@ export const SearchFilters = () => {
               {filter.filters.map(({ id, value, matchedPublicationsCount }) => (
                 <DropdownMenuCheckboxItem
                   key={id}
+                  onSelect={preventClose}
                   checked={selectedFilters.some((f) => f.id === filter.id && f.values.includes(id))}
                   onCheckedChange={() => handleFilterChange(filter.id, id.toString(), filter.name)}
                 >
