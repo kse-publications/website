@@ -13,7 +13,8 @@ namespace Publications.BackgroundJobs.Tasks;
 
 public class SyncDatabasesTask(
     ILogger<SyncDatabasesTask> taskLogger,
-    IOptionsSnapshot<DbSynchronizationOptions> options,
+    IOptionsSnapshot<DbSyncOptions> options,
+    IDbVersionService dbVersionService,
     ISourceRepository sourceRepository,
     IPublicationsRepository publicationsRepository,
     ICollectionsRepository collectionsRepository,
@@ -40,9 +41,9 @@ public class SyncDatabasesTask(
         _sourceFilters = await filtersService.GetFiltersForPublicationsAsync(_sourcePublications!);
 
         await DeletePublicationsNotInSourceAsync();
-        
-        List<Publication> newOrUpdatedPublications = FindNewOrUpdatedPublications(
-            options.Value.ForceUpdateAll.Enabled);
+
+        bool forceUpdateAll = await dbVersionService.IsMajorVersionUpToDateAsync(typeof(Publication));
+        List<Publication> newOrUpdatedPublications = FindNewOrUpdatedPublications(forceUpdateAll);
         
         newOrUpdatedPublications = filtersService
             .AssignFiltersToPublicationsAsync(newOrUpdatedPublications, _sourceFilters.ToList())
@@ -67,9 +68,9 @@ public class SyncDatabasesTask(
         await publicationsRepository.DeleteAsync(publicationsToDelete);
     }
 
-    private List<Publication> FindNewOrUpdatedPublications(bool forceUpdateAllEnabled)
+    private List<Publication> FindNewOrUpdatedPublications(bool forceUpdateAll)
     {
-        if (options.Value.ForceUpdateAll.Enabled)
+        if (forceUpdateAll)
         { 
             return _sourcePublications!.ToList();
         }

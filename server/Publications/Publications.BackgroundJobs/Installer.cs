@@ -15,8 +15,8 @@ public static class Installer
         services.AddHostedService<ConfigurationHostedService>();
 
         services
-            .AddOptions<DbSynchronizationOptions>()
-            .Bind(configuration.GetSection("DbSynchronizationOptions"));
+            .AddOptions<DbSyncOptions>()
+            .Bind(configuration.GetSection("DbSync"));
         
         services.AddTransient<SyncDatabasesTask>();
         services.AddScheduler();
@@ -29,13 +29,12 @@ public static class Installer
     
     public static void UseBackgroundJobs(this IServiceProvider serviceProvider)
     {
-        var optionsMonitor = serviceProvider.GetRequiredService<IOptionsMonitor<DbSynchronizationOptions>>();
+        var optionsMonitor = serviceProvider.GetRequiredService<IOptionsMonitor<DbSyncOptions>>();
         serviceProvider.UseScheduler(scheduler =>
         {
             scheduler.Schedule<SyncDatabasesTask>()
                 .Cron(optionsMonitor.CurrentValue.Interval)
-                .RunOnceAtStart()
-                .When(() => Task.FromResult(optionsMonitor.CurrentValue.SyncEnabled))
+                .When(() => Task.FromResult(optionsMonitor.CurrentValue.Enabled))
                 .PreventOverlapping(nameof(SyncDatabasesTask));
         });
     }

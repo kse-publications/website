@@ -9,6 +9,7 @@ using Publications.Domain.Shared.Slugs;
 using Publications.Infrastructure.Publications;
 using Publications.Infrastructure.Requests;
 using Publications.Infrastructure.Services;
+using Publications.Infrastructure.Services.DbConfiguration;
 using Publications.Infrastructure.Source;
 using Publications.Infrastructure.Statistics;
 using Redis.OM;
@@ -42,6 +43,16 @@ public static class Installer
         
         services.AddSingleton<IRedisConnectionProvider>(
             new RedisConnectionProvider(connectionMultiplexer));
+        
+        return services;
+    }
+    
+    private static IServiceCollection AddDbConfigurationServices(this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddOptionsWithValidateOnStart<RedisIndexesVersions>()
+            .ValidateDataAnnotations()
+            .Bind(configuration.GetSection("Redis:IndexesVersions"));
         
         services.AddTransient<IDbConfigurationService, DbConfigurationService>();
         

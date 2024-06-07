@@ -9,12 +9,12 @@ namespace Publications.BackgroundJobs;
 
 public class ConfigurationHostedService: IHostedService
 {
-    private readonly IOptions<DbSynchronizationOptions> _options;
+    private readonly IOptions<DbSyncOptions> _options;
     private readonly IServiceProvider _serviceProvider;
     
     public ConfigurationHostedService(
         IServiceProvider serviceProvider,
-        IOptions<DbSynchronizationOptions> options)
+        IOptions<DbSyncOptions> options)
     {
         _serviceProvider = serviceProvider;
         _options = options;
@@ -26,7 +26,7 @@ public class ConfigurationHostedService: IHostedService
         var dbConfigurationService = scope.ServiceProvider.GetRequiredService<IDbConfigurationService>();
         await dbConfigurationService.ConfigureAsync();
         
-        if(_options.Value.SyncEnabled)
+        if(_options.Value.Enabled)
         {
             var syncDatabasesTask = scope.ServiceProvider.GetRequiredService<SyncDatabasesTask>();
             await syncDatabasesTask.Invoke();
