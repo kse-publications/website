@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿
+using System.Text.Json;
 using NRedisStack;
 using NRedisStack.RedisStackCommands;
 using NRedisStack.Search;
@@ -10,6 +11,7 @@ using Publications.Domain.Collections;
 using Publications.Domain.Publications;
 using Publications.Infrastructure.Shared;
 using Redis.OM;
+using Redis.OM.Searching;
 using StackExchange.Redis;
 
 namespace Publications.Infrastructure.Publications;
@@ -17,11 +19,15 @@ namespace Publications.Infrastructure.Publications;
 public class PublicationsRepository: EntityRepository<Publication>, IPublicationsRepository
 {
     private readonly IDatabase _db;
+    private IPublicationsRepository _publicationsRepositoryImplementation;
+    private readonly RedisCollection<Publication> _publications;
 
     public PublicationsRepository(IConnectionMultiplexer connectionMultiplexer) 
         : base(new RedisConnectionProvider(connectionMultiplexer))
     {
         _db = connectionMultiplexer.GetDatabase();
+        // var provider = new RedisConnectionProvider(connectionMultiplexer); 
+        // _publications = provider.RedisCollection<Publication>();
     }
 
     public async Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
@@ -174,6 +180,16 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
                     .Deserialize<Publication[]>(json)!.First()))
             .ToList();
     }
+    
+    // public async Task<PublicationSummary[]> GetTopPublicationsByRecentViews()
+    // {
+    //      var topPublications = await _publications
+    //          .OrderByDescending(pub => pub.RecentViews)
+    //          .Take(4)
+    //        .ToListAsync();
+    //
+    //     return topPublications;
+    // }
 
     private static string PublicationAuthorsName => 
         $"{nameof(Publication.Authors)}_{nameof(Author.Name)}";

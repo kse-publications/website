@@ -9,4 +9,7 @@ public interface IRequestsRepository
     
     Task<Dictionary<int, int>>  GetResourceViews<TResource>(bool distinct = true) 
         where TResource : Entity<TResource>;
+    
+    Task<Dictionary<int, int>> GetResourceRecentViews(DateTime periodStart);
+    Task<int> GetResourceRecentViewsCount(DateTime periodStart);
 }
