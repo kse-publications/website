@@ -44,7 +44,7 @@ public class DbVersionService: IDbVersionService
         return DbVersion.FromString(dbVersionValue.IsNullOrEmpty ? "0.0" : dbVersionValue.ToString());
     }
 
-    public DbVersion GetCurrentIndexVersionAsync(Type type)
+    public DbVersion GetCurrentIndexVersion(Type type)
     {
         return _redisIndexesVersions.GetIndexVersion(type);
     }

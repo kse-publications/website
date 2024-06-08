@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using NRedisStack;
 using NRedisStack.RedisStackCommands;
 using Publications.Application.Services;
@@ -18,16 +19,26 @@ public class DbConfigurationService : IDbConfigurationService
     private readonly SearchCommands _ft;
     private readonly RequestsHistoryDbContext _dbContext;
     private readonly IDbVersionService _versionService;
-
+    private readonly ILogger<IDbConfigurationService> _logger;
+    
+    private readonly Dictionary<string, Type> _indexesToCreate = new[]
+    {
+        typeof(Publication),
+        typeof(Collection),
+        typeof(FilterGroup)
+    }.ToDictionary(RedisIndexesVersions.GetIndexName);
+    
     public DbConfigurationService(
         IConnectionMultiplexer connectionMultiplexer,
         RequestsHistoryDbContext dbContext,
-        IDbVersionService versionService)
+        IDbVersionService versionService,
+        ILogger<IDbConfigurationService> logger)
     {
         _redisConnectionProvider = new RedisConnectionProvider(connectionMultiplexer);
         _ft = connectionMultiplexer.GetDatabase().FT();
         _dbContext = dbContext;
         _versionService = versionService;
+        _logger = logger;
     }
 
     public async Task ConfigureAsync()
@@ -38,13 +49,11 @@ public class DbConfigurationService : IDbConfigurationService
 
     private async Task ConfigureRedisAsync()
     {
-        var indexes = (await _redisConnectionProvider.Connection
+        var existingIndexes = (await _redisConnectionProvider.Connection
             .ExecuteAsync("FT._LIST")).ToArray();
         
-        await CreateIndexesAsync(indexes,
-            typeof(Publication),
-            typeof(Collection),
-            typeof(FilterGroup));
+        await DeleteUnusedIndexes(existingIndexes);
+        await CreateIndexesAsync(existingIndexes);
     }
     
     private async Task ConfigureSqliteAsync()
@@ -52,52 +61,54 @@ public class DbConfigurationService : IDbConfigurationService
         await _dbContext.Database.MigrateAsync();   
     }
 
-    private async Task CreateIndexesAsync(RedisReply[] indexes, params Type[] types)
+    private async Task CreateIndexesAsync(RedisReply[] indexes)
     {
-        Dictionary<string, Type> indexesToCreate = types
-            .ToDictionary(RedisIndexesVersions.GetIndexName);
-        
-        foreach (var currentIndex in indexesToCreate.Keys)
+        foreach (var currentIndex in _indexesToCreate.Keys)
         {
+            DbVersion currentVersion = _versionService
+                .GetCurrentIndexVersion(_indexesToCreate[currentIndex]);
+            
             if (indexes.All(i => i != currentIndex))
             {
-                await CreateIndexAsync(type: indexesToCreate[currentIndex]);
+                await CreateIndexAsync(type: _indexesToCreate[currentIndex], version: currentVersion);
+                _logger.LogInformation("Index '{index}' CREATED with version {version}", 
+                    currentIndex, currentVersion);
+                
                 continue;
             }
             
-            DbVersion currentVersion = _versionService.GetCurrentIndexVersionAsync(indexesToCreate[currentIndex]);
-            DbVersion dbVersion = await _versionService.GetDbIndexVersionAsync(indexesToCreate[currentIndex]);
+            DbVersion dbVersion = await _versionService
+                .GetDbIndexVersionAsync(_indexesToCreate[currentIndex]);
             
-            if (currentVersion == dbVersion)
+            if (dbVersion == currentVersion)
                 continue;
             
-            bool deleteAssociatedData = currentVersion.Major != dbVersion.Major;
+            bool deleteAssociatedData = dbVersion.Major != currentVersion.Major;
             
             await _ft.DropIndexAsync(currentIndex, dd: deleteAssociatedData);
-            await CreateIndexAsync(type: indexesToCreate[currentIndex]);
+            await CreateIndexAsync(type: _indexesToCreate[currentIndex], version: currentVersion);
+            
+            _logger.LogInformation("Index '{index}' UPDATED from {dbV} to {currV}", 
+                currentIndex, dbVersion, currentVersion);
         }
-        
-        await DeleteUnusedIndexes(indexes, indexesToCreate);
     }
 
-    private async Task CreateIndexAsync(Type type)
+    private async Task CreateIndexAsync(Type type, DbVersion version)
     {
         await _redisConnectionProvider.Connection.CreateIndexAsync(type);
-        
-        var versionToSet = _versionService.GetCurrentIndexVersionAsync(type);
-        await _versionService.UpdateDbIndexVersionAsync(type, versionToSet);
+        await _versionService.UpdateDbIndexVersionAsync(type, version);
     }
     
-    private async Task DeleteUnusedIndexes(
-        RedisReply[] indexes, Dictionary<string, Type> indexesToCreate)
+    private async Task DeleteUnusedIndexes(RedisReply[] indexes)
     {
         foreach (var existingIndex in indexes)
         {
-            if (indexesToCreate.ContainsKey(existingIndex))
+            if (_indexesToCreate.ContainsKey(existingIndex))
                 continue;
             
             await _ft.DropIndexAsync(existingIndex, dd: true);
-            await _versionService.DeleteDbIndexVersionAsync(indexesToCreate[existingIndex]);
+            await _versionService.DeleteDbIndexVersionAsync(_indexesToCreate[existingIndex]);
+            _logger.LogInformation("Index '{index}' DELETED", (string)existingIndex);
         }
     }
 }
