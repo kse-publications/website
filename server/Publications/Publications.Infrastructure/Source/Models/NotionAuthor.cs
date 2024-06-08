@@ -11,10 +11,12 @@ internal class NotionAuthor : Author
     private NotionAuthor(
         string notionId,
         int id,
-        string name) 
+        string name,
+        DateTime lastModifiedAt) 
         : base(id, name)
     {
         _notionId = notionId;
+        LastModifiedAt = lastModifiedAt;
     }
     
     internal static NotionAuthor? MapFromPage(Page page)
@@ -26,7 +28,8 @@ internal class NotionAuthor : Author
         return new NotionAuthor(
             notionId: page.Id,
             id: id,
-            name: name);
+            name: name,
+            lastModifiedAt: page.LastEditedTime);
     }
     
     internal Author ToAuthor()

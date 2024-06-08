@@ -11,10 +11,12 @@ internal class NotionPublisher : Publisher
     private NotionPublisher(
         string notionId,
         int id,
-        string name) 
+        string name,
+        DateTime lastModifiedAt) 
         : base(id, name)
     {
         _notionId = notionId;
+        LastModifiedAt = lastModifiedAt;
     }
     
     internal static NotionPublisher? MapFromPage(Page page)
@@ -26,6 +28,7 @@ internal class NotionPublisher : Publisher
         return new NotionPublisher(
             notionId: page.Id,
             id: id,
-            name: name);
+            name: name,
+            lastModifiedAt: page.LastEditedTime);
     }
 }

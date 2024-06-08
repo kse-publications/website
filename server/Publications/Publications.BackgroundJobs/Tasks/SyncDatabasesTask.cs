@@ -28,6 +28,9 @@ public class SyncDatabasesTask(
     private IReadOnlyCollection<Publication>? _sourcePublications;
     private IReadOnlyCollection<FilterGroup>? _sourceFilters;
     private IReadOnlyCollection<Collection>? _sourceCollections;
+    private IReadOnlyCollection<Author>? _sourceAuthors;
+    private IReadOnlyCollection<Publisher>? _sourcePublishers;
+    
     private IReadOnlyCollection<Publication>? _localPublications;
     private IReadOnlyCollection<Collection>? _localCollections;
     
@@ -35,6 +38,8 @@ public class SyncDatabasesTask(
     {
         _sourceCollections = await sourceRepository.GetCollectionsAsync();
         _sourcePublications = await sourceRepository.GetPublicationsAsync();
+        _sourceAuthors = await sourceRepository.GetAuthorsAsync();
+        _sourcePublishers = await sourceRepository.GetPublishersAsync();
     }
 
     protected override async Task OnSuccessAsync()
@@ -92,11 +97,20 @@ public class SyncDatabasesTask(
         var newOrUpdatedPublications = FindNewOrUpdatedEntities(
             _localPublications!, _sourcePublications!, forceUpdateAllPublication);
         
+        if (forceUpdateAllPublication)
+            return newOrUpdatedPublications;
+        
         var publicationsInUpdatedCollections = FindPublicationsInUpdatedCollections(
             newOrUpdatedCollections);
         
+        var publicationsWithUpdatedAuthors = FindPublicationsWithUpdatedAuthors();
+        var publicationsWithUpdatedPublishers = FindPublicationsWithUpdatedPublishers();
+        
         return newOrUpdatedPublications
-            .UnionBy(publicationsInUpdatedCollections, p => p.Id)
+            .Concat(publicationsInUpdatedCollections)
+            .Concat(publicationsWithUpdatedAuthors)
+            .Concat(publicationsWithUpdatedPublishers)
+            .DistinctBy(p => p.Id)
             .ToList();
     }
     
@@ -115,6 +129,22 @@ public class SyncDatabasesTask(
         
         return _sourcePublications!
             .Where(p => publicationIdsInUpdatedCollections.Contains(p.Id))
+            .ToList();
+    }
+    
+    private List<Publication> FindPublicationsWithUpdatedAuthors()
+    {
+        return _sourcePublications!
+            .Where(p => p.Authors.Any(a => p.LastSynchronizedAt < a.LastModifiedAt))
+            .ToList();
+    }
+    
+    private List<Publication> FindPublicationsWithUpdatedPublishers()
+    {
+        return _sourcePublications!
+            .Where(p => 
+                p.Publisher is not null && 
+                p.LastSynchronizedAt < p.Publisher.LastModifiedAt)
             .ToList();
     }
     
