@@ -27,10 +27,14 @@ public class EntityRepository<TEntity> : IEntityRepository<TEntity>
         return await _collection.FindByIdAsync(resourceId.ToString());
     }
 
-    public virtual async Task<IReadOnlyCollection<TEntity>> GetAllAsync(
+    public async Task<IReadOnlyCollection<SyncEntityMetadata>> GetAllSyncMetadataAsync(
         CancellationToken cancellationToken = default)
     {
-        return (await _collection.ToListAsync()).AsReadOnly();
+        return (await _collection.Select(e => new SyncEntityMetadata
+        {
+            Id = e.Id,
+            LastSynchronizedAt = e.LastSynchronizedAt,
+        }).ToListAsync()).AsReadOnly();
     }
 
     public virtual async Task<IReadOnlyCollection<SiteMapResourceMetadata>> GetSiteMapMetadataAsync(

@@ -9,7 +9,7 @@ public interface IEntityRepository<TEntity> where TEntity : Entity
         int resourceId,
         CancellationToken cancellationToken = default);
     
-    Task<IReadOnlyCollection<TEntity>> GetAllAsync(
+    Task<IReadOnlyCollection<SyncEntityMetadata>> GetAllSyncMetadataAsync(
         CancellationToken cancellationToken = default);
     
     Task<IReadOnlyCollection<SiteMapResourceMetadata>> GetSiteMapMetadataAsync(
