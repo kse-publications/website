@@ -42,7 +42,7 @@ public class SyncDatabasesTask(
 
         await DeletePublicationsNotInSourceAsync();
 
-        bool forceUpdateAll = await dbVersionService.IsMajorVersionUpToDateAsync(typeof(Publication));
+        bool forceUpdateAll = !await dbVersionService.IsMajorVersionUpToDateAsync(typeof(Publication));
         List<Publication> newOrUpdatedPublications = FindNewOrUpdatedPublications(forceUpdateAll);
         
         newOrUpdatedPublications = filtersService
