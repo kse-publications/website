@@ -8,6 +8,7 @@ using Publications.BackgroundJobs.Options;
 using Publications.Domain.Collections;
 using Publications.Domain.Filters;
 using Publications.Domain.Publications;
+using Publications.Domain.Shared;
 
 namespace Publications.BackgroundJobs.Tasks;
 
@@ -28,22 +29,29 @@ public class SyncDatabasesTask(
     private IReadOnlyCollection<FilterGroup>? _sourceFilters;
     private IReadOnlyCollection<Collection>? _sourceCollections;
     private IReadOnlyCollection<Publication>? _localPublications;
+    private IReadOnlyCollection<Collection>? _localCollections;
     
     protected override async Task DoRetriableTaskAsync()
     {
         _sourceCollections = await sourceRepository.GetCollectionsAsync();
         _sourcePublications = await sourceRepository.GetPublicationsAsync();
-        _localPublications = await publicationsRepository.GetAllAsync();
     }
 
     protected override async Task OnSuccessAsync()
     {
-        _sourceFilters = await filtersService.GetFiltersForPublicationsAsync(_sourcePublications!);
+        _localPublications = await publicationsRepository.GetAllAsync();
+        _localCollections = await collectionsRepository.GetAllAsync();
 
         await DeletePublicationsNotInSourceAsync();
+        
+        bool forceUpdateAllCollections = !await dbVersionService.IsMajorVersionUpToDateAsync(typeof(Collection));
+        List<Collection> newOrUpdatedCollections = FindNewOrUpdatedCollections(forceUpdateAllCollections);
 
-        bool forceUpdateAll = !await dbVersionService.IsMajorVersionUpToDateAsync(typeof(Publication));
-        List<Publication> newOrUpdatedPublications = FindNewOrUpdatedPublications(forceUpdateAll);
+        bool forceUpdateAllPublications = !await dbVersionService.IsMajorVersionUpToDateAsync(typeof(Publication));
+        var newOrUpdatedPublications = FindNewOrUpdatedPublications(
+            newOrUpdatedCollections, forceUpdateAllPublications);
+        
+        _sourceFilters = await filtersService.GetFiltersForPublicationsAsync(_sourcePublications!);
         
         newOrUpdatedPublications = filtersService
             .AssignFiltersToPublicationsAsync(newOrUpdatedPublications, _sourceFilters.ToList())
@@ -51,9 +59,13 @@ public class SyncDatabasesTask(
             
         await publicationsRepository.InsertOrUpdateAsync(newOrUpdatedPublications);
         await UpdatePublicationsViews(newOrUpdatedPublications);
-        await collectionsRepository.InsertOrUpdateAsync(_sourceCollections!);
+        await collectionsRepository.InsertOrUpdateAsync(newOrUpdatedCollections);
         await filtersRepository.ReplaceWithNewAsync(_sourceFilters);
         await statisticsRepository.SetTotalPublicationsCountAsync(_sourcePublications!.Count);
+        
+        taskLogger.LogInformation(
+            "Databases synchronized successfully. {0} publications updated. {1} collections updated.",
+            newOrUpdatedPublications.Count, newOrUpdatedCollections.Count);
     }
     
     private async Task DeletePublicationsNotInSourceAsync()
@@ -61,35 +73,77 @@ public class SyncDatabasesTask(
         var sourcePublicationsDict = _sourcePublications!.ToDictionary(p => p.Id);
 
         List<Publication> publicationsToDelete = _localPublications!
-            .Where(p => !sourcePublicationsDict.TryGetValue(p.Id, out _))
+            .Where(p => !sourcePublicationsDict.ContainsKey(p.Id))
             .ToList();
 
         await publicationsRepository.DeleteAsync(publicationsToDelete);
+
+        var deletedIds = publicationsToDelete.Select(p => p.Id);
+        
+        _localPublications = _localPublications!
+            .Where(p => !deletedIds.Contains(p.Id))
+            .ToList();
     }
 
-    private List<Publication> FindNewOrUpdatedPublications(bool forceUpdateAll)
+    private List<Publication> FindNewOrUpdatedPublications(
+        IReadOnlyCollection<Collection> newOrUpdatedCollections,
+        bool forceUpdateAllPublication)
+    {
+        var newOrUpdatedPublications = FindNewOrUpdatedEntities(
+            _localPublications!, _sourcePublications!, forceUpdateAllPublication);
+        
+        var publicationsInUpdatedCollections = FindPublicationsInUpdatedCollections(
+            newOrUpdatedCollections);
+        
+        return newOrUpdatedPublications
+            .UnionBy(publicationsInUpdatedCollections, p => p.Id)
+            .ToList();
+    }
+    
+    private List<Collection> FindNewOrUpdatedCollections(bool forceUpdateAllCollections)
+    {
+        return FindNewOrUpdatedEntities(
+            _localCollections!, _sourceCollections!, forceUpdateAllCollections);
+    }
+    
+    private List<Publication> FindPublicationsInUpdatedCollections(
+        IReadOnlyCollection<Collection> newOrUpdatedCollections)
+    {
+        var publicationIdsInUpdatedCollections = newOrUpdatedCollections
+            .SelectMany(c => c.PublicationsIds)
+            .ToHashSet();
+        
+        return _sourcePublications!
+            .Where(p => publicationIdsInUpdatedCollections.Contains(p.Id))
+            .ToList();
+    }
+    
+    private static List<TEntity> FindNewOrUpdatedEntities<TEntity>(
+        IReadOnlyCollection<TEntity> localEntities,
+        IReadOnlyCollection<TEntity> sourceEntities,
+        bool forceUpdateAll) where TEntity : Entity<TEntity>
     {
         if (forceUpdateAll)
-        { 
-            return _sourcePublications!.ToList();
+        {
+            return sourceEntities.ToList();
         }
         
-        var localIdsHashSet = _localPublications!.Select(p => p.Id).ToHashSet();
-        var sourcePublicationsDict = _sourcePublications!.ToDictionary(p => p.Id);
+        var localIdsHashSet = localEntities.Select(e => e.Id).ToHashSet();
+        var sourceEntitiesDict = sourceEntities.ToDictionary(e => e.Id);
 
-        // updated publications
-        List<Publication> newOrUpdatedPublications = _localPublications!
-            .Where(p =>
-                sourcePublicationsDict.TryGetValue(p.Id, out _) &&
-                p.LastSynchronizedAt < sourcePublicationsDict[p.Id].LastModifiedAt)
-            .Select(p => sourcePublicationsDict[p.Id])
+        // updated entities
+        List<TEntity> newOrUpdatedEntities = localEntities
+            .Where(localEntity =>
+                sourceEntitiesDict.TryGetValue(localEntity.Id, out var sourceEntity) &&
+                localEntity.LastSynchronizedAt < sourceEntity.LastModifiedAt)
+            .Select(localEntity => sourceEntitiesDict[localEntity.Id])
             .ToList();
-            
-        // new publications
-        newOrUpdatedPublications.AddRange(_sourcePublications!
-            .Where(p => !localIdsHashSet.Contains(p.Id)));
-        
-        return newOrUpdatedPublications;
+
+        // new entities
+        newOrUpdatedEntities.AddRange(sourceEntities
+            .Where(e => !localIdsHashSet.Contains(e.Id)));
+
+        return newOrUpdatedEntities;
     }
 
     private async Task UpdatePublicationsViews(IEnumerable<Publication> publications)
