@@ -6,50 +6,42 @@ namespace Publications.Infrastructure.Source.Models;
 
 internal class NotionCollection : Collection
 {
-    internal List<ObjectId> PublicationsRelation { get; private init; } = [];
+    private readonly List<ObjectId> _publicationsRelation;
+    internal List<ObjectId> GetPublicationsRelation() => _publicationsRelation;
+
+    private NotionCollection(
+        int id,
+        string name,
+        DateTime lastModifiedAt,
+        List<ObjectId> publicationsRelation,
+        IWordsService wordsService) 
+        : base(id, name, lastModifiedAt, wordsService)
+    {
+        _publicationsRelation = publicationsRelation;
+    }
     
     internal static NotionCollection? MapFromPage(Page page, IWordsService wordsService)
     {
-        if (!IsValidPage(page))
+        if (!(page.TryGetId(out int id) &&
+              page.TryGetName(out string name) &&
+              page.TryGetRelationProperty("Publications", out var publications)))
             return null;
         
-        NotionCollection collection = new() 
+        return new NotionCollection(
+            id: id,
+            name: name,
+            lastModifiedAt: page.LastEditedTime,
+            publicationsRelation: publications,
+            wordsService)
         {
-            Id = page.Properties["ID"].GetId(),
-            Icon = page.GetRichTextProperty("Icon"),
-            Name = page.Properties["Name"].GetName(),
-            Description = page.GetRichTextProperty("Description"),
-            PublicationsRelation = ((RelationPropertyValue)page.Properties["Publications"]).Relation,
-            PublicationsCount = (int)((FormulaPropertyValue)page.Properties["Publications Count"])
-                .Formula.Number!.Value,
-            LastModifiedAt = page.LastEditedTime
+            Icon = page.GetRichTextPropertyOrDefault("Icon"),
+            Description = page.GetRichTextPropertyOrDefault("Description"),
+            PublicationsCount = (int)page.GetFormulaPropertyOrDefault("Publications Count")
         };
-        
-        collection
-            .UpdateSlug(wordsService)
-            .Synchronize();
-        
-        return collection;
-    }
-    
-    private static bool IsValidPage(Page collectionPage)
-    {
-        return collectionPage.Properties["ID"].IsValidId() &&
-               collectionPage.Properties["Name"].IsValidName() &&
-               collectionPage.Properties["Visible"].IsVisible();
     }
     
     internal Collection ToCollection()
     {
-        return new Collection
-        {
-            Id = Id,
-            Name = Name,
-            Icon = Icon,
-            Slug = Slug,
-            Description = Description,
-            PublicationsCount = PublicationsCount,
-            LastSynchronizedAt = LastSynchronizedAt
-        };
+        return this;
     }
 }

@@ -12,10 +12,12 @@ public abstract class Entity<T> where T: Entity<T>
     public int Id { get; init; }
     
     [Indexed(Sortable = true)]
+    [JsonInclude]
     public string Slug { get; set; } = string.Empty;
     
     [Indexed]
     [IgnoreInResponse]
+    [JsonInclude]
     [JsonConverter(typeof(UnixTimestampJsonConverter))]
     public DateTime LastSynchronizedAt { get; set; }
     
@@ -23,14 +25,6 @@ public abstract class Entity<T> where T: Entity<T>
     [IgnoreInResponse]
     [JsonConverter(typeof(UnixTimestampJsonConverter))]
     public DateTime LastModifiedAt { get; set; }
-
-    public T Synchronize()
-    {
-        LastSynchronizedAt = DateTime.UtcNow;
-        return (T)this;
-    }
-
-    public abstract T UpdateSlug(IWordsService wordsService);
     
     public static string IndexName => $"{typeof(T).Name.ToLower()}-idx";
 }

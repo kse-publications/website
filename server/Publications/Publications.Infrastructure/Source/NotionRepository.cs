@@ -65,13 +65,14 @@ public class NotionRepository: ISourceRepository
     public async Task<IReadOnlyCollection<Author>> GetAuthorsAsync()
     {
         return (await GetNotionAuthorsAsync())
-            .Select(a => a.ToAuthor()).ToList();
+            .Select(a => a.ToAuthor())
+            .ToList()
+            .AsReadOnly();
     }
     
     public async Task<IReadOnlyCollection<Publisher>> GetPublishersAsync()
     {
-        return (await GetNotionPublishersAsync())
-            .Select(p => p.ToPublisher()).ToList();
+        return await GetNotionPublishersAsync();
     }
 
     private async Task<IReadOnlyCollection<NotionCollection>> GetNotionCollectionsAsync()

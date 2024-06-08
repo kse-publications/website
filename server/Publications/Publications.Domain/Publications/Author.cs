@@ -1,4 +1,6 @@
-﻿namespace Publications.Domain.Publications;
+﻿using System.Text.Json.Serialization;
+
+namespace Publications.Domain.Publications;
 
 /// <summary>
 /// Represents an author of a <see cref="Publication"/>.
@@ -6,5 +8,12 @@
 public class Author
 {
     public int Id { get; init; }
-    public string Name { get; init; } = null!;
+    public string Name { get; init; }
+    
+    [JsonConstructor]
+    public Author(int id, string name)
+    {
+        Id = id;
+        Name = name;
+    }
 }

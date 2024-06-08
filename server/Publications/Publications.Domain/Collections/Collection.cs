@@ -1,4 +1,5 @@
-﻿using Publications.Domain.Shared;
+﻿using System.Text.Json.Serialization;
+using Publications.Domain.Shared;
 using Publications.Domain.Shared.Slugs;
 using Publications.Domain.Shared.ValueObjects;
 using Redis.OM.Modeling;
@@ -12,18 +13,36 @@ namespace Publications.Domain.Collections;
 public class Collection: Entity<Collection>
 {
     [Indexed] 
+    [JsonInclude]
     public string Icon { get; set; } = string.Empty;
 
     [Searchable(Weight = 1.0)] 
-    public string Name { get; set; } = null!;
+    public string Name { get; init; }
 
-    [Searchable(Weight = 0.8)] 
+    [Searchable(Weight = 0.8)]
+    [JsonInclude]
     public string Description { get; set; } = string.Empty;
 
-    [Indexed(Sortable = true)] 
+    [Indexed(Sortable = true)]
+    [JsonInclude]
     public int PublicationsCount { get; set; }
 
-    public override Collection UpdateSlug(IWordsService wordsService)
+    [JsonConstructor]
+    public Collection(
+        int id,
+        string name, 
+        DateTime lastModifiedAt,
+        IWordsService wordsService)
+    {
+        Id = id;
+        Name = name;
+        LastSynchronizedAt = DateTime.UtcNow;
+        LastModifiedAt = lastModifiedAt;
+        
+        UpdateSlug(wordsService);
+    }
+
+    private Collection UpdateSlug(IWordsService wordsService)
     {
         Slug = SlugFactory.Create(Name, Id.ToString(), IsoLanguageCode.English, wordsService);
         return this;

@@ -47,7 +47,6 @@ public class SyncDatabasesTask(
         
         newOrUpdatedPublications = filtersService
             .AssignFiltersToPublicationsAsync(newOrUpdatedPublications, _sourceFilters.ToList())
-            .Select(p => p.Synchronize())
             .ToList();
             
         await publicationsRepository.InsertOrUpdateAsync(newOrUpdatedPublications);

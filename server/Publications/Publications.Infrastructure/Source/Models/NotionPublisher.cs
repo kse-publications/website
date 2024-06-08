@@ -5,33 +5,27 @@ namespace Publications.Infrastructure.Source.Models;
 
 internal class NotionPublisher : Publisher
 {
-    internal string NotionId { get; set; } = string.Empty;
+    private readonly string _notionId;
+    internal string GetNotionId() => _notionId;
+    
+    private NotionPublisher(
+        string notionId,
+        int id,
+        string name) 
+        : base(id, name)
+    {
+        _notionId = notionId;
+    }
     
     internal static NotionPublisher? MapFromPage(Page page)
     {
-        if (!IsValidPage(page))
+        if (!(page.TryGetId(out int id) && 
+              page.TryGetName(out string name)))
             return null;
         
-        return new NotionPublisher
-        {
-            NotionId = page.Id,
-            Id = page.Properties["ID"].GetId(),
-            Name = page.Properties["Name"].GetName()
-        };
-    }
-    
-    private static bool IsValidPage(Page publisherPage)
-    {
-        return publisherPage.Properties["ID"].IsValidId() && 
-               publisherPage.Properties["Name"].IsValidName();
-    }
-
-    public Publisher ToPublisher()
-    {
-        return new Publisher
-        {
-            Id = Id,
-            Name = Name,
-        };
+        return new NotionPublisher(
+            notionId: page.Id,
+            id: id,
+            name: name);
     }
 }

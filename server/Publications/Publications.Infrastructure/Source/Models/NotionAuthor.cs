@@ -5,33 +5,32 @@ namespace Publications.Infrastructure.Source.Models;
 
 internal class NotionAuthor : Author
 {
-    internal string NotionId { get; private init; } = string.Empty;
+    private readonly string _notionId;
+    internal string GetNotionId() => _notionId;
+    
+    private NotionAuthor(
+        string notionId,
+        int id,
+        string name) 
+        : base(id, name)
+    {
+        _notionId = notionId;
+    }
     
     internal static NotionAuthor? MapFromPage(Page page)
     {
-        if (!IsValidPage(page))
+        if (!(page.TryGetId(out int id) && 
+              page.TryGetName(out string name))) 
             return null;
         
-        return new NotionAuthor
-        {
-            NotionId = page.Id,
-            Id = page.Properties["ID"].GetId(),
-            Name = page.Properties["Name"].GetName()
-        };
-    }
-    
-    private static bool IsValidPage(Page authorPage)
-    {
-        return authorPage.Properties["ID"].IsValidId() &&
-               authorPage.Properties["Name"].IsValidName();
+        return new NotionAuthor(
+            notionId: page.Id,
+            id: id,
+            name: name);
     }
     
     internal Author ToAuthor()
     {
-        return new Author
-        {
-            Id = Id,
-            Name = Name,
-        };
+        return this;
     }
 }
