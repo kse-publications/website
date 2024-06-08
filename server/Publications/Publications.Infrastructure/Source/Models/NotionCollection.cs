@@ -8,6 +8,10 @@ internal class NotionCollection : Collection
 {
     private readonly List<ObjectId> _publicationsRelation;
     internal List<ObjectId> GetPublicationsRelation() => _publicationsRelation;
+    
+    private readonly List<int> _publicationsIds = [];
+    internal void AddPublicationId(int publicationId) 
+        => _publicationsIds.Add(publicationId);
 
     private NotionCollection(
         int id,
@@ -35,13 +39,14 @@ internal class NotionCollection : Collection
             wordsService)
         {
             Icon = page.GetRichTextPropertyOrDefault("Icon"),
-            Description = page.GetRichTextPropertyOrDefault("Description"),
-            PublicationsCount = (int)page.GetFormulaPropertyOrDefault("Publications Count")
+            Description = page.GetRichTextPropertyOrDefault("Description")
         };
     }
     
     internal Collection ToCollection()
     {
+        PublicationsIds = _publicationsIds.ToArray();
+        PublicationsCount = _publicationsIds.Count;
         return this;
     }
 }

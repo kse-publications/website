@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using Publications.Domain.Shared;
+using Publications.Domain.Shared.Serialization;
 using Publications.Domain.Shared.Slugs;
 using Publications.Domain.Shared.ValueObjects;
 using Redis.OM.Modeling;
@@ -22,6 +23,9 @@ public class Collection: Entity<Collection>
     [Searchable(Weight = 0.8)]
     [JsonInclude]
     public string Description { get; set; } = string.Empty;
+    
+    [IgnoreInResponse]
+    public int[] PublicationsIds { get; set; } = Array.Empty<int>();
 
     [Indexed(Sortable = true)]
     [JsonInclude]

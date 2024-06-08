@@ -97,10 +97,11 @@ internal class NotionPublication : Publication
         {
             foreach (var relationId in collection.GetPublicationsRelation())
             {
-                if (publicationsDictionary.TryGetValue(relationId.Id, out NotionPublication? publication))
-                {
-                    publication._updatableCollections.Add(collection);
-                }
+                if (!publicationsDictionary.TryGetValue(relationId.Id, out NotionPublication? publication)) 
+                    continue;
+                
+                publication._updatableCollections.Add(collection);
+                collection.AddPublicationId(publication.Id);
             }
         }
 
