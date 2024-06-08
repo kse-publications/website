@@ -21,7 +21,7 @@ public class RequestsRepository: IRequestsRepository
     }
     
     public async Task<Dictionary<int, int>> GetResourceViews<TResource>(bool distinct = true) 
-        where TResource : Entity<TResource>
+        where TResource : Entity
     {
         string resourceName = ResourceHelper.GetResourceName<TResource>();
         

@@ -15,7 +15,7 @@ namespace Publications.Domain.Publications;
 /// Aggregate root of Publications aggregate.
 /// </summary>
 [Document(IndexName = "publication-idx", StorageType = StorageType.Json, Prefixes = ["publication"])]
-public class Publication: Entity<Publication>
+public class Publication: Entity
 {
     [Searchable(Weight = 1.0)]
     public string Title { get; init; }
@@ -69,6 +69,8 @@ public class Publication: Entity<Publication>
     [JsonInclude]
     public Collection[] Collections { get; set; } = Array.Empty<Collection>();
     
+    private Publication(int id) { Id = id; }
+    
     [JsonConstructor]
     public Publication( 
         int id,
@@ -92,6 +94,8 @@ public class Publication: Entity<Publication>
         UpdateSlug(wordsService);
         UpdateVectors(wordsService);
     }
+
+    public static Publication InitWithId(int id) => new(id);
     
     private void UpdateSlug(IWordsService wordsService)
     {

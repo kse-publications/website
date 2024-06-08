@@ -3,16 +3,14 @@ using NRedisStack;
 using NRedisStack.RedisStackCommands;
 using NRedisStack.Search;
 using NRedisStack.Search.Aggregation;
-using Publications.Application;
-using Publications.Application.DTOs;
 using Publications.Application.DTOs.Request;
 using Publications.Application.DTOs.Response;
 using Publications.Application.Repositories;
 using Publications.Domain.Collections;
 using Publications.Domain.Publications;
+using Publications.Domain.Shared;
 using Publications.Infrastructure.Shared;
-using Redis.OM.Contracts;
-using Redis.OM.Searching;
+using Redis.OM;
 using StackExchange.Redis;
 
 namespace Publications.Infrastructure.Publications;
@@ -20,24 +18,13 @@ namespace Publications.Infrastructure.Publications;
 public class PublicationsRepository: EntityRepository<Publication>, IPublicationsRepository
 {
     private readonly IDatabase _db;
-    private IRedisCollection<Publication> _publications;
 
     public PublicationsRepository(
-        IConnectionMultiplexer connectionMultiplexer,
-        IRedisConnectionProvider connectionProvider) 
-        : base(connectionProvider)
+        IConnectionMultiplexer connectionMultiplexer)
+        : base(new RedisConnectionProvider(connectionMultiplexer))
     {
         _db = connectionMultiplexer.GetDatabase();
-        _publications = connectionProvider.RedisCollection<Publication>();
     }
-
-    // public override async Task<IReadOnlyCollection<Publication>> GetAllAsync(
-    //     CancellationToken cancellationToken = default)
-    // {
-    //     //exclude SimilarityVectors from the response
-    //     
-    //     return (await _publications.ToListAsync()).
-    // }
 
     public async Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
         FilterDTO filterDTO, PaginationDTO paginationDTO,
@@ -46,7 +33,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         SearchCommands ft = _db.FT();
         SearchQuery query = SearchQuery.CreateWithFilter(filterDTO);
         
-        AggregationResult aggregationResult = await ft.AggregateAsync(Publication.IndexName,
+        AggregationResult aggregationResult = await ft.AggregateAsync(Entity.IndexName<Publication>(),
             new AggregationRequest(query.Build())
                 .Load(
                     new FieldName(nameof(Publication.Slug)),
@@ -85,7 +72,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             .CreateWithSearch(searchDTO.SearchTerm, searchFields)
             .Filter(filterDTO);
         
-        var searchResult = await ft.SearchAsync(Publication.IndexName, 
+        var searchResult = await ft.SearchAsync(Entity.IndexName<Publication>(), 
             new Query(query.Build())
                 .Paginate(paginationDTO.Page, paginationDTO.PageSize)
                 .Dialect(3));
@@ -118,7 +105,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         }
         query.And(authorsQuery.Build());
         
-        SearchResult searchResult = await ft.SearchAsync(Publication.IndexName, 
+        SearchResult searchResult = await ft.SearchAsync(Entity.IndexName<Publication>(), 
             new Query(query.Build())
                 .SetSortBy(nameof(Publication.Views), ascending: false)
                 .Paginate(paginationDto.Page, paginationDto.PageSize)
@@ -146,7 +133,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         var ft = _db.FT();
         string idFilter = new SearchFieldName(nameof(Publication.Id)).NotEqualTo(currentPublication.Id);
         
-        var searchResult = await ft.SearchAsync(Publication.IndexName,
+        var searchResult = await ft.SearchAsync(Entity.IndexName<Publication>(),
             new Query($"({idFilter})=>[KNN $K @{nameof(Publication.SimilarityVector)} $BLOB as similarity_score]")
                 .AddParam("K", 6)
                 .AddParam("BLOB", currentPublication.SimilarityVector.Embedding!)
@@ -166,7 +153,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             .Where(new SearchFieldName(PublicationCollectionsId)
                 .EqualTo(collectionId));
         
-        SearchResult searchResult = await ft.SearchAsync(Publication.IndexName,
+        SearchResult searchResult = await ft.SearchAsync(Entity.IndexName<Publication>(),
             new Query(query.Build())
                 .SetSortBy(nameof(Publication.Views), ascending: false)
                 .Paginate(paginationDTO.Page, paginationDTO.PageSize)

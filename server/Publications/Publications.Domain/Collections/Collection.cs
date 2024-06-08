@@ -11,7 +11,7 @@ namespace Publications.Domain.Collections;
 /// Represents a logically grouped set of publications.
 /// </summary>
 [Document(IndexName = "collection-idx", StorageType = StorageType.Json, Prefixes = ["collection"])]
-public class Collection: Entity<Collection>
+public class Collection: Entity
 {
     [Indexed] 
     [JsonInclude]
@@ -31,6 +31,8 @@ public class Collection: Entity<Collection>
     [Indexed(Sortable = true)]
     [JsonInclude]
     public int PublicationsCount { get; set; }
+    
+    private Collection(int id) { Id = id; }
 
     [JsonConstructor]
     public Collection(
@@ -46,10 +48,11 @@ public class Collection: Entity<Collection>
         
         UpdateSlug(wordsService);
     }
+    
+    public static Collection InitWithId(int id) => new(id);
 
-    private Collection UpdateSlug(IWordsService wordsService)
+    private void UpdateSlug(IWordsService wordsService)
     {
         Slug = SlugFactory.Create(Name, Id.ToString(), IsoLanguageCode.English, wordsService);
-        return this;
     }
 }

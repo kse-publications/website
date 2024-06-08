@@ -1,5 +1,4 @@
-﻿using Publications.Application;
-using Publications.Application.DTOs.Response;
+﻿using Publications.Application.DTOs.Response;
 using Publications.Application.Repositories;
 using Publications.Domain.Shared;
 using Redis.OM;
@@ -10,7 +9,7 @@ using Redis.OM.Searching;
 namespace Publications.Infrastructure.Shared;
 
 public class EntityRepository<TEntity> : IEntityRepository<TEntity> 
-    where TEntity : Entity<TEntity>
+    where TEntity : Entity
 {
     private readonly IRedisCollection<TEntity> _collection;
     private readonly RedisAggregationSet<TEntity> _aggregationSet;

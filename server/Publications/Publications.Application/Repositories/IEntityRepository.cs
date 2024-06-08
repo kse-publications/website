@@ -3,8 +3,7 @@ using Publications.Domain.Shared;
 
 namespace Publications.Application.Repositories;
 
-public interface IEntityRepository<TEntity>
-    where TEntity : Entity<TEntity>
+public interface IEntityRepository<TEntity> where TEntity : Entity
 {
     Task<TEntity?> GetByIdAsync(
         int resourceId,

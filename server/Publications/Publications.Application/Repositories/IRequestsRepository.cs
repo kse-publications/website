@@ -8,5 +8,5 @@ public interface IRequestsRepository
     Task AddAsync(Request request);
     
     Task<Dictionary<int, int>>  GetResourceViews<TResource>(bool distinct = true) 
-        where TResource : Entity<TResource>;
+        where TResource : Entity;
 }
