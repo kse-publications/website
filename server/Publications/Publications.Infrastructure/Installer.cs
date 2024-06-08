@@ -26,6 +26,7 @@ public static class Installer
         services
             .AddRedis(configuration)
             .AddSqliteDb(configuration)
+            .AddDbConfigurationServices(configuration)
             .AddRepositories()
             .AddServices()
             .AddNotionClient(configuration);
@@ -95,6 +96,7 @@ public static class Installer
         services.AddScoped<IPublicationsService, PublicationsService>();
         services.AddScoped<IFiltersService, FiltersService>();
         services.AddScoped<IWordsService, WordsService>();
+        services.AddScoped<IDbVersionService, DbVersionService>();
         
         return services;
     }

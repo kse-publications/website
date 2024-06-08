@@ -10,19 +10,19 @@ public class DbVersionService: IDbVersionService
     private readonly RedisIndexesVersions _redisIndexesVersions;
 
     public DbVersionService(
-        IDatabase db,
+        IConnectionMultiplexer connectionMultiplexer,
         IOptions<RedisIndexesVersions> redisIndexesVersions)
     {
-        _db = db;
+        _db = connectionMultiplexer.GetDatabase();
         _redisIndexesVersions = redisIndexesVersions.Value;
     }
 
     public async Task<bool> IsMajorVersionUpToDateAsync(Type indexType)
     {
-        var majorVersion = _redisIndexesVersions.GetIndexVersion(indexType);
-        var currentMajorVersion = await GetDbIndexVersionAsync(indexType);
+        var currentVersion = _redisIndexesVersions.GetIndexVersion(indexType);
+        var dbVersion = await GetDbIndexVersionAsync(indexType);
 
-        return majorVersion == currentMajorVersion;
+        return currentVersion.Major == dbVersion.Major;
     }
     
     public async Task UpdateDbIndexVersionAsync(Type indexType, DbVersion dbVersion)
