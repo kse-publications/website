@@ -1,5 +1,5 @@
 ﻿
-namespace Publications.Application.Statistics;
+namespace Publications.Application.DTOs.Response;
 
 public class OverallStats
 {

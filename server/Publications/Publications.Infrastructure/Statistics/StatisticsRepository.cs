@@ -1,4 +1,5 @@
-﻿using Publications.Application.Statistics;
+﻿using Publications.Application.DTOs.Response;
+using Publications.Application.Statistics;
 using StackExchange.Redis;
 
 namespace Publications.Infrastructure.Statistics;

@@ -1,5 +1,8 @@
 ﻿using Publications.Application.DTOs;
+using Publications.Application.DTOs.Request;
+using Publications.Application.DTOs.Response;
 using Publications.Domain.Publications;
+using SearchDTO = Publications.Application.DTOs.Request.SearchDTO;
 
 namespace Publications.Application.Repositories;
 

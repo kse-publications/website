@@ -24,7 +24,8 @@ public class Collection: Entity<Collection>
     [JsonInclude]
     public string Description { get; set; } = string.Empty;
     
-    [IgnoreInResponse]
+    [IgnoreInResponse] 
+    [JsonInclude]
     public int[] PublicationsIds { get; set; } = Array.Empty<int>();
 
     [Indexed(Sortable = true)]

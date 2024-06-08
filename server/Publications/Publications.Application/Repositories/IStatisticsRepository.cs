@@ -1,4 +1,6 @@
-﻿namespace Publications.Application.Statistics;
+﻿using Publications.Application.DTOs.Response;
+
+namespace Publications.Application.Statistics;
 
 public interface IStatisticsRepository
 {

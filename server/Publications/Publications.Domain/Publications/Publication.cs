@@ -23,6 +23,7 @@ public class Publication: Entity<Publication>
     [Indexed(DistanceMetric = DistanceMetric.COSINE, Algorithm = VectorAlgorithm.HNSW)]
     [SentenceVectorizer]
     [IgnoreInResponse]
+    [JsonInclude]
     public Vector<string> SimilarityVector { get; set; } = null!;
     
     [Indexed(Sortable = true)]

@@ -1,7 +1,10 @@
 ﻿using Publications.Application.DTOs;
+using Publications.Application.DTOs.Request;
+using Publications.Application.DTOs.Response;
 using Publications.Domain.Filters;
 using Publications.Domain.Publications;
 using Redis.OM.Searching;
+using SearchDTO = Publications.Application.DTOs.Request.SearchDTO;
 
 namespace Publications.Application.Services;
 

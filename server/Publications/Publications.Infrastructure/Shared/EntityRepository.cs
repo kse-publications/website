@@ -1,4 +1,5 @@
 ﻿using Publications.Application;
+using Publications.Application.DTOs.Response;
 using Publications.Application.Repositories;
 using Publications.Domain.Shared;
 using Redis.OM;
@@ -27,7 +28,7 @@ public class EntityRepository<TEntity> : IEntityRepository<TEntity>
         return await _collection.FindByIdAsync(resourceId.ToString());
     }
 
-    public async Task<IReadOnlyCollection<TEntity>> GetAllAsync(
+    public virtual async Task<IReadOnlyCollection<TEntity>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
         return (await _collection.ToListAsync()).AsReadOnly();

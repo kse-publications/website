@@ -5,11 +5,14 @@ using NRedisStack.Search;
 using NRedisStack.Search.Aggregation;
 using Publications.Application;
 using Publications.Application.DTOs;
+using Publications.Application.DTOs.Request;
+using Publications.Application.DTOs.Response;
 using Publications.Application.Repositories;
 using Publications.Domain.Collections;
 using Publications.Domain.Publications;
 using Publications.Infrastructure.Shared;
-using Redis.OM;
+using Redis.OM.Contracts;
+using Redis.OM.Searching;
 using StackExchange.Redis;
 
 namespace Publications.Infrastructure.Publications;
@@ -17,12 +20,24 @@ namespace Publications.Infrastructure.Publications;
 public class PublicationsRepository: EntityRepository<Publication>, IPublicationsRepository
 {
     private readonly IDatabase _db;
+    private IRedisCollection<Publication> _publications;
 
-    public PublicationsRepository(IConnectionMultiplexer connectionMultiplexer) 
-        : base(new RedisConnectionProvider(connectionMultiplexer))
+    public PublicationsRepository(
+        IConnectionMultiplexer connectionMultiplexer,
+        IRedisConnectionProvider connectionProvider) 
+        : base(connectionProvider)
     {
         _db = connectionMultiplexer.GetDatabase();
+        _publications = connectionProvider.RedisCollection<Publication>();
     }
+
+    // public override async Task<IReadOnlyCollection<Publication>> GetAllAsync(
+    //     CancellationToken cancellationToken = default)
+    // {
+    //     //exclude SimilarityVectors from the response
+    //     
+    //     return (await _publications.ToListAsync()).
+    // }
 
     public async Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
         FilterDTO filterDTO, PaginationDTO paginationDTO,

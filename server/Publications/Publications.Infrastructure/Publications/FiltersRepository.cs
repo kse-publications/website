@@ -3,6 +3,7 @@ using NRedisStack.RedisStackCommands;
 using NRedisStack.Search;
 using NRedisStack.Search.Aggregation;
 using Publications.Application.DTOs;
+using Publications.Application.DTOs.Request;
 using Publications.Application.Repositories;
 using Publications.Domain.Filters;
 using Publications.Domain.Publications;

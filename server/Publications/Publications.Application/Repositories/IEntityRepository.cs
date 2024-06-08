@@ -1,4 +1,5 @@
-﻿using Publications.Domain.Shared;
+﻿using Publications.Application.DTOs.Response;
+using Publications.Domain.Shared;
 
 namespace Publications.Application.Repositories;
 
