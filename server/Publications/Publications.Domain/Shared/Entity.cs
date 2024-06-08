@@ -17,12 +17,10 @@ public abstract class Entity
     [Indexed]
     [IgnoreInResponse]
     [JsonInclude]
-    [JsonConverter(typeof(UnixTimestampJsonConverter))]
     public DateTime LastSynchronizedAt { get; set; }
     
     [Indexed]
     [IgnoreInResponse]
-    [JsonConverter(typeof(UnixTimestampJsonConverter))]
     public DateTime LastModifiedAt { get; set; }
     
     public static string IndexName<T>() => $"{typeof(T).Name.ToLower()}-idx";

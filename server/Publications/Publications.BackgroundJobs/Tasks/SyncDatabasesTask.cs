@@ -41,8 +41,8 @@ public class SyncDatabasesTask(
     
     protected override async Task DoRetriableTaskAsync()
     {
-        _sourceCollections = await sourceRepository.GetCollectionsAsync();
         _sourcePublications = await sourceRepository.GetPublicationsAsync();
+        _sourceCollections = await sourceRepository.GetCollectionsAsync();
     }
 
     protected override async Task OnSuccessAsync()
@@ -146,9 +146,9 @@ public class SyncDatabasesTask(
     private List<Publication> FindPublicationsWithUpdatedAuthors()
     {
         return _sourcePublications!
-            .Where(p => p.Authors.Any(author => 
-                _localPublicationsMetadataDict!.TryGetValue(p.Id, out var localEntityMeta) &&
-                localEntityMeta.LastSynchronizedAt < author.LastModifiedAt))
+            .Where(p => 
+                _localPublicationsMetadataDict!.TryGetValue(p.Id, out var localEntityMeta) && 
+                p.Authors.Any(author => WasModifiedAfterLastSync(localEntityMeta, author.LastModifiedAt)))
             .ToList();
     }
     
@@ -158,7 +158,7 @@ public class SyncDatabasesTask(
             .Where(p => 
                 p.Publisher is not null && 
                 _localPublicationsMetadataDict!.TryGetValue(p.Id, out var localEntityMeta) &&
-                localEntityMeta.LastSynchronizedAt < p.Publisher.LastModifiedAt)
+                WasModifiedAfterLastSync(localEntityMeta, p.Publisher.LastModifiedAt))
             .ToList();
     }
     
@@ -176,7 +176,7 @@ public class SyncDatabasesTask(
         List<TEntity> newOrUpdatedEntities = sourceEntities
             .Where(sourceEntity =>
                 localEntitiesMetadataDict.TryGetValue(sourceEntity.Id, out var localEntityMeta) &&
-                localEntityMeta.LastSynchronizedAt < sourceEntity.LastModifiedAt)
+                WasModifiedAfterLastSync(localEntityMeta, sourceEntity.LastModifiedAt))
             .ToList();
 
         // new entities
@@ -236,5 +236,11 @@ public class SyncDatabasesTask(
                 nameof(Publication.Views),
                 newValue: viewsCount.ToString());
         }
+    }
+
+    private static bool WasModifiedAfterLastSync(
+        SyncEntityMetadata localMetadata, DateTime lastEditedTime)
+    {
+        return localMetadata.LastSynchronizedAt.ToUniversalTime() < lastEditedTime.ToUniversalTime();
     }
 }
