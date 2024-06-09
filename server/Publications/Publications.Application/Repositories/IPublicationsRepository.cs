@@ -16,6 +16,9 @@ public interface IPublicationsRepository : IEntityRepository<Publication>
         PaginationDTO paginationDTO,
         CancellationToken cancellationToken = default);
     
+    Task<IReadOnlyCollection<SyncEntityMetadata>> GetAllSyncMetadataAsync(
+        CancellationToken cancellationToken = default);
+    
     /// <summary>
     /// Returns publications that match the provided search and filter criteria.
     /// </summary>

@@ -45,8 +45,7 @@ internal class NotionCollection : Collection
     
     internal Collection ToCollection()
     {
-        PublicationsIds = _publicationsIds.ToArray();
-        PublicationsCount = _publicationsIds.Count;
+        SetPublicationIds(_publicationsIds.ToArray());
         return this;
     }
 }

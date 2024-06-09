@@ -24,9 +24,10 @@ public class Collection: Entity
     [JsonInclude]
     public string Description { get; set; } = string.Empty;
     
+    [Indexed]
     [IgnoreInResponse] 
     [JsonInclude]
-    public int[] PublicationsIds { get; set; } = Array.Empty<int>();
+    public string PublicationsIds { get; set; } = string.Empty;
 
     [Indexed(Sortable = true)]
     [JsonInclude]
@@ -54,5 +55,18 @@ public class Collection: Entity
     private void UpdateSlug(IWordsService wordsService)
     {
         Slug = SlugFactory.Create(Name, Id.ToString(), IsoLanguageCode.English, wordsService);
+    }
+    
+    public int[] GetPublicationIds() => GetPublicationIds(PublicationsIds);
+    
+    public static int[] GetPublicationIds(string publicationIds)
+    {
+        return publicationIds.Split(',').Select(int.Parse).ToArray();
+    }
+
+    protected void SetPublicationIds(int[] publicationIds)
+    {
+        PublicationsIds = string.Join(',', publicationIds);
+        PublicationsCount = publicationIds.Length;
     }
 }

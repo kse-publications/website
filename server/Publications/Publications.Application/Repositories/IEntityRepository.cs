@@ -9,21 +9,18 @@ public interface IEntityRepository<TEntity> where TEntity : Entity
         int resourceId,
         CancellationToken cancellationToken = default);
     
-    Task<IReadOnlyCollection<SyncEntityMetadata>> GetAllSyncMetadataAsync(
-        CancellationToken cancellationToken = default);
-    
     Task<IReadOnlyCollection<SiteMapResourceMetadata>> GetSiteMapMetadataAsync(
         CancellationToken cancellationToken = default);
     
-    Task InsertOrUpdateAsync(
+    Task InsertAsync(
+        IEnumerable<TEntity> entities,
+        CancellationToken cancellationToken = default);
+    
+    Task UpdateAsync(
         IEnumerable<TEntity> entities,
         CancellationToken cancellationToken = default);
     
     Task DeleteAsync(
         IEnumerable<TEntity> entities,
-        CancellationToken cancellationToken = default);
-    
-    Task SynchronizeAsync(
-        DateTime lastSyncDateTime,
         CancellationToken cancellationToken = default);
 }

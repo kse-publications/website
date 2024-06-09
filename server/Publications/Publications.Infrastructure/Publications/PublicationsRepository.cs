@@ -11,6 +11,8 @@ using Publications.Domain.Publications;
 using Publications.Domain.Shared;
 using Publications.Infrastructure.Shared;
 using Redis.OM;
+using Redis.OM.Contracts;
+using Redis.OM.Searching;
 using StackExchange.Redis;
 
 namespace Publications.Infrastructure.Publications;
@@ -18,12 +20,14 @@ namespace Publications.Infrastructure.Publications;
 public class PublicationsRepository: EntityRepository<Publication>, IPublicationsRepository
 {
     private readonly IDatabase _db;
+    private readonly IRedisCollection<Publication> _publications;
 
     public PublicationsRepository(
-        IConnectionMultiplexer connectionMultiplexer)
-        : base(new RedisConnectionProvider(connectionMultiplexer))
+        IConnectionMultiplexer connectionMultiplexer,
+        IRedisConnectionProvider connectionProvider) : base(connectionProvider)
     {
         _db = connectionMultiplexer.GetDatabase();
+        _publications = connectionProvider.RedisCollection<Publication>();
     }
 
     public async Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
@@ -56,6 +60,16 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             Items: publications,
             TotalCount: (int)aggregationResult.TotalResults,
             ResultCount: publications.Count);
+    }
+
+    public async Task<IReadOnlyCollection<SyncEntityMetadata>> GetAllSyncMetadataAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return (await _publications.Select(e => new SyncEntityMetadata
+        {
+            Id = e.Id,
+            LastSynchronizedAt = e.LastSynchronizedAt,
+        }).ToListAsync()).AsReadOnly();
     }
 
     public async Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
