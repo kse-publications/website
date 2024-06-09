@@ -102,11 +102,14 @@ public class SyncDatabasesTask(
         IEnumerable<int> deletedCollectionIds,
         bool forceUpdateAllPublication)
     {
-        var newOrUpdatedPublications = FindNewOrUpdatedEntities(
+        var updatedPublications = FindUpdatedEntities(
             _localPublicationsMetadataDict!, _sourcePublications!, forceUpdateAllPublication);
         
         if (forceUpdateAllPublication)
-            return newOrUpdatedPublications;
+            return updatedPublications;
+
+        var newPublications = FindNewEntities(
+            _localPublicationsMetadataDict!, _sourcePublications!);
         
         var publicationsInUpdatedCollections = FindPublicationsInChangedCollections(
             newOrUpdatedCollections, deletedCollectionIds);
@@ -114,7 +117,8 @@ public class SyncDatabasesTask(
         var publicationsWithUpdatedAuthors = FindPublicationsWithUpdatedAuthors();
         var publicationsWithUpdatedPublishers = FindPublicationsWithUpdatedPublishers();
         
-        return newOrUpdatedPublications
+        return updatedPublications
+            .Concat(newPublications)
             .Concat(publicationsInUpdatedCollections)
             .Concat(publicationsWithUpdatedAuthors)
             .Concat(publicationsWithUpdatedPublishers)
@@ -124,8 +128,18 @@ public class SyncDatabasesTask(
     
     private List<Collection> FindNewOrUpdatedCollections(bool forceUpdateAllCollections)
     {
-        return FindNewOrUpdatedEntities(
+        var updatedCollections = FindUpdatedEntities(
             _localCollectionsMetadataDict!, _sourceCollections!, forceUpdateAllCollections);
+        
+        if (forceUpdateAllCollections)
+            return updatedCollections;
+        
+        var newCollections = FindNewEntities(
+            _localCollectionsMetadataDict!, _sourceCollections!);
+        
+        return updatedCollections
+            .Concat(newCollections)
+            .ToList();
     }
     
     private List<Publication> FindPublicationsInChangedCollections(
@@ -162,7 +176,7 @@ public class SyncDatabasesTask(
             .ToList();
     }
     
-    private static List<TEntity> FindNewOrUpdatedEntities<TEntity>(
+    private static List<TEntity> FindUpdatedEntities<TEntity>(
         Dictionary<int, SyncEntityMetadata> localEntitiesMetadataDict,
         IReadOnlyCollection<TEntity> sourceEntities,
         bool forceUpdateAll) where TEntity : Entity
@@ -172,18 +186,22 @@ public class SyncDatabasesTask(
             return sourceEntities.ToList();
         }
         
-        // updated entities
-        List<TEntity> newOrUpdatedEntities = sourceEntities
+        List<TEntity> updatedEntities = sourceEntities
             .Where(sourceEntity =>
                 localEntitiesMetadataDict.TryGetValue(sourceEntity.Id, out var localEntityMeta) &&
                 WasModifiedAfterLastSync(localEntityMeta, sourceEntity.LastModifiedAt))
             .ToList();
 
-        // new entities
-        newOrUpdatedEntities.AddRange(sourceEntities
-            .Where(e => !localEntitiesMetadataDict.ContainsKey(e.Id)));
-
-        return newOrUpdatedEntities;
+        return updatedEntities;
+    }
+    
+    private static List<TEntity> FindNewEntities<TEntity>(
+        Dictionary<int, SyncEntityMetadata> localEntitiesMetadataDict,
+        IReadOnlyCollection<TEntity> sourceEntities) where TEntity : Entity
+    {
+        return sourceEntities
+            .Where(e => !localEntitiesMetadataDict.ContainsKey(e.Id))
+            .ToList();
     }
     
     private async Task<int[]> DeletePublicationsNotInSourceAsync()

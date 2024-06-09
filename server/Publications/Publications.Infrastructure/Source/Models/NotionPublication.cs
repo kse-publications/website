@@ -73,7 +73,7 @@ internal class NotionPublication : Publication
         if (!page.TryGetRelationProperty("Publisher", out var publisherRelation))
             return this;
         
-        if (!(publisherRelation.FirstOrDefault()?.Id is null))
+        if (publisherRelation.FirstOrDefault()?.Id is null)
         {
             Publisher = null;
             return this;
