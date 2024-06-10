@@ -20,10 +20,14 @@ public class RequestsRepository: IRequestsRepository
         await _dbContext.SaveChangesAsync();
     }
     
-    public async Task<Dictionary<int, int>> GetResourceViews<TResource>(bool distinct = true) 
+    public async Task<Dictionary<int, int>> GetResourceViews<TResource>(
+        DateTime? after = null,
+        DateTime? before = null,
+        bool distinct = true) 
         where TResource : Entity<TResource>
     {
         string resourceName = ResourceHelper.GetResourceName<TResource>();
+        
         
         return await _dbContext.Requests
             .Where(r => r.ResourceName == resourceName)
@@ -36,22 +40,6 @@ public class RequestsRepository: IRequestsRepository
                     : group.Count()
             })
             .ToDictionaryAsync(k => k.ResourceId, v => v.Views);
-        
-        
-    }
-
-    public async Task<Dictionary<int, int>> GetResourceRecentViews(DateTime periodStart)
-    {
-        var views = await _dbContext.Requests
-            .Where(r => r.RequestedAt >= periodStart)
-            .GroupBy(r => r.ResourceId)
-            .Select(g => new
-            {
-                ResourceId = g.Key, Count = g.Count()
-            })
-            .ToDictionaryAsync(x => x.ResourceId, x => x.Count);
-
-        return views;
     }
     public async Task<int> GetResourceRecentViewsCount(DateTime periodStart)
     {

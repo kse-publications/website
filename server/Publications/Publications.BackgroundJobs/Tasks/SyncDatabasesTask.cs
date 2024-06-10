@@ -66,7 +66,7 @@ public class SyncDatabasesTask(
     private async Task<IReadOnlyCollection<Publication>> SetPublicationsRecentViews(
         IEnumerable<Publication> resourceItemsCollection, DateTime periodStart)
     {
-        Dictionary<int, int> recentViews = await requestsRepository.GetResourceRecentViews(periodStart);
+        Dictionary<int, int> recentViews = await requestsRepository.GetResourceViews<Publication>(periodStart);
         return resourceItemsCollection
             .Select(resource => recentViews.TryGetValue(resource.Id, out int resourceRecentViews)
                 ? resource.UpdateRecentViews(resourceRecentViews)

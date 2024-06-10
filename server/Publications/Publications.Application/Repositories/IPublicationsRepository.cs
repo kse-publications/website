@@ -40,5 +40,5 @@ public interface IPublicationsRepository : IEntityRepository<Publication>
         int collectionId,
         PaginationDTO paginationDTO,
         CancellationToken cancellationToken = default);
-    // Task<PublicationSummary[]> GetTopPublicationsByRecentViews();
+     Task<PublicationSummary[]> GetTopPublicationsByRecentViews();
 }

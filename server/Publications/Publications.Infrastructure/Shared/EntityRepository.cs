@@ -1,7 +1,5 @@
 ﻿using Publications.Application;
-using Publications.Application.DTOs;
 using Publications.Application.Repositories;
-using Publications.Domain.Publications;
 using Publications.Domain.Shared;
 using Redis.OM;
 using Redis.OM.Aggregation;
