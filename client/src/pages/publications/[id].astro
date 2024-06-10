@@ -14,5 +14,5 @@ const data = await getPublication(id, clientUuid?.value).catch((error) => {
 ---
 
 <Layout title=`KSE Publications | ${data.title}`>
-  <PublicationPage data={data} transition:persist client:only />
+  <PublicationPage data={data} transition:persist client:load />
 </Layout>
