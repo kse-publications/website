@@ -15,7 +15,7 @@ export const SearchInput = () => {
       <Input
         className="w-full p-4 py-6 pr-12 text-lg"
         aria-label="Search docs input"
-        placeholder="Enter your search here"
+        placeholder="Search by authors, topics and key words"
         value={searchText}
         onChange={onChangeHandler}
       />
