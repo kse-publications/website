@@ -11,7 +11,6 @@ namespace Publications.Infrastructure.Source;
 public class NotionRepository: ISourceRepository
 {
     private readonly INotionClient _notionClient;
-    private readonly IWordsService _wordsService;
     private readonly NotionDatabaseOptions _databaseOptions;
 
     private IReadOnlyCollection<NotionPublisher>? _publishers;
@@ -21,11 +20,9 @@ public class NotionRepository: ISourceRepository
     
     public NotionRepository(
         INotionClient notionClient, 
-        IWordsService wordsService,
         IOptions<NotionDatabaseOptions> databaseOptions)
     {
         _notionClient = notionClient;
-        _wordsService = wordsService;
         _databaseOptions = databaseOptions.Value;
     }
 
@@ -79,7 +76,7 @@ public class NotionRepository: ISourceRepository
 
         _publications = publicationsPages
             .Select(page => NotionPublication
-                .MapFromPage(page, _wordsService)?
+                .MapFromPage(page)?
                 .JoinAuthors(page, authors)
                 .JoinPublisher(page, publishers))
             .Where(publication => publication is not null)
@@ -97,7 +94,7 @@ public class NotionRepository: ISourceRepository
         List<Page> collectionsPages = await GetAllPagesAsync(_databaseOptions.CollectionsDbId);
         
         _collections = collectionsPages
-            .Select(page => NotionCollection.MapFromPage(page, _wordsService))
+            .Select(page => NotionCollection.MapFromPage(page))
             .Where(collection => collection is not null)
             .ToList()
             .AsReadOnly()!;

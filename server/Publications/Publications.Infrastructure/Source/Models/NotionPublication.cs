@@ -1,7 +1,6 @@
 ﻿using Notion.Client;
 using Publications.Domain.Collections;
 using Publications.Domain.Publications;
-using Publications.Domain.Shared.Slugs;
 
 namespace Publications.Infrastructure.Source.Models;
 
@@ -18,14 +17,13 @@ internal class NotionPublication : Publication
         int year,
         string link,
         string abstractText,
-        DateTime lastModifiedAt,
-        IWordsService wordsService) 
-        : base(id, title, type, year, link, abstractText, lastModifiedAt, wordsService)
+        DateTime lastModifiedAt) 
+        : base(id, title, type, year, link, abstractText, lastModifiedAt)
     {
         _notionId = notionId;
     }
     
-    internal static NotionPublication? MapFromPage(Page page, IWordsService wordsService)
+    internal static NotionPublication? MapFromPage(Page page)
     {
         if (!(page.TryGetId(out int id) && 
               page.TryGetName(out string name) &&
@@ -44,8 +42,7 @@ internal class NotionPublication : Publication
             year: (int)year,
             link: url,
             abstractText: abstractText,
-            lastModifiedAt: page.LastEditedTime,
-            wordsService)
+            lastModifiedAt: page.LastEditedTime)
         {
             Language = page.GetSelectPropertyOrDefault("Language"),
             Keywords = page.GetSeparatedRichTextProperty("Keywords", separator: ','),

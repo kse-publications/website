@@ -1,6 +1,5 @@
 ﻿using Notion.Client;
 using Publications.Domain.Collections;
-using Publications.Domain.Shared.Slugs;
 
 namespace Publications.Infrastructure.Source.Models;
 
@@ -13,14 +12,13 @@ internal class NotionCollection : Collection
         int id,
         string name,
         DateTime lastModifiedAt,
-        List<ObjectId> publicationsRelation,
-        IWordsService wordsService) 
-        : base(id, name, lastModifiedAt, wordsService)
+        List<ObjectId> publicationsRelation) 
+        : base(id, name, lastModifiedAt)
     {
         _publicationsRelation = publicationsRelation;
     }
     
-    internal static NotionCollection? MapFromPage(Page page, IWordsService wordsService)
+    internal static NotionCollection? MapFromPage(Page page)
     {
         if (!(page.TryGetId(out int id) &&
               page.TryGetName(out string name) &&
@@ -31,8 +29,7 @@ internal class NotionCollection : Collection
             id: id,
             name: name,
             lastModifiedAt: page.LastEditedTime,
-            publicationsRelation: publications,
-            wordsService)
+            publicationsRelation: publications)
         {
             Icon = page.GetRichTextPropertyOrDefault("Icon"),
             Description = page.GetRichTextPropertyOrDefault("Description")

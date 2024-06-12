@@ -10,6 +10,7 @@ using Publications.Domain.Collections;
 using Publications.Domain.Filters;
 using Publications.Domain.Publications;
 using Publications.Domain.Shared;
+using Publications.Domain.Shared.Slugs;
 
 namespace Publications.BackgroundJobs.Tasks;
 
@@ -19,6 +20,7 @@ public class SyncDatabasesTask(
     ISourceRepository sourceRepository,
     IPublicationsRepository publicationsRepository,
     ICollectionsRepository collectionsRepository,
+    IWordsService wordsService,
     IFiltersRepository filtersRepository,
     IFiltersService filtersService,
     IRequestsRepository requestsRepository,
@@ -240,7 +242,8 @@ public class SyncDatabasesTask(
             return;
         
         var updatedPublicationsWithFilters = filtersService
-            .AssignFiltersToPublications(updatedPublications, _sourceFilters!.ToList());
+            .AssignFiltersToPublications(updatedPublications, _sourceFilters!.ToList())
+            .Select(p => p.HydrateDynamicFields(wordsService));
 
         await publicationsRepository.UpdateAsync(updatedPublicationsWithFilters);
     }
@@ -251,7 +254,8 @@ public class SyncDatabasesTask(
             return;
         
         var newPublicationsWithFilters = filtersService
-            .AssignFiltersToPublications(newPublications, _sourceFilters!.ToList());
+            .AssignFiltersToPublications(newPublications, _sourceFilters!.ToList())
+            .Select(p => p.HydrateDynamicFields(wordsService));
 
         await publicationsRepository.InsertAsync(newPublicationsWithFilters);
     }
@@ -261,7 +265,8 @@ public class SyncDatabasesTask(
         if (updatedCollections.Count == 0)
             return;
         
-        await collectionsRepository.UpdateAsync(updatedCollections);
+        await collectionsRepository.UpdateAsync(updatedCollections.Select(c 
+            => c.HydrateDynamicFields(wordsService)));
     }
 
     private async Task InsertNewCollectionsAsync(List<Collection> newCollections)
@@ -269,7 +274,8 @@ public class SyncDatabasesTask(
         if (newCollections.Count == 0)
             return;
         
-        await collectionsRepository.InsertAsync(newCollections);
+        await collectionsRepository.InsertAsync(newCollections.Select(c 
+            => c.HydrateDynamicFields(wordsService)));
     }
     
     private static bool WasModifiedAfterLastSync(

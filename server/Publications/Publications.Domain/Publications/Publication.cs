@@ -79,8 +79,7 @@ public class Publication: Entity
         int year, 
         string link,
         string abstractText,
-        DateTime lastModifiedAt,
-        IWordsService wordsService)
+        DateTime lastModifiedAt)
     {
         Id = id;
         Title = title;
@@ -90,12 +89,16 @@ public class Publication: Entity
         Abstract = abstractText;
         LastModifiedAt = lastModifiedAt;
         LastSynchronizedAt = DateTime.UtcNow;
-        
-        UpdateSlug(wordsService);
-        UpdateVectors(wordsService);
     }
 
     public static Publication InitWithId(int id) => new(id);
+    
+    public Publication HydrateDynamicFields(IWordsService wordsService)
+    {
+        UpdateSlug(wordsService);
+        UpdateVectors(wordsService);
+        return this;
+    }
     
     private void UpdateSlug(IWordsService wordsService)
     {

@@ -39,18 +39,21 @@ public class Collection: Entity
     public Collection(
         int id,
         string name, 
-        DateTime lastModifiedAt,
-        IWordsService wordsService)
+        DateTime lastModifiedAt)
     {
         Id = id;
         Name = name;
         LastSynchronizedAt = DateTime.UtcNow;
         LastModifiedAt = lastModifiedAt;
-        
-        UpdateSlug(wordsService);
     }
     
     public static Collection InitWithId(int id) => new(id);
+    
+    public Collection HydrateDynamicFields(IWordsService wordsService)
+    {
+        UpdateSlug(wordsService);
+        return this;
+    }
 
     private void UpdateSlug(IWordsService wordsService)
     {
