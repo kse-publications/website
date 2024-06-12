@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using NRedisStack;
 using NRedisStack.RedisStackCommands;
 using NRedisStack.Search;
@@ -10,18 +11,25 @@ using Publications.Domain.Collections;
 using Publications.Domain.Publications;
 using Publications.Infrastructure.Shared;
 using Redis.OM;
+using Redis.OM.Contracts;
+using Redis.OM.Searching;
 using StackExchange.Redis;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Publications.Infrastructure.Publications;
 
 public class PublicationsRepository: EntityRepository<Publication>, IPublicationsRepository
 {
     private readonly IDatabase _db;
+    private readonly IRedisCollection<Publication> _publications;
+    private readonly IRedisConnectionProvider _connectionProvider;
 
-    public PublicationsRepository(IConnectionMultiplexer connectionMultiplexer) 
+
+    public PublicationsRepository(IConnectionMultiplexer connectionMultiplexer, IRedisConnectionProvider connectionProvider) 
         : base(new RedisConnectionProvider(connectionMultiplexer))
     {
         _db = connectionMultiplexer.GetDatabase();
+        _publications = connectionProvider.RedisCollection<Publication>();
     }
 
     public async Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
@@ -173,6 +181,17 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
                 .FromPublication(JsonSerializer
                     .Deserialize<Publication[]>(json)!.First()))
             .ToList();
+    }
+
+    public async Task<PublicationSummary[]> GetTopPublicationsByRecentViews()
+    {
+        var topPublications = await _publications
+            .OrderByDescending(pub => pub.RecentViews) 
+            .Take(4)  
+            .Select(pub => PublicationSummary.FromPublication(pub))  
+            .ToArrayAsync();  
+
+        return topPublications;
     }
 
     private static string PublicationAuthorsName => 

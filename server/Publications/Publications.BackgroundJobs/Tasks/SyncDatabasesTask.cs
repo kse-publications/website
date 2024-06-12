@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Publications.Application.DTOs;
 using Publications.Application.Repositories;
 using Publications.Application.Services;
 using Publications.Application.Statistics;
@@ -62,4 +63,16 @@ public class SyncDatabasesTask(
             .ToList()
             .AsReadOnly();
     }
+    private async Task<IReadOnlyCollection<Publication>> SetPublicationsRecentViews(
+        IEnumerable<Publication> resourceItemsCollection, DateTime periodStart)
+    {
+        Dictionary<int, int> recentViews = await requestsRepository.GetResourceViews<Publication>(periodStart);
+        return resourceItemsCollection
+            .Select(resource => recentViews.TryGetValue(resource.Id, out int resourceRecentViews)
+                ? resource.UpdateRecentViews(resourceRecentViews)
+                : resource)
+            .ToList()
+            .AsReadOnly();
+    }
+
 }

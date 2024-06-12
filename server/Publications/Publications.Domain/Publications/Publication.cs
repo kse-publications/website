@@ -45,6 +45,8 @@ public class Publication: Entity<Publication>
     [Indexed(Sortable = true)]
     public int Views { get; set; } 
     
+    public int RecentViews { get; set; }
+    
     [Indexed(JsonPath = "$.Id")]
     [IgnoreInResponse]
     public Filter[] Filters { get; set; } = Array.Empty<Filter>();
@@ -69,6 +71,11 @@ public class Publication: Entity<Publication>
         }
         
         Views = views;
+        return this;
+    }
+    public Publication UpdateRecentViews(int recentViews)
+    {
+        RecentViews = recentViews;
         return this;
     }
     
