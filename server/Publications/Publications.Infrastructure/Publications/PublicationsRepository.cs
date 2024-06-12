@@ -222,7 +222,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             .ToJson()
             .Select(json => PublicationSummary
                 .FromPublication(JsonSerializer
-                    .Deserialize<Publication[]>(json)!.First()))
+                    .Deserialize<Publication[]>(json, new JsonSerializerOptions() { IncludeFields = true})!.First()))
             .ToList();
     }
 

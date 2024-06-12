@@ -1,6 +1,6 @@
 using Publications.Application.DTOs.Response;
 using System.Text.Json;
-using Publications.Application.Statistics;
+using Publications.Application.Repositories;
 using StackExchange.Redis;
 
 namespace Publications.Infrastructure.Statistics;
@@ -58,7 +58,8 @@ public class StatisticsRepository: IStatisticsRepository
         await _db.StringSetAsync(nameof(RecentStats.RecentViewsCount), count);
     }
     
-    public async Task SetTopRecentlyViewedPublicationsAsync(PublicationSummary[] publications)
+    public async Task SetTopRecentlyViewedPublicationsAsync(
+        IEnumerable<PublicationSummary> publications)
     {
         string serializedPublications = JsonSerializer.Serialize(publications);
         await _db.StringSetAsync(nameof(RecentStats.TopRecentlyViewedPublications), serializedPublications);

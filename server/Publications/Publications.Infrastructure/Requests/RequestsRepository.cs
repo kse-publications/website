@@ -25,10 +25,27 @@ public class RequestsRepository: IRequestsRepository
         DateTime? before = null,
         bool distinct = true) where TResource : Entity
     {
-        string resourceName = ResourceHelper.GetResourceName<TResource>();
+        if (after.HasValue && before.HasValue && after.Value > before.Value)
+        {
+            throw new ArgumentException("After date cannot be greater than before date.");
+        }
         
-        return await _dbContext.Requests
-            .Where(r => r.ResourceName == resourceName)
+        string resourceName = ResourceHelper.GetResourceName<TResource>();
+
+        var query = _dbContext.Requests
+            .Where(r => r.ResourceName == resourceName);
+
+        if (after.HasValue)
+        {
+            query = query.Where(r => r.RequestedAt >= after.Value);
+        }
+
+        if (before.HasValue)
+        {
+            query = query.Where(r => r.RequestedAt <= before.Value);
+        }
+
+        return await query
             .GroupBy(r => r.ResourceId)
             .Select(group => new
             {

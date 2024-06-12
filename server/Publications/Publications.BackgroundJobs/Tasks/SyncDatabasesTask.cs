@@ -3,7 +3,6 @@ using Microsoft.Extensions.Options;
 using Publications.Application.DTOs.Response;
 using Publications.Application.Repositories;
 using Publications.Application.Services;
-using Publications.Application.Statistics;
 using Publications.BackgroundJobs.Abstractions;
 using Publications.BackgroundJobs.Options;
 using Publications.Domain.Collections;
@@ -72,6 +71,9 @@ public class SyncDatabasesTask(
         
         await UpdatePublicationsViews(_sourcePublications!);
         await filtersRepository.ReplaceWithNewAsync(_sourceFilters);
+        
+        var topRecentlyViewedPublications = await publicationsRepository.GetTopPublicationsByRecentViews();
+        await statisticsRepository.SetTopRecentlyViewedPublicationsAsync(topRecentlyViewedPublications);
         await statisticsRepository.SetTotalPublicationsCountAsync(_sourcePublications!.Count);
         
         taskLogger.LogInformation(
@@ -223,17 +225,30 @@ public class SyncDatabasesTask(
     private async Task UpdatePublicationsViews(IEnumerable<Publication> publications)
     {
         Dictionary<int, int> views = await requestsRepository.GetResourceViews<Publication>();
-
+        Dictionary<int, int> recentViews = await requestsRepository.GetResourceViews<Publication>(
+            after: DateTime.Today - TimeSpan.FromDays(30));
+        
         foreach (var publication in publications)
         {
-            if (!views.TryGetValue(publication.Id, out var viewsCount))
-                continue;
+            if (views.TryGetValue(publication.Id, out var viewsCount))
+            {
+                await publicationsRepository.UpdatePropertyValueAsync(
+                    publication.Id, 
+                    nameof(Publication.Views),
+                    newValue: viewsCount.ToString());
+            }
             
-            await publicationsRepository.UpdatePropertyValueAsync(
-                publication.Id, 
-                nameof(Publication.Views),
-                newValue: viewsCount.ToString());
+            if (recentViews.TryGetValue(publication.Id, out var recentViewsCount))
+            {
+                await publicationsRepository.UpdatePropertyValueAsync(
+                    publication.Id, 
+                    nameof(Publication.RecentViews),
+                    newValue: recentViewsCount.ToString());
+            }
         }
+        
+        await statisticsRepository.SetRecentViewsCountAsync(recentViews
+            .Sum(kvp => kvp.Value));
     }
     
     private async Task UpdatePublicationsAsync(List<Publication> updatedPublications)
@@ -283,16 +298,4 @@ public class SyncDatabasesTask(
     {
         return localMetadata.LastSynchronizedAt.ToUniversalTime() < lastEditedTime.ToUniversalTime();
     }
-    private async Task<IReadOnlyCollection<Publication>> SetPublicationsRecentViews(
-        IEnumerable<Publication> resourceItemsCollection, DateTime periodStart)
-    {
-        Dictionary<int, int> recentViews = await requestsRepository.GetResourceViews<Publication>(periodStart);
-        return resourceItemsCollection
-            .Select(resource => recentViews.TryGetValue(resource.Id, out int resourceRecentViews)
-                ? resource.UpdateRecentViews(resourceRecentViews)
-                : resource)
-            .ToList()
-            .AsReadOnly();
-    }
-
 }

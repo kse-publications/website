@@ -59,6 +59,8 @@ public class Publication: Entity
     [JsonInclude]
     public int Views { get; set; } 
     
+    [Indexed(Sortable = true)]
+    [JsonInclude]
     public int RecentViews { get; set; }
     
     [Indexed(JsonPath = "$.Id")]
@@ -113,11 +115,6 @@ public class Publication: Entity
         SimilarityVector = Vector.Of(wordsService
             .Transliterate(GetSimilarityValue())
             .RemoveSpecialChars());
-    }
-    public Publication UpdateRecentViews(int recentViews)
-    {
-        RecentViews = recentViews;
-        return this;
     }
     
     public static EntityFilter[] GetEntityFilters() =>

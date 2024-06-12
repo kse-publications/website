@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Notion.Client;
 using Publications.Application.Repositories;
 using Publications.Application.Services;
-using Publications.Application.Statistics;
 using Publications.Domain.Shared.Slugs;
 using Publications.Infrastructure.Publications;
 using Publications.Infrastructure.Requests;

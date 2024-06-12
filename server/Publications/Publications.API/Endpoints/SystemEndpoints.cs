@@ -1,7 +1,6 @@
 ﻿using Coravel.Scheduling.Schedule.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Publications.Application.Repositories;
-using Publications.Application.Statistics;
 using Publications.BackgroundJobs.Tasks;
 using Publications.Domain.Publications;
 
