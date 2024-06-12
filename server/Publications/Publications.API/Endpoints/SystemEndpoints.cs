@@ -21,16 +21,40 @@ public static class SystemEndpoints
         this IEndpointRouteBuilder endpoints)
     {
         endpoints.MapGet("/EB292BF0-E995-491A-A98E-6121601E1069/sync", 
-            (ILogger<Program> logger, IScheduler scheduler) => 
+            (ILogger<Program> logger, IServiceProvider serviceProvider) => 
             {
                 logger.LogInformation("/sync endpoint hit");
-                scheduler.Schedule<SyncDatabasesTask>()
-                    .EverySecond()
-                    .Once()
-                    .PreventOverlapping(nameof(SyncDatabasesTask));
+                
+                Task.Run(async () =>
+                {
+                    await ExecuteSyncDatabasesTask(serviceProvider);
+                });
+                
+                return Results.Ok(new { message = "Sync started" });
             });
         
         return endpoints;
+    }
+
+    private static async Task ExecuteSyncDatabasesTask(IServiceProvider serviceProvider)
+    {
+        using var scope = serviceProvider.CreateScope();
+        var mutex = scope.ServiceProvider.GetRequiredService<IMutex>();
+
+        if (!mutex.TryGetLock(nameof(SyncDatabasesTask), timeoutMinutes: 30))
+        {
+            return;
+        }
+        
+        var syncDatabasesTask = scope.ServiceProvider.GetRequiredService<SyncDatabasesTask>();
+        try
+        {
+            await syncDatabasesTask.Invoke();
+        }
+        finally
+        {
+            mutex.Release(nameof(SyncDatabasesTask));
+        }
     }
     
     private static IEndpointRouteBuilder MapGetViewsEndpoint(
