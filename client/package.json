@@ -36,7 +36,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
-    "lucide-react": "^0.359.0",
+    "lucide-react": "^0.394.0",
     "posthog-js": "^1.131.4",
     "react": "^18.2.0",
     "react-dom": "^18.3.1",
