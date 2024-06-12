@@ -30,7 +30,7 @@ public static class SystemEndpoints
                     await ExecuteSyncDatabasesTask(serviceProvider);
                 });
                 
-                return Results.Ok(new { message = "Sync started" });
+                return Results.Ok();
             });
         
         return endpoints;

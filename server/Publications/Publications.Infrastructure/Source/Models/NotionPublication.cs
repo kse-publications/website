@@ -8,8 +8,6 @@ namespace Publications.Infrastructure.Source.Models;
 internal class NotionPublication : Publication
 {
     private readonly string _notionId;
-    private string GetNotionId() => _notionId;
-    
     private readonly ICollection<Collection> _updatableCollections = [];
 
     private NotionPublication(
@@ -54,6 +52,10 @@ internal class NotionPublication : Publication
         };
     }
     
+    internal string GetNotionId() => _notionId;
+    
+    internal void AddCollection(Collection collection) => _updatableCollections.Add(collection);
+    
     internal NotionPublication JoinAuthors(Page page, ICollection<NotionAuthor> authors)
     {
         if (!page.TryGetRelationProperty("Authors", out var authorsRelation))
@@ -84,28 +86,6 @@ internal class NotionPublication : Publication
             .FirstOrDefault(p => p.GetNotionId() == publisherId);
 
         return this;
-    }
-    
-    internal static IEnumerable<NotionPublication> JoinCollections(
-        IEnumerable<NotionPublication> publications, 
-        IEnumerable<NotionCollection> collections)
-    {
-        Dictionary<string, NotionPublication> publicationsDictionary = publications
-            .ToDictionary(p => p.GetNotionId());
-
-        foreach (var collection in collections)
-        {
-            foreach (var relationId in collection.GetPublicationsRelation())
-            {
-                if (!publicationsDictionary.TryGetValue(relationId.Id, out NotionPublication? publication)) 
-                    continue;
-                
-                publication._updatableCollections.Add(collection);
-                collection.AddPublicationId(publication.Id);
-            }
-        }
-
-        return publicationsDictionary.Values;
     }
 
     internal Publication ToPublication()

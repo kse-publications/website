@@ -40,8 +40,7 @@ public class SyncDatabasesTask(
     
     protected override async Task DoRetriableTaskAsync()
     {
-        _sourcePublications = await sourceRepository.GetPublicationsAsync();
-        _sourceCollections = await sourceRepository.GetCollectionsAsync();
+        (_sourcePublications, _sourceCollections) = await sourceRepository.GetPublicationsAndCollectionsAsync();
     }
 
     protected override async Task OnSuccessAsync()

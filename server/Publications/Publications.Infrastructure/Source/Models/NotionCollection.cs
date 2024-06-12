@@ -7,11 +7,7 @@ namespace Publications.Infrastructure.Source.Models;
 internal class NotionCollection : Collection
 {
     private readonly List<ObjectId> _publicationsRelation;
-    internal List<ObjectId> GetPublicationsRelation() => _publicationsRelation;
-    
     private readonly List<int> _publicationsIds = [];
-    internal void AddPublicationId(int publicationId) 
-        => _publicationsIds.Add(publicationId);
 
     private NotionCollection(
         int id,
@@ -42,6 +38,10 @@ internal class NotionCollection : Collection
             Description = page.GetRichTextPropertyOrDefault("Description")
         };
     }
+    
+    internal List<ObjectId> GetPublicationsRelation() => _publicationsRelation;
+    
+    internal void AddPublicationId(int publicationId) => _publicationsIds.Add(publicationId);
     
     internal Collection ToCollection()
     {
