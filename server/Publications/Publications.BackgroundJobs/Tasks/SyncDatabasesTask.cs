@@ -52,12 +52,14 @@ public class SyncDatabasesTask(
         int[] deletedPublicationIds = await DeletePublicationsNotInSourceAsync();
         int[] deletedCollectionIds = await DeleteCollectionsNotInSourceAsync();
         
-        List<Collection> updatedCollections = FindUpdatedCollections();
         List<Collection> newCollections = FindNewEntities(_localCollectionsMetadataDict!, _sourceCollections!);
+        List<Collection> updatedCollections = FindUpdatedCollections();
         
-        List<Publication> updatedPublications = FindUpdatedPublications(
-            updatedCollections, newCollections, deletedCollectionIds);
         List<Publication> newPublications = FindNewEntities(_localPublicationsMetadataDict!, _sourcePublications!);
+        HashSet<int> newPublicationIds = newPublications.Select(p => p.Id).ToHashSet();
+        List<Publication> updatedPublications = 
+            FindUpdatedPublications(updatedCollections, newCollections, deletedCollectionIds)
+                .Where(p => !newPublicationIds.Contains(p.Id)).ToList();
 
         _sourceFilters = await filtersService.GetFiltersForPublicationsAsync(_sourcePublications!);
         
