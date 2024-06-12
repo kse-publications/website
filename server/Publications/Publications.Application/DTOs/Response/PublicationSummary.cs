@@ -1,6 +1,6 @@
 ﻿using Publications.Domain.Publications;
 
-namespace Publications.Application.DTOs;
+namespace Publications.Application.DTOs.Response;
 
 /// <summary>
 /// A DTO that represents a publication summary.

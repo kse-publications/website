@@ -1,14 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
+﻿using System.Text.Json;
 using NRedisStack;
 using NRedisStack.RedisStackCommands;
 using NRedisStack.Search;
 using NRedisStack.Search.Aggregation;
-using Publications.Application;
-using Publications.Application.DTOs;
+using Publications.Application.DTOs.Request;
+using Publications.Application.DTOs.Response;
 using Publications.Application.Repositories;
 using Publications.Domain.Collections;
 using Publications.Domain.Publications;
+using Publications.Domain.Shared;
 using Publications.Infrastructure.Shared;
 using Redis.OM;
 using Redis.OM.Contracts;
@@ -22,11 +22,10 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
 {
     private readonly IDatabase _db;
     private readonly IRedisCollection<Publication> _publications;
-    private readonly IRedisConnectionProvider _connectionProvider;
 
-
-    public PublicationsRepository(IConnectionMultiplexer connectionMultiplexer, IRedisConnectionProvider connectionProvider) 
-        : base(new RedisConnectionProvider(connectionMultiplexer))
+    public PublicationsRepository(
+        IConnectionMultiplexer connectionMultiplexer,
+        IRedisConnectionProvider connectionProvider) : base(connectionProvider)
     {
         _db = connectionMultiplexer.GetDatabase();
         _publications = connectionProvider.RedisCollection<Publication>();
@@ -39,7 +38,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         SearchCommands ft = _db.FT();
         SearchQuery query = SearchQuery.CreateWithFilter(filterDTO);
         
-        AggregationResult aggregationResult = await ft.AggregateAsync(Publication.IndexName,
+        AggregationResult aggregationResult = await ft.AggregateAsync(Entity.IndexName<Publication>(),
             new AggregationRequest(query.Build())
                 .Load(
                     new FieldName(nameof(Publication.Slug)),
@@ -64,6 +63,16 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             ResultCount: publications.Count);
     }
 
+    public async Task<IReadOnlyCollection<SyncEntityMetadata>> GetAllSyncMetadataAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return (await _publications.Select(e => new SyncEntityMetadata
+        {
+            Id = e.Id,
+            LastSynchronizedAt = e.LastSynchronizedAt,
+        }).ToListAsync()).AsReadOnly();
+    }
+
     public async Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
         FilterDTO filterDTO, PaginationDTO paginationDTO, SearchDTO searchDTO,
         CancellationToken cancellationToken = default)
@@ -78,7 +87,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             .CreateWithSearch(searchDTO.SearchTerm, searchFields)
             .Filter(filterDTO);
         
-        var searchResult = await ft.SearchAsync(Publication.IndexName, 
+        var searchResult = await ft.SearchAsync(Entity.IndexName<Publication>(), 
             new Query(query.Build())
                 .Paginate(paginationDTO.Page, paginationDTO.PageSize)
                 .Dialect(3));
@@ -111,7 +120,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         }
         query.And(authorsQuery.Build());
         
-        SearchResult searchResult = await ft.SearchAsync(Publication.IndexName, 
+        SearchResult searchResult = await ft.SearchAsync(Entity.IndexName<Publication>(), 
             new Query(query.Build())
                 .SetSortBy(nameof(Publication.Views), ascending: false)
                 .Paginate(paginationDto.Page, paginationDto.PageSize)
@@ -126,6 +135,29 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             ResultCount: publications.Count);
     }
 
+    public async Task<IReadOnlyCollection<PublicationSummary>> GetSimilarAsync(
+        int currentPublicationId, 
+        CancellationToken cancellationToken = default)
+    {
+        Publication? currentPublication = await GetByIdAsync(currentPublicationId, cancellationToken);
+        if (currentPublication is null)
+        {
+            return Array.Empty<PublicationSummary>();
+        }
+
+        var ft = _db.FT();
+        string idFilter = new SearchFieldName(nameof(Publication.Id)).NotEqualTo(currentPublication.Id);
+        
+        var searchResult = await ft.SearchAsync(Entity.IndexName<Publication>(),
+            new Query($"({idFilter})=>[KNN $K @{nameof(Publication.SimilarityVector)} $BLOB as similarity_score]")
+                .AddParam("K", 6)
+                .AddParam("BLOB", currentPublication.SimilarityVector.Embedding!)
+                .SetSortBy("similarity_score", ascending: false)
+                .Dialect(3));
+
+        return MapToPublicationSummaries(searchResult).AsReadOnly();
+    }
+
     public async Task<PaginatedCollection<PublicationSummary>> GetFromCollectionAsync(
         int collectionId,
         PaginationDTO paginationDTO,
@@ -136,7 +168,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             .Where(new SearchFieldName(PublicationCollectionsId)
                 .EqualTo(collectionId));
         
-        SearchResult searchResult = await ft.SearchAsync(Publication.IndexName,
+        SearchResult searchResult = await ft.SearchAsync(Entity.IndexName<Publication>(),
             new Query(query.Build())
                 .SetSortBy(nameof(Publication.Views), ascending: false)
                 .Paginate(paginationDTO.Page, paginationDTO.PageSize)
@@ -151,6 +183,19 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             ResultCount: publications.Count);
     }
 
+    public async Task UpdatePropertyValueAsync(
+        int publicationId,
+        string propertyName, 
+        string newValue,
+        CancellationToken cancellationToken = default)
+    {
+        var json = _db.JSON();
+        
+        await json.SetAsync(
+            key: Publication.GetKey(publicationId), 
+            $"$.{propertyName}", newValue);
+    }
+
     private static List<PublicationSummary> MapToPublicationSummaries(
         IEnumerable<Dictionary<string, RedisValue>> aggregationResults)
     {
@@ -158,10 +203,8 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         {
             Slug = result[nameof(Publication.Slug)]!,
             Title = JsonSerializer.Deserialize<string[]>(result[nameof(Publication.Title)]!)!.First(),
-            Type = result.TryGetValue(nameof(Publication.Type), out var typeValue) 
-                ? typeValue! : string.Empty,
-            Year = result.TryGetValue(nameof(Publication.Year), out var yearValue) 
-                ? (int)yearValue! : 0,
+            Type = result.TryGetValue(nameof(Publication.Type), out var typeValue) ? typeValue! : string.Empty,
+            Year = result.TryGetValue(nameof(Publication.Year), out var yearValue) ? (int)yearValue! : 0,
             Authors = JsonSerializer
                 .Deserialize<string[]>(result
                     .TryGetValue(PublicationAuthorsName, out var authorsValue) ? authorsValue! : "[]")
@@ -189,9 +232,9 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             .OrderByDescending(pub => pub.RecentViews) 
             .Take(4)  
             .Select(pub => PublicationSummary.FromPublication(pub))  
-            .ToArrayAsync();  
+            .ToListAsync();  
 
-        return topPublications;
+        return topPublications.ToArray();
     }
 
     private static string PublicationAuthorsName => 

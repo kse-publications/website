@@ -1,5 +1,8 @@
 ﻿using Publications.Application.DTOs;
+using Publications.Application.DTOs.Request;
+using Publications.Application.DTOs.Response;
 using Publications.Domain.Publications;
+using SearchDTO = Publications.Application.DTOs.Request.SearchDTO;
 
 namespace Publications.Application.Repositories;
 
@@ -11,6 +14,9 @@ public interface IPublicationsRepository : IEntityRepository<Publication>
     Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
         FilterDTO filterDTO,
         PaginationDTO paginationDTO,
+        CancellationToken cancellationToken = default);
+    
+    Task<IReadOnlyCollection<SyncEntityMetadata>> GetAllSyncMetadataAsync(
         CancellationToken cancellationToken = default);
     
     /// <summary>
@@ -32,6 +38,10 @@ public interface IPublicationsRepository : IEntityRepository<Publication>
         AuthorFilterDTO authorFilterDto,
         CancellationToken cancellationToken = default);
     
+    Task<IReadOnlyCollection<PublicationSummary>> GetSimilarAsync(
+        int currentPublicationId,
+        CancellationToken cancellationToken = default);
+    
     /// <summary>
     /// Returns paginated collection of publications
     /// that are part of the provided collection.
@@ -40,5 +50,12 @@ public interface IPublicationsRepository : IEntityRepository<Publication>
         int collectionId,
         PaginationDTO paginationDTO,
         CancellationToken cancellationToken = default);
+    
+    Task UpdatePropertyValueAsync(
+        int publicationId,
+        string propertyName,
+        string newValue,
+        CancellationToken cancellationToken = default);
+    
      Task<PublicationSummary[]> GetTopPublicationsByRecentViews();
 }

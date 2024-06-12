@@ -1,5 +1,5 @@
-﻿using System.Text.Json;
-using Publications.Application.DTOs;
+using Publications.Application.DTOs.Response;
+using System.Text.Json;
 using Publications.Application.Statistics;
 using StackExchange.Redis;
 

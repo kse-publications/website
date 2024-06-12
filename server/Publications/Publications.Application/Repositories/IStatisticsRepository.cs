@@ -1,4 +1,4 @@
-﻿using Publications.Application.DTOs;
+using Publications.Application.DTOs.Response;
 
 namespace Publications.Application.Statistics;
 
