@@ -5,8 +5,14 @@ import bgImageAvif from '../../assets/images/bg-image.avif'
 import { SearchInput } from './search-input'
 import { SearchFilters } from './search-filters'
 import { useSearchContext } from '@/contexts/search-context'
+import type { ICollection } from '@/types/common/collection'
+import { CollectionList } from '../collections/collections-list'
 
-export const SearchBackground = () => {
+interface SearchBackgroundProps {
+  collections: ICollection[]
+}
+
+export const SearchBackground = ({ collections }: SearchBackgroundProps) => {
   const { isRecent } = useSearchContext()
 
   return (
@@ -36,6 +42,7 @@ export const SearchBackground = () => {
           </CSSTransition>
           <SearchInput />
           <SearchFilters />
+          <CollectionList collections={collections} />
         </div>
       </CSSTransition>
     </div>
