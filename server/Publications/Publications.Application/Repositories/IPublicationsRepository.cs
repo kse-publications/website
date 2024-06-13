@@ -1,5 +1,4 @@
-﻿using Publications.Application.DTOs;
-using Publications.Application.DTOs.Request;
+﻿using Publications.Application.DTOs.Request;
 using Publications.Application.DTOs.Response;
 using Publications.Domain.Publications;
 using SearchDTO = Publications.Application.DTOs.Request.SearchDTO;
@@ -57,5 +56,7 @@ public interface IPublicationsRepository : IEntityRepository<Publication>
         string newValue,
         CancellationToken cancellationToken = default);
     
-     Task<PublicationSummary[]> GetTopPublicationsByRecentViews();
+     Task<PublicationSummary[]> GetTopPublicationsByRecentViews(
+         int count = 4,
+         CancellationToken cancellationToken = default);
 }

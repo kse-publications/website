@@ -22,11 +22,14 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
 {
     private readonly IDatabase _db;
     private readonly IRedisCollection<Publication> _publications;
-
+    private readonly JsonSerializerOptions _jsonOptions;
+    
     public PublicationsRepository(
         IConnectionMultiplexer connectionMultiplexer,
-        IRedisConnectionProvider connectionProvider) : base(connectionProvider)
+        IRedisConnectionProvider connectionProvider,
+        JsonSerializerOptions jsonOptions) : base(connectionProvider)
     {
+        _jsonOptions = jsonOptions;
         _db = connectionMultiplexer.GetDatabase();
         _publications = connectionProvider.RedisCollection<Publication>();
     }
@@ -216,21 +219,22 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         }).ToList();
     }
 
-    private static List<PublicationSummary> MapToPublicationSummaries(SearchResult result)
+    private List<PublicationSummary> MapToPublicationSummaries(SearchResult result)
     {
         return result
             .ToJson()
-            .Select(json => PublicationSummary
-                .FromPublication(JsonSerializer
-                    .Deserialize<Publication[]>(json, new JsonSerializerOptions() { IncludeFields = true})!.First()))
+            .Select(json => PublicationSummary.FromPublication(JsonSerializer
+                    .Deserialize<Publication[]>(json, _jsonOptions)!.First()))
             .ToList();
     }
 
-    public async Task<PublicationSummary[]> GetTopPublicationsByRecentViews()
+    public async Task<PublicationSummary[]> GetTopPublicationsByRecentViews(
+        int count = 4, 
+        CancellationToken cancellationToken = default)
     {
         var topPublications = await _publications
             .OrderByDescending(pub => pub.RecentViews) 
-            .Take(4)  
+            .Take(count)  
             .Select(pub => PublicationSummary.FromPublication(pub))  
             .ToListAsync();  
 

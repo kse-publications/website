@@ -4,16 +4,26 @@ using Publications.API.Middleware;
 using Publications.API.Serialization;
 using Publications.Domain.Filters;
 using Publications.Domain.Publications;
+using Redis.OM.Modeling;
 
 namespace Publications.API;
 
 public static class Installer
 {
-    public static IMvcBuilder ConfigureJsonOptions(this IMvcBuilder builder)
+    public static void ConfigureJsonOptions(this IMvcBuilder builder)
     {
-        return builder.AddJsonOptions(options =>
+        builder.AddJsonOptions(options =>
         {
             options.JsonSerializerOptions.AddResponseJsonConverters();
+        });
+
+        builder.Services.AddSingleton(new JsonSerializerOptions()
+        {
+            PropertyNameCaseInsensitive = true,
+            Converters =
+            {
+                new DateTimeJsonConverter()
+            }
         });
     }
     

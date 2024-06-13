@@ -43,7 +43,7 @@ public class Publication: Entity
     public string[] Keywords { get; set; } = Array.Empty<string>();
 
     [Searchable(Weight = 0.7)] 
-    public string Abstract { get; init; }
+    public string AbstractText { get; init; }
     
     [Indexed(JsonPath = "$.Id")]
     [Searchable(JsonPath = "$.Name", Weight = 0.8, PhoneticMatcher = "dm:en")]
@@ -90,7 +90,7 @@ public class Publication: Entity
         Type = type;
         Year = year;
         Link = link;
-        Abstract = abstractText;
+        AbstractText = abstractText;
         LastModifiedAt = lastModifiedAt;
         LastSynchronizedAt = DateTime.UtcNow;
     }
@@ -127,7 +127,7 @@ public class Publication: Entity
     public static string[] GetSearchableFields() =>
     [
         nameof(Title),
-        nameof(Abstract),
+        nameof(AbstractText),
         $"{nameof(Authors)}_{nameof(Author.Name)}",
         $"{nameof(Publisher)}_{nameof(Publisher.Name)}"
     ];
@@ -136,7 +136,7 @@ public class Publication: Entity
 
     private string GetSimilarityValue() =>
         Title + " " + 
-        Abstract + " " +
+        AbstractText + " " +
         string.Join(" ", Keywords) + " " + 
         string.Join(" ", Collections.Select(c => c.Name));
 }
