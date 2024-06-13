@@ -13,7 +13,7 @@ namespace Publications.API.Middleware;
 
 
 public class RequestAnalyticsFilter<TResource> : IAsyncActionFilter
-    where TResource : Entity<TResource>
+    where TResource : Entity
 {
     private readonly IQueue _queue;
 

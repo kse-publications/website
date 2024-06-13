@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Publications.Application.DTOs;
+namespace Publications.Application.DTOs.Request;
 
 /// <summary>
 /// Basic pagination DTO.

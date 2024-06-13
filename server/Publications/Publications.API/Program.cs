@@ -15,8 +15,6 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services
         .AddInfrastructure(builder.Configuration)
         .AddBackgroundJobs(builder.Configuration);
-    
-    builder.Services.ConfigureFeatureFlags(builder.Configuration);
 }
 
 var app = builder.Build();
@@ -27,7 +25,7 @@ var app = builder.Build();
         app.UseSwaggerUI();
     }
     
-    app.Services.UseBackgroundJobs(app.GetFeatureFlagsMonitor());
+    app.Services.UseBackgroundJobs();
     
     app.UseCorsPolicies();
     app.UseHttpsRedirection();
@@ -35,6 +33,6 @@ var app = builder.Build();
 }
 
 app.MapControllers();
-app.MapSystemEndpoints();
+app.MapSyncEndpoint(app.Configuration);
 
 app.Run();

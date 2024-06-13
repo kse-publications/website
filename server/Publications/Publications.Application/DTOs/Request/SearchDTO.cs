@@ -1,7 +1,7 @@
 ﻿
 using System.Text.RegularExpressions;
 
-namespace Publications.Application.DTOs;
+namespace Publications.Application.DTOs.Request;
 
 /// <summary>
 /// Basic pagination and search DTO.
