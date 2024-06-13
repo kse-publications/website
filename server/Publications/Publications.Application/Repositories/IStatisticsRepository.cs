@@ -4,8 +4,8 @@ namespace Publications.Application.Repositories;
 
 public interface IStatisticsRepository
 {
-    Task<OverallStats> GetOverallStatsAsync();
-    Task<RecentStats> GetRecentStatsAsync();
+    Task<OverallStats> GetOverallStatsAsync(CancellationToken cancellationToken = default);
+    Task<RecentStats> GetRecentStatsAsync(CancellationToken cancellationToken = default);
     
     Task SetTotalPublicationsCountAsync(int count);
     Task IncrementTotalSearchesAsync(int searchesCount = 1);

@@ -14,7 +14,7 @@ public class StatisticsRepository: IStatisticsRepository
         _db = connectionMultiplexer.GetDatabase();
     }
     
-    public async Task<OverallStats> GetOverallStatsAsync()
+    public async Task<OverallStats> GetOverallStatsAsync(CancellationToken cancellationToken = default)
     {
         var totalPublicationsCount = await _db
             .StringGetAsync(nameof(OverallStats.TotalPublicationsCount));
@@ -28,7 +28,7 @@ public class StatisticsRepository: IStatisticsRepository
         };
     }
 
-    public async Task<RecentStats> GetRecentStatsAsync()
+    public async Task<RecentStats> GetRecentStatsAsync(CancellationToken cancellationToken = default)
     {
         var recentViewsCount = await _db
             .StringGetAsync(nameof(RecentStats.RecentViewsCount));

@@ -198,6 +198,20 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             key: Publication.GetKey(publicationId), 
             $"$.{propertyName}", newValue);
     }
+    
+    public async Task<PublicationSummary[]> GetTopPublicationsByRecentViews(
+        int count = 4, 
+        CancellationToken cancellationToken = default)
+    {
+        var topPublications = await _publications
+            .OrderByDescending(pub => pub.RecentViews) 
+            .Take(count)  
+            .ToListAsync();  
+
+        return topPublications
+            .Select(PublicationSummary.FromPublication)
+            .ToArray();
+    }
 
     private static List<PublicationSummary> MapToPublicationSummaries(
         IEnumerable<Dictionary<string, RedisValue>> aggregationResults)
@@ -226,19 +240,6 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             .Select(json => PublicationSummary.FromPublication(JsonSerializer
                     .Deserialize<Publication[]>(json, _jsonOptions)!.First()))
             .ToList();
-    }
-
-    public async Task<PublicationSummary[]> GetTopPublicationsByRecentViews(
-        int count = 4, 
-        CancellationToken cancellationToken = default)
-    {
-        var topPublications = await _publications
-            .OrderByDescending(pub => pub.RecentViews) 
-            .Take(count)  
-            .Select(pub => PublicationSummary.FromPublication(pub))  
-            .ToListAsync();  
-
-        return topPublications.ToArray();
     }
 
     private static string PublicationAuthorsName => 
