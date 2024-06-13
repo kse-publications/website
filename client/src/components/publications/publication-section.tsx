@@ -50,7 +50,7 @@ function PublicationPage({ data }: PublicationPageProps) {
           ))}
         </div>
 
-        <p className="mt-4 leading-7">{data.abstract}</p>
+        <p className="mt-4 leading-7">{data.abstracttext}</p>
         {data.link && (
           <div className="mt-6 flex items-center justify-center text-base">
             <a className={buttonVariants({ variant: 'default' })} href={data.link} target="_blank">
