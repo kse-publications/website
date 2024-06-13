@@ -1,6 +1,4 @@
-﻿using Publications.Application.DTOs;
-
-namespace Publications.Application.Statistics;
+﻿namespace Publications.Application.DTOs.Response;
 
 public class RecentStats
 {

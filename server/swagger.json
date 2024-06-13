@@ -301,6 +301,56 @@
         }
       }
     },
+    "/publications/{id}/similar": {
+      "get": {
+        "tags": [
+          "Publications"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PublicationSummary"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PublicationSummary"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PublicationSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/publications/search": {
       "get": {
         "tags": [
@@ -473,6 +523,64 @@
           }
         }
       }
+    },
+    "/stats/overall": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/OverallStats"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OverallStats"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OverallStats"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stats/recent": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecentStats"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecentStats"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecentStats"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -484,15 +592,7 @@
             "type": "integer",
             "format": "int32"
           },
-          "slug": {
-            "type": "string",
-            "nullable": true
-          },
           "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "profileLink": {
             "type": "string",
             "nullable": true
           }
@@ -568,6 +668,20 @@
         },
         "additionalProperties": false
       },
+      "OverallStats": {
+        "type": "object",
+        "properties": {
+          "totalPublicationsCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalSearchesCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
       "ProblemDetails": {
         "type": "object",
         "properties": {
@@ -633,7 +747,7 @@
             },
             "nullable": true
           },
-          "abstract": {
+          "abstractText": {
             "type": "string",
             "nullable": true
           },
@@ -648,6 +762,10 @@
             "$ref": "#/components/schemas/Publisher"
           },
           "views": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "recentViews": {
             "type": "integer",
             "format": "int32"
           },
@@ -722,12 +840,25 @@
             "type": "integer",
             "format": "int32"
           },
-          "slug": {
-            "type": "string",
-            "nullable": true
-          },
           "name": {
             "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecentStats": {
+        "type": "object",
+        "properties": {
+          "recentViewsCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "topRecentlyViewedPublications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicationSummary"
+            },
             "nullable": true
           }
         },

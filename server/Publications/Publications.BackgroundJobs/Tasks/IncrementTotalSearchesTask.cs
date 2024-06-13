@@ -1,6 +1,6 @@
 ﻿using Coravel.Invocable;
 using Microsoft.Extensions.Logging;
-using Publications.Application.Statistics;
+using Publications.Application.Repositories;
 
 namespace Publications.BackgroundJobs.Tasks;
 

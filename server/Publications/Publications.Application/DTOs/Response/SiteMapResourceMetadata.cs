@@ -1,4 +1,4 @@
-﻿namespace Publications.Application;
+﻿namespace Publications.Application.DTOs.Response;
 
 public class SiteMapResourceMetadata
 {

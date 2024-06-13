@@ -1,4 +1,4 @@
-﻿using Publications.Application;
+﻿using Publications.Application.DTOs.Response;
 using Publications.Application.Repositories;
 using Publications.Domain.Shared;
 using Redis.OM;
@@ -9,12 +9,12 @@ using Redis.OM.Searching;
 namespace Publications.Infrastructure.Shared;
 
 public class EntityRepository<TEntity> : IEntityRepository<TEntity> 
-    where TEntity : Entity<TEntity>
+    where TEntity : Entity
 {
     private readonly IRedisCollection<TEntity> _collection;
     private readonly RedisAggregationSet<TEntity> _aggregationSet;
 
-    public EntityRepository(IRedisConnectionProvider connectionProvider)
+    protected EntityRepository(IRedisConnectionProvider connectionProvider)
     {
         _collection = connectionProvider.RedisCollection<TEntity>();
         _aggregationSet = connectionProvider.AggregationSet<TEntity>();
@@ -26,28 +26,7 @@ public class EntityRepository<TEntity> : IEntityRepository<TEntity>
     {
         return await _collection.FindByIdAsync(resourceId.ToString());
     }
-    
-    public virtual async Task InsertOrUpdateAsync(
-        IEnumerable<TEntity> entities, 
-        CancellationToken cancellationToken = default)
-    {
-        await _collection.InsertAsync(entities);
-    }
-    
-    /// <summary>
-    /// Deletes entities that were last synchronized before the given date.
-    /// </summary>
-    public virtual async Task SynchronizeAsync(
-        DateTime lastSyncDateTime, 
-        CancellationToken cancellationToken = default)
-    {
-        var entitiesToDelete = await _collection
-            .Where(e => e.SynchronizedAt < lastSyncDateTime)
-            .ToListAsync();
-        
-        await _collection.DeleteAsync(entitiesToDelete);
-    }
-    
+
     public virtual async Task<IReadOnlyCollection<SiteMapResourceMetadata>> GetSiteMapMetadataAsync(
         CancellationToken cancellationToken = default)
     {
@@ -60,4 +39,26 @@ public class EntityRepository<TEntity> : IEntityRepository<TEntity>
             .ToList()
             .AsReadOnly();
     }
+    
+    public virtual async Task InsertAsync(
+        IEnumerable<TEntity> entities, 
+        CancellationToken cancellationToken = default)
+    {
+        await _collection.InsertAsync(entities);
+    }
+    
+    public virtual async Task UpdateAsync(
+        IEnumerable<TEntity> entities, 
+        CancellationToken cancellationToken = default)
+    {
+        await _collection.UpdateAsync(entities);
+    }
+    
+    public virtual async Task DeleteAsync(
+        IEnumerable<TEntity> entities, 
+        CancellationToken cancellationToken = default)
+    {
+        await _collection.DeleteAsync(entities);
+    }
+    
 }
