@@ -33,6 +33,6 @@ var app = builder.Build();
 }
 
 app.MapControllers();
-app.MapSystemEndpoints();
+app.MapSyncEndpoint(app.Configuration);
 
 app.Run();
