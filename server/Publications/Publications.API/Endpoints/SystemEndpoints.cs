@@ -1,26 +1,25 @@
 ﻿using Coravel.Scheduling.Schedule.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Publications.Application.Repositories;
 using Publications.BackgroundJobs.Tasks;
-using Publications.Domain.Publications;
 
 namespace Publications.API.Endpoints;
 
 public static class SystemEndpoints
 {
-    public static IEndpointRouteBuilder MapSystemEndpoints(this IEndpointRouteBuilder endpoints)
+    public static IEndpointRouteBuilder MapSyncEndpoint(this IEndpointRouteBuilder endpoints,
+        IConfiguration configuration)
     {
-        return endpoints
-            .MapSyncEndpoint()
-            .MapGetViewsEndpoint();
-    }
-    
-    private static IEndpointRouteBuilder MapSyncEndpoint(
-        this IEndpointRouteBuilder endpoints)
-    {
-        endpoints.MapGet("/EB292BF0-E995-491A-A98E-6121601E1069/sync", 
-            (ILogger<Program> logger, IServiceProvider serviceProvider) => 
+        endpoints.MapGet("/sync", (
+            [FromServices]ILogger<Program> logger,
+            [FromServices]IServiceProvider serviceProvider,
+            [FromQuery] string key = "") => 
             {
+                if (key != configuration["DbSync:Key"])
+                {
+                    logger.LogWarning("Unauthorized access to /sync endpoint");
+                    return Results.Unauthorized();
+                }
+                
                 logger.LogInformation("/sync endpoint hit");
                 
                 Task.Run(async () =>
@@ -43,7 +42,7 @@ public static class SystemEndpoints
         {
             return;
         }
-        
+
         var syncDatabasesTask = scope.ServiceProvider.GetRequiredService<SyncDatabasesTask>();
         try
         {
@@ -53,20 +52,5 @@ public static class SystemEndpoints
         {
             mutex.Release(nameof(SyncDatabasesTask));
         }
-    }
-    
-    private static IEndpointRouteBuilder MapGetViewsEndpoint(
-        this IEndpointRouteBuilder endpoints)
-    {
-        endpoints.MapGet("/FC2097AD-8BE2-463C-AD89-1190880C44AD/views", 
-            async ([FromServices] IRequestsRepository requestsRepository) =>
-            {
-                Dictionary<int, int> views = await requestsRepository
-                    .GetResourceViews<Publication>();
-            
-                return views;
-            });
-        
-        return endpoints;
     }
 }
