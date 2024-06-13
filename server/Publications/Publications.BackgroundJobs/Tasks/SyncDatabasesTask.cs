@@ -222,33 +222,37 @@ public class SyncDatabasesTask(
         return deletedIds.ToArray();
     }
 
-    private async Task UpdatePublicationsViews(IEnumerable<Publication> publications)
+    private async Task UpdatePublicationsViews(IEnumerable<Publication> publications) 
     {
         Dictionary<int, int> views = await requestsRepository.GetResourceViews<Publication>();
         Dictionary<int, int> recentViews = await requestsRepository.GetResourceViews<Publication>(
             after: DateTime.Today - TimeSpan.FromDays(30));
-        
+
+        List<Task> updateViewsTasks = new(views.Keys.Count + recentViews.Keys.Count);
+            
         foreach (var publication in publications)
         {
             if (views.TryGetValue(publication.Id, out var viewsCount))
             {
-                await publicationsRepository.UpdatePropertyValueAsync(
-                    publication.Id, 
+                updateViewsTasks.Add(publicationsRepository.UpdatePropertyValueAsync(
+                    publication.Id,
                     nameof(Publication.Views),
-                    newValue: viewsCount.ToString());
+                    newValue: viewsCount.ToString()));
             }
-            
+                
             if (recentViews.TryGetValue(publication.Id, out var recentViewsCount))
             {
-                await publicationsRepository.UpdatePropertyValueAsync(
-                    publication.Id, 
+                updateViewsTasks.Add(publicationsRepository.UpdatePropertyValueAsync(
+                    publication.Id,
                     nameof(Publication.RecentViews),
-                    newValue: recentViewsCount.ToString());
+                    newValue: recentViewsCount.ToString()));
             }
         }
-        
-        await statisticsRepository.SetRecentViewsCountAsync(recentViews
-            .Sum(kvp => kvp.Value));
+            
+        updateViewsTasks.Add(statisticsRepository
+            .SetRecentViewsCountAsync(recentViews.Sum(kvp => kvp.Value)));
+            
+        await Task.WhenAll(updateViewsTasks);
     }
     
     private async Task UpdatePublicationsAsync(List<Publication> updatedPublications)
