@@ -4,7 +4,7 @@ import { buttonVariants } from '@/components/ui/button'
 import type { Publication } from '@/types/publication/publication'
 import { ChevronRightIcon } from '@radix-ui/react-icons'
 
-import GoBackButton from '../static-pages/go-back-button'
+import GoBackButton from '../layout/go-back-button'
 import type { PaginatedCollection } from '@/types/common/paginated-collection'
 import type { PublicationSummary } from '@/types/publication-summary/publication-summary'
 import RelatedAuthorsContextProvider from '../related-by-authors-results/authors-context'
@@ -61,7 +61,7 @@ function PublicationPage({ data, relatedPublications }: PublicationPageProps) {
             ))}
           </div>
 
-          <p className="mt-4 leading-7">{data.abstract}</p>
+          <p className="mt-4 leading-7">{data.abstracttext}</p>
           {data.link && (
             <div className="mt-6 flex items-center justify-center text-base">
               <a
