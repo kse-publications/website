@@ -45,7 +45,7 @@ internal class NotionPublication : Publication
             lastModifiedAt: page.LastEditedTime)
         {
             Language = page.GetSelectPropertyOrDefault("Language"),
-            Keywords = page.GetSeparatedRichTextProperty("Keywords", ',')
+            SearchableKeywords = page.GetSeparatedRichTextProperty("Keywords", ',')
                 .Select(k => new Keyword { Value = k })
                 .ToArray()
         };
