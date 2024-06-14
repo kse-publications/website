@@ -1,8 +1,9 @@
 import Masonry from 'react-masonry-css'
-import { SearchResultItem } from '../search-results/search-result-item'
 import { useRelatedAuthorsContext } from './authors-context'
+
+import { SearchResultItem } from '../search-results/search-result-item'
 import { SearchSkeleton } from '../search-results/search-skeleton'
-import { AuthorsLoadingTrigger } from './authors-loading-trigger'
+import { LoadingTrigger } from '../search-results/search-loading-trigger'
 
 const breakpointColumnsObj = {
   default: 2,
@@ -11,7 +12,8 @@ const breakpointColumnsObj = {
 }
 
 export default function RelatedAuthorsResults() {
-  const { error, isLoading, relatedResults } = useRelatedAuthorsContext()
+  const { error, isLoading, relatedResults, totalResults, loadMoreHandler } =
+    useRelatedAuthorsContext()
 
   return (
     <div className="more-publications mb-10">
@@ -30,7 +32,12 @@ export default function RelatedAuthorsResults() {
           </Masonry>
 
           {isLoading && <SearchSkeleton />}
-          <AuthorsLoadingTrigger />
+          <LoadingTrigger
+            isLoading={isLoading}
+            resultsLength={relatedResults.length}
+            totalResults={totalResults}
+            loadMoreHandler={loadMoreHandler}
+          />
         </>
       )}
     </div>

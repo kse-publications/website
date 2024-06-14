@@ -13,14 +13,11 @@ import {
 } from 'react'
 import type { PublicationSummary } from '@/types/publication-summary/publication-summary'
 import { getRelatedByAuthors } from '@/services/search/get-publications'
-import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, SEARCH_TEXT_DEBOUNCE_MS } from '@/config/search-params'
+import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '@/config/search-params'
 import type { PaginatedCollection } from '@/types/common/paginated-collection'
 import type { RelatedPublicationsQueryParams } from '@/types/common/query-params'
-import { useDebounce } from 'use-debounce'
 
 interface IRelatedAuthorsContext {
-  debouncedAuthors: string
-
   relatedResults: PublicationSummary[]
   setRelatedResults: Dispatch<SetStateAction<PublicationSummary[]>>
 
@@ -53,7 +50,6 @@ const RelatedAuthorsContextProvider = ({
   id,
   authors,
 }: RelatedAuthorsContextProviderProps) => {
-  const isInitialPublications = useRef(true)
   const isLoadingMoreStarted = useRef(false)
 
   const [error, setError] = useState('')
@@ -61,21 +57,17 @@ const RelatedAuthorsContextProvider = ({
   const [relatedResults, setRelatedResults] = useState<PublicationSummary[]>(initialResults || [])
   const [totalResults, setTotalResults] = useState(initialTotalResults || 0)
 
-  const [debouncedAuthors] = useDebounce(authors, SEARCH_TEXT_DEBOUNCE_MS)
-
   useEffect(() => {
-    if (isInitialPublications.current) return
-
     setRelatedResults([])
-    fetchPublications({ id, authors: debouncedAuthors })
-  }, [debouncedAuthors])
+    fetchAuthors({ id, authors })
+  }, [authors])
 
   const currentPage = useMemo(
     () => Math.ceil(relatedResults.length / DEFAULT_PAGE_SIZE),
     [relatedResults]
   )
 
-  const fetchPublications = useCallback(
+  const fetchAuthors = useCallback(
     async ({ id = '', authors = '', page = DEFAULT_PAGE }: RelatedPublicationsQueryParams) => {
       setIsLoading(true)
       setError('')
@@ -109,17 +101,16 @@ const RelatedAuthorsContextProvider = ({
 
     isLoadingMoreStarted.current = true
 
-    fetchPublications({
+    fetchAuthors({
       id,
       authors,
       page: currentPage + 1,
     })
-  }, [authors, currentPage, fetchPublications, id, isLoading, relatedResults.length, totalResults])
+  }, [authors, currentPage, fetchAuthors, id, isLoading, relatedResults.length, totalResults])
 
   const value: IRelatedAuthorsContext = useMemo(
     () => ({
       loadMoreHandler,
-      debouncedAuthors,
 
       relatedResults,
       setRelatedResults,
@@ -132,7 +123,7 @@ const RelatedAuthorsContextProvider = ({
 
       totalResults,
     }),
-    [loadMoreHandler, debouncedAuthors, relatedResults, isLoading, error, totalResults]
+    [loadMoreHandler, relatedResults, isLoading, error, totalResults]
   )
 
   return <RelatedAuthorsContext.Provider value={value}>{children}</RelatedAuthorsContext.Provider>
