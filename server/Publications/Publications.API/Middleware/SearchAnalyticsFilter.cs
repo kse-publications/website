@@ -1,7 +1,9 @@
 ﻿using Coravel.Queuing.Interfaces;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Publications.Application.DTOs;
+using Publications.Application.DTOs.Request;
 using Publications.BackgroundJobs;
+using Publications.BackgroundJobs.Tasks;
 
 namespace Publications.API.Middleware;
 

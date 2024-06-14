@@ -1,35 +1,36 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Publications.Application;
 using Publications.Application.Services;
+using Publications.BackgroundJobs.Options;
+using Publications.BackgroundJobs.Tasks;
 
 namespace Publications.BackgroundJobs;
 
 public class ConfigurationHostedService: IHostedService
 {
-    private readonly IOptionsMonitor<FeatureFlags> _flagsMonitor;
+    private readonly IOptions<DbSyncOptions> _options;
     private readonly IServiceProvider _serviceProvider;
     
     public ConfigurationHostedService(
         IServiceProvider serviceProvider,
-        IOptionsMonitor<FeatureFlags> flagsMonitor)
+        IOptions<DbSyncOptions> options)
     {
         _serviceProvider = serviceProvider;
-        _flagsMonitor = flagsMonitor;
+        _options = options;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        if (!_flagsMonitor.CurrentValue.SyncDatabases)
-            return;
-
         using IServiceScope scope = _serviceProvider.CreateScope();
         var dbConfigurationService = scope.ServiceProvider.GetRequiredService<IDbConfigurationService>();
-        var syncDatabasesTask = scope.ServiceProvider.GetRequiredService<SyncDatabasesTask>();
-        
         await dbConfigurationService.ConfigureAsync();
-        await syncDatabasesTask.Invoke();
+        
+        if(_options.Value.Enabled)
+        {
+            var syncDatabasesTask = scope.ServiceProvider.GetRequiredService<SyncDatabasesTask>();
+            await syncDatabasesTask.Invoke();
+        }
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

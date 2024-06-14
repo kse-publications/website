@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Primitives;
 using Publications.API.Serialization;
 using Publications.BackgroundJobs;
+using Publications.BackgroundJobs.Tasks;
 using Publications.Domain.Requests;
 using Publications.Domain.Shared;
 using Publications.Infrastructure.Requests;
@@ -12,7 +13,7 @@ namespace Publications.API.Middleware;
 
 
 public class RequestAnalyticsFilter<TResource> : IAsyncActionFilter
-    where TResource : Entity<TResource>
+    where TResource : Entity
 {
     private readonly IQueue _queue;
 

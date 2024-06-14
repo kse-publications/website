@@ -1,0 +1,19 @@
+version: 2
+updates:
+  - package-ecosystem: "npm" 
+    directory: "/client/"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "marchellodev"
+      - "DmytroKolisnyk2"
+      - "yeontannie"
+
+  - package-ecosystem: "nuget"
+    directory: "/server/Publications/"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "marchellodev"
+      - "PrudiusVladislav"
+      - "Pivdenna"

@@ -4,11 +4,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Notion.Client;
 using Publications.Application.Repositories;
 using Publications.Application.Services;
-using Publications.Application.Statistics;
 using Publications.Domain.Shared.Slugs;
 using Publications.Infrastructure.Publications;
 using Publications.Infrastructure.Requests;
 using Publications.Infrastructure.Services;
+using Publications.Infrastructure.Services.DbConfiguration;
 using Publications.Infrastructure.Source;
 using Publications.Infrastructure.Statistics;
 using Redis.OM;
@@ -25,6 +25,7 @@ public static class Installer
         services
             .AddRedis(configuration)
             .AddSqliteDb(configuration)
+            .AddDbConfigurationServices(configuration)
             .AddRepositories()
             .AddServices()
             .AddNotionClient(configuration);
@@ -43,7 +44,17 @@ public static class Installer
         services.AddSingleton<IRedisConnectionProvider>(
             new RedisConnectionProvider(connectionMultiplexer));
         
-        services.AddTransient<IDbConfigurationService, RedisConfigurationService>();
+        return services;
+    }
+    
+    private static IServiceCollection AddDbConfigurationServices(this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddOptionsWithValidateOnStart<RedisIndexesVersions>()
+            .ValidateDataAnnotations()
+            .Bind(configuration.GetSection("Redis:IndexesVersions"));
+        
+        services.AddTransient<IDbConfigurationService, DbConfigurationService>();
         
         return services;
     }
@@ -67,8 +78,8 @@ public static class Installer
     
     private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
-        services.AddScoped<IPublicationsQueryRepository, PublicationsQueryRepository>();
-        services.AddScoped<IPublicationsCommandRepository, PublicationsCommandRepository>();
+        services.AddScoped<IPublicationsRepository, PublicationsRepository>();
+        services.AddScoped<IFiltersRepository, FiltersRepository>();
         services.AddScoped<ICollectionsRepository, CollectionsRepository>();
         
         services.AddScoped<ISourceRepository, NotionRepository>();
@@ -84,6 +95,7 @@ public static class Installer
         services.AddScoped<IPublicationsService, PublicationsService>();
         services.AddScoped<IFiltersService, FiltersService>();
         services.AddScoped<IWordsService, WordsService>();
+        services.AddScoped<IDbVersionService, DbVersionService>();
         
         return services;
     }
@@ -97,12 +109,5 @@ public static class Installer
         });
         
         return services;
-    }
-
-    public static void UpdateDatabase(this IServiceProvider serviceProvider)
-    {
-        using var scope = serviceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<RequestsHistoryDbContext>();
-        dbContext.Database.Migrate();
     }
 }

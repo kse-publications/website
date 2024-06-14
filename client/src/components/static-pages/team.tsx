@@ -1,5 +1,5 @@
 import { AnimatedHeadLine } from '../ui/animated-headline'
-import MainPageButton from './to-main-button'
+import MainPageButton from '../layout/to-main-button'
 
 function TeamPage() {
   return (
@@ -29,6 +29,17 @@ function TeamPage() {
               Mark Motliuk
             </a>{' '}
             (KSE BA '25).
+          </p>
+          <br />
+          <p>
+            <a
+              href="https://www.linkedin.com/in/anastasia-shevelova-344a1b2a5/"
+              className="underline"
+              target="_blank"
+            >
+              Anastasia Shevelova
+            </a>{' '}
+            (KSE BA '25) takes up the position of a content manager.
           </p>
           <br />
           <p>The technical team comprises four students:</p>

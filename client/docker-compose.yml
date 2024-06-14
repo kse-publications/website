@@ -1,0 +1,16 @@
+services:
+  client:
+    image: client:production
+    container_name: client.production
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - PUBLIC_HOST_URL=${PUBLIC_HOST_URL}
+        - PUBLIC_API_URL=${PUBLIC_API_URL}
+        - PUBLIC_ENVIRONMENT=${PUBLIC_ENVIRONMENT}
+        - ASTRO_ADAPTER=${ASTRO_ADAPTER}
+        - PUBLIC_POSTHOG_API_KEY=${PUBLIC_POSTHOG_API_KEY}
+        - PUBLIC_POSTHOG_HOST=${PUBLIC_POSTHOG_HOST}
+    ports:
+      - '4321:4321'

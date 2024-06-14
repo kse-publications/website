@@ -19,7 +19,7 @@ internal static class WordsExtensions
     
     internal static string RemoveSpecialChars(this string words)
     {
-        return Regex.Replace(words, @"[^a-zA-Z0-9\s]", string.Empty);
+        return Regex.Replace(words, @"[^a-zA-Z0-9 ]|\n|\r|\t|\f", string.Empty);
     }
     
     internal static string[] SplitWords(this string words)

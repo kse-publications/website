@@ -1,56 +1,48 @@
 ﻿using Notion.Client;
 using Publications.Domain.Collections;
-using Publications.Domain.Publications;
-using Publications.Domain.Shared.Slugs;
 
 namespace Publications.Infrastructure.Source.Models;
 
 internal class NotionCollection : Collection
 {
-    internal List<ObjectId> PublicationsRelation { get; private init; } = [];
-    
-    internal static NotionCollection? MapFromPage(Page page, IWordsService wordsService)
+    private readonly List<ObjectId> _publicationsRelation;
+    private readonly List<int> _publicationsIds = [];
+
+    private NotionCollection(
+        int id,
+        string name,
+        DateTime lastModifiedAt,
+        List<ObjectId> publicationsRelation) 
+        : base(id, name, lastModifiedAt)
     {
-        if (!IsValidPage(page))
+        _publicationsRelation = publicationsRelation;
+    }
+    
+    internal static NotionCollection? MapFromPage(Page page)
+    {
+        if (!(page.TryGetId(out int id) &&
+              page.TryGetName(out string name) &&
+              page.TryGetRelationProperty("Publications", out var publications)))
             return null;
         
-        NotionCollection collection = new() 
+        return new NotionCollection(
+            id: id,
+            name: name,
+            lastModifiedAt: page.LastEditedTime,
+            publicationsRelation: publications)
         {
-            Id = page.Properties["ID"].GetId(),
-            Icon = page.GetRichTextProperty("Icon"),
-            Name = page.Properties["Name"].GetName(),
-            Description = page.GetRichTextProperty("Description"),
-            PublicationsRelation = ((RelationPropertyValue)page.Properties["Publications"]).Relation,
-            PublicationsCount = (int)((FormulaPropertyValue)page.Properties["Publications Count"])
-                .Formula.Number!.Value,
-            LastModifiedAt = page.LastEditedTime
+            Icon = page.GetRichTextPropertyOrDefault("Icon"),
+            Description = page.GetRichTextPropertyOrDefault("Description")
         };
-        
-        collection
-            .UpdateSlug(wordsService)
-            .Synchronize();
-        
-        return collection;
     }
     
-    private static bool IsValidPage(Page collectionPage)
-    {
-        return collectionPage.Properties["ID"].IsValidId() &&
-               collectionPage.Properties["Name"].IsValidName() &&
-               collectionPage.Properties["Visible"].IsVisible();
-    }
+    internal List<ObjectId> GetPublicationsRelation() => _publicationsRelation;
+    
+    internal void AddPublicationId(int publicationId) => _publicationsIds.Add(publicationId);
     
     internal Collection ToCollection()
     {
-        return new Collection
-        {
-            Id = Id,
-            Name = Name,
-            Icon = Icon,
-            Slug = Slug,
-            Description = Description,
-            PublicationsCount = PublicationsCount,
-            SynchronizedAt = SynchronizedAt
-        };
+        SetPublicationIds(_publicationsIds.ToArray());
+        return this;
     }
 }

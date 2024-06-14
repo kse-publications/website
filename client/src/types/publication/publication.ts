@@ -19,7 +19,7 @@ export interface Publication {
   year: number
   link: string
   keywords: string[]
-  abstract: string
+  abstracttext: string
   authors: Author[]
   publisher: Publisher
   lastmodified: string

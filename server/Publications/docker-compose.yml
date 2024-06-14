@@ -16,6 +16,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - Notion__AuthToken=${NOTION_AUTH_TOKEN}
+      - DbSync__Key=${DB_SYNC_KEY}
     volumes:
       - sqlite-data-production:/app/sqlite_db
 

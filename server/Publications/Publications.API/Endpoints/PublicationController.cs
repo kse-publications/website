@@ -3,6 +3,8 @@ using Publications.API.Middleware;
 using Publications.API.Serialization;
 using Publications.Application;
 using Publications.Application.DTOs;
+using Publications.Application.DTOs.Request;
+using Publications.Application.DTOs.Response;
 using Publications.Application.Services;
 using Publications.Domain.Filters;
 using Publications.Domain.Publications;
@@ -72,6 +74,22 @@ public class PublicationsController : ControllerBase
     {
         PaginatedCollection<PublicationSummary> publications = await _publicationsService
             .GetRelatedByAuthorsAsync(id, paginationDTO, authorFilterDto, cancellationToken);
+        
+        return Ok(publications);
+    }
+    
+    [HttpGet("{id}/similar")]
+    [ProducesResponseType(typeof(IReadOnlyCollection<PublicationSummary>), StatusCodes.Status200OK)]
+    [SwaggerOperation(
+        Summary = "Get similar publications",
+        Description = "Finds k nearest publications using vector similarity search."
+    )]
+    public async Task<IActionResult> GetSimilar(
+        [FromRoute] int id,
+        CancellationToken cancellationToken)
+    {
+        IReadOnlyCollection<PublicationSummary> publications = await _publicationsService
+            .GetSimilarAsync(id, cancellationToken);
         
         return Ok(publications);
     }

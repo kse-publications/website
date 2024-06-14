@@ -1,21 +1,29 @@
 ﻿using System.Text.Json;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Publications.API.Middleware;
 using Publications.API.Serialization;
-using Publications.Application;
 using Publications.Domain.Filters;
 using Publications.Domain.Publications;
+using Redis.OM.Modeling;
 
 namespace Publications.API;
 
 public static class Installer
 {
-    public static IMvcBuilder ConfigureJsonOptions(this IMvcBuilder builder)
+    public static void ConfigureJsonOptions(this IMvcBuilder builder)
     {
-        return builder.AddJsonOptions(options =>
+        builder.AddJsonOptions(options =>
         {
             options.JsonSerializerOptions.AddResponseJsonConverters();
+        });
+
+        builder.Services.AddSingleton(new JsonSerializerOptions()
+        {
+            PropertyNameCaseInsensitive = true,
+            Converters =
+            {
+                new DateTimeJsonConverter()
+            }
         });
     }
     
@@ -57,18 +65,6 @@ public static class Installer
                         .AllowCredentials();
                 });
         });
-    }
-    
-    public static void ConfigureFeatureFlags(this IServiceCollection services,
-        IConfiguration configuration)
-    {
-        services.AddOptions<FeatureFlags>()
-            .Bind(configuration.GetSection("FeatureFlags"));
-    }
-    
-    public static IOptionsMonitor<FeatureFlags> GetFeatureFlagsMonitor(this WebApplication app)
-    {
-        return app.Services.GetRequiredService<IOptionsMonitor<FeatureFlags>>();
     }
     
     public static void UseCorsPolicies(this WebApplication app)

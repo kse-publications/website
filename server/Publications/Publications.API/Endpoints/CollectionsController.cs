@@ -2,6 +2,8 @@
 using Publications.API.Serialization;
 using Publications.Application;
 using Publications.Application.DTOs;
+using Publications.Application.DTOs.Request;
+using Publications.Application.DTOs.Response;
 using Publications.Application.Repositories;
 using Publications.Domain.Collections;
 using Publications.Domain.Publications;
@@ -14,14 +16,14 @@ namespace Publications.API.Endpoints;
 public class CollectionsController: ControllerBase
 {
     private readonly ICollectionsRepository _collectionsRepository;
-    private readonly IPublicationsQueryRepository _publicationsQueryRepository;
+    private readonly IPublicationsRepository _publicationsRepository;
 
     public CollectionsController(
         ICollectionsRepository collectionsRepository,
-        IPublicationsQueryRepository publicationsQueryRepository)
+        IPublicationsRepository publicationsRepository)
     {
         _collectionsRepository = collectionsRepository;
-        _publicationsQueryRepository = publicationsQueryRepository;
+        _publicationsRepository = publicationsRepository;
     }
     
     [HttpGet]
@@ -47,7 +49,7 @@ public class CollectionsController: ControllerBase
         [FromQuery]PaginationDTO paginationDTO,
         CancellationToken cancellationToken)
     {
-        PaginatedCollection<PublicationSummary> publications = await _publicationsQueryRepository
+        PaginatedCollection<PublicationSummary> publications = await _publicationsRepository
             .GetFromCollectionAsync(slug.GetId(), paginationDTO, cancellationToken);
         
         return Ok(publications);
