@@ -12,6 +12,7 @@ interface Publisher {
 }
 
 export interface Publication {
+  id: number
   title: string
   type: string
   language: string

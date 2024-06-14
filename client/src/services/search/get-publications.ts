@@ -44,3 +44,13 @@ export const getPublication = async (id: string, clientUuid?: string): Promise<a
       : {},
   }).then((response) => response.json())
 }
+
+export const getRelatedByAuthors = async (
+  id: string,
+  page: number,
+  authors: string
+): Promise<PaginatedCollection<PublicationSummary>> => {
+  return fetch(
+    `${BASE_URL}/publications/${id}/related-by-authors?Page=${page}&PageSize=${DEFAULT_PAGE_SIZE}&Authors=${authors}`
+  ).then((response) => response.json())
+}
