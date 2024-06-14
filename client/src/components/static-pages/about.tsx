@@ -1,5 +1,5 @@
 import { AnimatedHeadLine } from '../ui/animated-headline'
-import MainPageButton from './to-main-button'
+import MainPageButton from '../layout/to-main-button'
 
 function AboutPage() {
   return (
