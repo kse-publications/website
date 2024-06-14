@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ChevronLeftIcon } from '@radix-ui/react-icons'
-
-import MainPageButton from './to-main-button'
 
 function GoBackButton() {
   const [buttonLabel, setButtonLabel] = useState('Go Back')
