@@ -38,9 +38,12 @@ public class Publication: Entity
     
     public string Link { get; init; }
     
-    [Searchable(Weight = 0.8)]
+    [Searchable(JsonPath = "$.Value", Weight = 0.8)]
     [JsonInclude]
-    public string[] Keywords { get; set; } = Array.Empty<string>();
+    [IgnoreInResponse]
+    public Keyword[] SearchableKeywords { get; set; } = Array.Empty<Keyword>();
+    
+    public string[] Keywords => SearchableKeywords.Select(k => k.Value).ToArray();
 
     [Searchable(Weight = 0.7)] 
     public string AbstractText { get; init; }
@@ -104,6 +107,24 @@ public class Publication: Entity
         return this;
     }
     
+    public static EntityFilter[] GetEntityFilters() =>
+    [
+        new EntityFilter(groupId: 1, nameof(Type)),
+        new EntityFilter(groupId: 2, nameof(Year), SortOrder.Descending),
+        new EntityFilter(groupId: 3, nameof(Language))
+    ];
+    
+    public static string[] GetSearchableFields() =>
+    [
+        nameof(Title),
+        nameof(AbstractText),
+        $"{nameof(SearchableKeywords)}_{nameof(Keyword.Value)}",
+        $"{nameof(Authors)}_{nameof(Author.Name)}",
+        $"{nameof(Publisher)}_{nameof(Publisher.Name)}"
+    ];
+    
+    public static string GetKey(int id) => $"publication:{id}";
+
     private void UpdateSlug(IWordsService wordsService)
     {
         Slug = SlugFactory.Create(
@@ -117,26 +138,9 @@ public class Publication: Entity
             .RemoveSpecialChars());
     }
     
-    public static EntityFilter[] GetEntityFilters() =>
-    [
-        new EntityFilter(groupId: 1, nameof(Type)),
-        new EntityFilter(groupId: 2, nameof(Year), SortOrder.Descending),
-        new EntityFilter(groupId: 3, nameof(Language))
-    ];
-    
-    public static string[] GetSearchableFields() =>
-    [
-        nameof(Title),
-        nameof(AbstractText),
-        $"{nameof(Authors)}_{nameof(Author.Name)}",
-        $"{nameof(Publisher)}_{nameof(Publisher.Name)}"
-    ];
-    
-    public static string GetKey(int id) => $"publication:{id}";
-
     private string GetSimilarityValue() =>
         Title + " " + 
         AbstractText + " " +
-        string.Join(" ", Keywords) + " " + 
+        string.Join(" ", SearchableKeywords.Select(k => k.Value)) + " " +
         string.Join(" ", Collections.Select(c => c.Name));
 }

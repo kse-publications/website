@@ -4,7 +4,7 @@ import { buttonVariants } from '@/components/ui/button'
 import type { Publication } from '@/types/publication/publication'
 import { ChevronRightIcon } from '@radix-ui/react-icons'
 
-import GoBackButton from '../static-pages/go-back-button'
+import GoBackButton from '../layout/go-back-button'
 
 interface PublicationPageProps {
   data: Publication
