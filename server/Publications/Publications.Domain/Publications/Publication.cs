@@ -104,19 +104,6 @@ public class Publication: Entity
         return this;
     }
     
-    private void UpdateSlug(IWordsService wordsService)
-    {
-        Slug = SlugFactory.Create(
-            Title, Id.ToString(), IsoLanguageCode.Create(Language), wordsService);
-    }
-    
-    private void UpdateVectors(IWordsService wordsService)
-    {
-        SimilarityVector = Vector.Of(wordsService
-            .Transliterate(GetSimilarityValue())
-            .RemoveSpecialChars());
-    }
-    
     public static EntityFilter[] GetEntityFilters() =>
     [
         new EntityFilter(groupId: 1, nameof(Type)),
@@ -134,6 +121,19 @@ public class Publication: Entity
     
     public static string GetKey(int id) => $"publication:{id}";
 
+    private void UpdateSlug(IWordsService wordsService)
+    {
+        Slug = SlugFactory.Create(
+            Title, Id.ToString(), IsoLanguageCode.Create(Language), wordsService);
+    }
+    
+    private void UpdateVectors(IWordsService wordsService)
+    {
+        SimilarityVector = Vector.Of(wordsService
+            .Transliterate(GetSimilarityValue())
+            .RemoveSpecialChars());
+    }
+    
     private string GetSimilarityValue() =>
         Title + " " + 
         AbstractText + " " +

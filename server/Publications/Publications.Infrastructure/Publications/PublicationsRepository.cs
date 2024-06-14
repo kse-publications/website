@@ -113,8 +113,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         
         SearchFieldName idSearchField = new(nameof(Publication.Id));
         SearchFieldName authorsIdSearchField = new(PublicationAuthorsId);
-        var query = SearchQuery.Where(
-            idSearchField.NotEqualTo(currentPublicationId));
+        var query = SearchQuery.Where(idSearchField.NotEqualTo(currentPublicationId));
 
         var authorsQuery = SearchQuery.MatchAll();
         foreach (var id in authorsIds)
@@ -145,7 +144,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         Publication? currentPublication = await GetByIdAsync(currentPublicationId, cancellationToken);
         if (currentPublication is null)
         {
-            return Array.Empty<PublicationSummary>();
+            return Array.Empty<PublicationSummary>().AsReadOnly();
         }
 
         var ft = _db.FT();
@@ -167,12 +166,10 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         CancellationToken cancellationToken = default)
     {
         SearchCommands ft = _db.FT();
-        SearchQuery query = SearchQuery
-            .Where(new SearchFieldName(PublicationCollectionsId)
-                .EqualTo(collectionId));
+        string query = new SearchFieldName(PublicationCollectionsId).EqualTo(collectionId);
         
         SearchResult searchResult = await ft.SearchAsync(Entity.IndexName<Publication>(),
-            new Query(query.Build())
+            new Query(query)
                 .SetSortBy(nameof(Publication.Views), ascending: false)
                 .Paginate(paginationDTO.Page, paginationDTO.PageSize)
                 .Dialect(3));
