@@ -24,8 +24,7 @@ public partial record SearchDTO
         
         string sanitizedTerm = ForbiddenCharactersRegex().Replace(searchTerm, " ");
         sanitizedTerm = ExtraSpacesRegex().Replace(sanitizedTerm, " ").Trim();
-
-        Console.WriteLine(sanitizedTerm);
+        
         return sanitizedTerm.Substring(0, Math.Min(maxSearchTermLength, sanitizedTerm.Length));
     }
     

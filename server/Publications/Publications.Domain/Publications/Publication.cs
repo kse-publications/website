@@ -40,7 +40,10 @@ public class Publication: Entity
     
     [Searchable(JsonPath = "$.Value", Weight = 0.8)]
     [JsonInclude]
-    public Keyword[] Keywords { get; set; } = Array.Empty<Keyword>();
+    [IgnoreInResponse]
+    public Keyword[] SearchableKeywords { get; set; } = Array.Empty<Keyword>();
+    
+    public string[] Keywords => SearchableKeywords.Select(k => k.Value).ToArray();
 
     [Searchable(Weight = 0.7)] 
     public string AbstractText { get; init; }
@@ -115,7 +118,7 @@ public class Publication: Entity
     [
         nameof(Title),
         nameof(AbstractText),
-        $"{nameof(Keywords)}_{nameof(Keyword.Value)}",
+        $"{nameof(SearchableKeywords)}_{nameof(Keyword.Value)}",
         $"{nameof(Authors)}_{nameof(Author.Name)}",
         $"{nameof(Publisher)}_{nameof(Publisher.Name)}"
     ];
@@ -138,6 +141,6 @@ public class Publication: Entity
     private string GetSimilarityValue() =>
         Title + " " + 
         AbstractText + " " +
-        string.Join(" ", Keywords.Select(k => k.Value)) + " " +
+        string.Join(" ", SearchableKeywords.Select(k => k.Value)) + " " +
         string.Join(" ", Collections.Select(c => c.Name));
 }
