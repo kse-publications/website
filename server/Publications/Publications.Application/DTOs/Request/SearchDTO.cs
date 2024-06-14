@@ -22,12 +22,14 @@ public partial record SearchDTO
         
         const int maxSearchTermLength = 50;
         
-        string sanitizedTerm = ForbiddenCharactersRegex().Replace(searchTerm, "");
+        string sanitizedTerm = ForbiddenCharactersRegex().Replace(searchTerm, " ");
         sanitizedTerm = ExtraSpacesRegex().Replace(sanitizedTerm, " ").Trim();
+
+        Console.WriteLine(sanitizedTerm);
         return sanitizedTerm.Substring(0, Math.Min(maxSearchTermLength, sanitizedTerm.Length));
     }
     
-    [GeneratedRegex(@"[^a-zA-Z0-9_ ]")]
+    [GeneratedRegex(@"[^\p{L}\p{Nd}_ ]")]
     private static partial Regex ForbiddenCharactersRegex();
 
     [GeneratedRegex(@"\s+")]

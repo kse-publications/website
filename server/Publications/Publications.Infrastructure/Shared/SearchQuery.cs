@@ -108,19 +108,19 @@ public class SearchQuery
             .EqualTo(filterId);
 
     public SearchQuery Search(
-        string searchTerm, params SearchFieldName[] searchFields)
+        string searchTerm, SearchFieldName[] searchFields)
     {
         return Search(this, searchTerm, searchFields);
     }
     
     public static SearchQuery CreateWithSearch(
-        string searchTerm, params SearchFieldName[] searchFields)
+        string searchTerm, SearchFieldName[] searchFields)
     {
         return Search(MatchAll(), searchTerm, searchFields);
     }
 
     private static SearchQuery Search(
-        SearchQuery query, string searchTerm, params SearchFieldName[] searchFields)
+        SearchQuery query, string searchTerm, SearchFieldName[] searchFields)
     {
         const int minSearchTermLength = 2;
         if (searchTerm.Length < minSearchTermLength || searchFields.Length == 0)

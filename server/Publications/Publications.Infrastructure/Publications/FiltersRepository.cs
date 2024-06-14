@@ -59,8 +59,7 @@ public class FiltersRepository: IFiltersRepository
                 
                 filtersWithoutCurrentGroup.Remove(entityFilter.GroupId);
                 
-                var newFilter = FilterDTO.CreateFromFilters(
-                    filtersWithoutCurrentGroup);
+                var newFilter = FilterDTO.CreateFromFilters(filtersWithoutCurrentGroup);
                 
                 SearchQuery query = SearchQuery
                     .CreateWithSearch(searchDTO.SearchTerm, searchFields)
