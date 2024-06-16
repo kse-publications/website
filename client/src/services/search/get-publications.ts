@@ -7,8 +7,10 @@ import { getFiltersString } from '@/utils/parse-filters'
 
 const getBaseUrl = () => {
   const isServer = typeof window === 'undefined'
-  if (isServer && import.meta.env.PUBLIC_SSR_API_URL !== undefined) {
-    return import.meta.env.PUBLIC_SSR_API_URL
+  const SSR_URL = import.meta.env.PUBLIC_SSR_API_URL
+  
+  if (isServer && SSR_URL) {
+    return SSR_URL
   }
   
   return import.meta.env.PUBLIC_API_URL
