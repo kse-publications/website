@@ -4,12 +4,21 @@ import type { PublicationSummary } from '@/types/publication-summary/publication
 import type { QueryParams, SearchPublicationsQueryParams } from '@/types/common/query-params'
 import { getFiltersString } from '@/utils/parse-filters'
 
-const BASE_URL = import.meta.env.PUBLIC_API_URL
+
+const getBaseUrl = () => {
+  const isServer = typeof window === 'undefined'
+  if (isServer && import.meta.env.PUBLIC_SSR_API_URL !== undefined) {
+    return import.meta.env.PUBLIC_SSR_API_URL
+  }
+  
+  return import.meta.env.PUBLIC_API_URL
+}
 
 export const getInitialPublications = async ({
   page = DEFAULT_PAGE,
   filters,
 }: QueryParams): Promise<PaginatedCollection<PublicationSummary>> => {
+  const BASE_URL = getBaseUrl()
   let url = `${BASE_URL}/publications?Page=${page}&PageSize=${DEFAULT_PAGE_SIZE}`
 
   if (filters?.length) {
@@ -26,6 +35,7 @@ export const searchPublications = async ({
   searchText,
   filters,
 }: SearchPublicationsQueryParams): Promise<PaginatedCollection<PublicationSummary>> => {
+  const BASE_URL = getBaseUrl()
   let url = `${BASE_URL}/publications/search?Page=${page}&SearchTerm=${searchText}&PageSize=${DEFAULT_PAGE_SIZE}`
 
   if (filters?.length) {
@@ -36,6 +46,7 @@ export const searchPublications = async ({
 }
 
 export const getPublication = async (id: string, clientUuid?: string): Promise<any> => {
+  const BASE_URL = getBaseUrl()
   return fetch(`${BASE_URL}/publications/${id}`, {
     headers: clientUuid
       ? {
