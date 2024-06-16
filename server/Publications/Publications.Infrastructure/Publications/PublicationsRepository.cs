@@ -154,7 +154,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             new Query($"({idFilter})=>[KNN $K @{nameof(Publication.SimilarityVector)} $BLOB as similarity_score]")
                 .AddParam("K", 6)
                 .AddParam("BLOB", currentPublication.SimilarityVector.Embedding!)
-                .SetSortBy("similarity_score", ascending: false)
+                .SetSortBy("similarity_score", ascending: true)
                 .Dialect(3));
 
         return MapToPublicationSummaries(searchResult).AsReadOnly();
