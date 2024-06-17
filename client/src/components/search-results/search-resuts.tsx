@@ -1,12 +1,10 @@
-import { useState, useEffect } from 'react'
+import Masonry from 'react-masonry-css'
 import { useSearchContext } from '@/contexts/search-context'
 
 import { SearchResultItem } from './search-result-item'
-import { SearchSkeleton } from './search-skeleton'
 import { LoadingTrigger } from './search-loading-trigger'
 
 import { AnimatedHeadLine } from '../ui/animated-headline'
-import Masonry from 'react-masonry-css'
 import { AnimatedCardWrapper } from '../ui/animated-card-wrapper'
 import { Skeleton } from '../ui/skeleton'
 
@@ -19,7 +17,8 @@ const breakpointColumnsObj = {
 const SKELETON_CARDS_COUNT = 5
 
 export const SearchResults = () => {
-  const { isRecent, error, isLoading, searchResults, totalResults } = useSearchContext()
+  const { isRecent, error, isLoading, searchResults, totalResults, loadMoreHandler } =
+    useSearchContext()
 
   return (
     <div className="w-full grow bg-[#f0f0f0] pb-4 pt-8">
@@ -51,7 +50,12 @@ export const SearchResults = () => {
                 ))}
             </Masonry>
 
-            <LoadingTrigger />
+            <LoadingTrigger
+              isLoading={isLoading}
+              resultsLength={searchResults.length}
+              totalResults={totalResults}
+              loadMoreHandler={loadMoreHandler}
+            />
           </>
         )}
       </div>
