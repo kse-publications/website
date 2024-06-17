@@ -77,7 +77,7 @@ function PublicationPage({ data, relatedPublications }: PublicationPageProps) {
             </div>
           )}
         </div>
-        <RelatedAuthorsResults />
+        {relatedPublications?.totalCount > 0 && <RelatedAuthorsResults />}
       </RelatedAuthorsContextProvider>
     </>
   )
