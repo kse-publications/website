@@ -4,15 +4,14 @@ import type { PublicationSummary } from '@/types/publication-summary/publication
 import type { QueryParams, SearchPublicationsQueryParams } from '@/types/common/query-params'
 import { getFiltersString } from '@/utils/parse-filters'
 
-
 const getBaseUrl = () => {
   const isServer = typeof window === 'undefined'
   const SSR_URL = import.meta.env.PUBLIC_SSR_API_URL
-  
+
   if (isServer && SSR_URL) {
     return SSR_URL
   }
-  
+
   return import.meta.env.PUBLIC_API_URL
 }
 
@@ -63,6 +62,7 @@ export const getRelatedByAuthors = async (
   page: number,
   authors: string
 ): Promise<PaginatedCollection<PublicationSummary>> => {
+  const BASE_URL = getBaseUrl()
   return fetch(
     `${BASE_URL}/publications/${id}/related-by-authors?Page=${page}&PageSize=${DEFAULT_PAGE_SIZE}&Authors=${authors}`
   ).then((response) => response.json())
