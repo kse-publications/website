@@ -17,9 +17,6 @@ updates:
       - "marchellodev"
       - "PrudiusVladislav"
       - "Pivdenna"
-    allow:
-      - dependency-type: "all"
-        update-types: ["version-update:semver-patch", "version-update:semver-minor", "version-update:semver-major"]
     ignore:
       - dependency-name: "*"
         versions: ["-beta", "-alpha", "-rc", "-preview"]
