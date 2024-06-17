@@ -19,4 +19,4 @@ updates:
       - "Pivdenna"
     ignore:
       - dependency-name: "*"
-        versions: ["*-beta", "*-alpha", "*-rc", "*-preview"]
+        versions: ["*-beta*", "*-alpha*", "*-rc*", "*-preview*"]
