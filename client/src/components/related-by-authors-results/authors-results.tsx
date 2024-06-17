@@ -17,7 +17,7 @@ export default function RelatedAuthorsResults() {
 
   return (
     <div className="more-publications mb-10">
-      <h3 className="mb-5 text-2xl font-bold">More publications by the same authors:</h3>
+      <h3 className="mb-5 text-2xl font-bold">Other publications by authors ({totalResults}):</h3>
       {error ? (
         <div className="text-red-500">Error: {error}</div>
       ) : (

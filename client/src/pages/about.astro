@@ -2,8 +2,26 @@
 import '@/styles/globals.css'
 import Layout from '../layouts/Layout.astro'
 import AboutPage from '@/components/static-pages/about'
+
+import { getOverallStatistics, getRecentStatistics } from '@/services/search/get-stats'
+
+let overallStats
+let recentStats
+
+const fetchOverallStatistics = async() => {
+  let stats = await getOverallStatistics()
+  return stats
+}
+
+const fetchRecentStatistics = async() => {
+  let stats = await getRecentStatistics()
+  return stats
+}
+
+overallStats = await fetchOverallStatistics()
+recentStats = await fetchRecentStatistics()
 ---
 
 <Layout title="KSE Publications | About">
-  <AboutPage />
+  <AboutPage totalPublication={overallStats?.totalPublicationsCount || 0} totalSearches={overallStats?.totalSearchesCount || 0} publicationViews={recentStats?.recentViewsCount || 0} />
 </Layout>
