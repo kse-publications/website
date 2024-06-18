@@ -3,6 +3,7 @@ import { useSearchContext } from '@/contexts/search-context'
 
 import { SearchResultItem } from './search-result-item'
 import { LoadingTrigger } from './search-loading-trigger'
+import { MostViewedPublications } from './most-viewed'
 
 import { AnimatedHeadLine } from '../ui/animated-headline'
 import { AnimatedCardWrapper } from '../ui/animated-card-wrapper'
@@ -22,9 +23,10 @@ export const SearchResults = () => {
 
   return (
     <div className="w-full grow bg-[#f0f0f0] pb-4 pt-8">
+      <MostViewedPublications />
       <div className="mx-auto max-w-[1160px] px-4">
         <AnimatedHeadLine>
-          {isRecent ? 'Recent publications' : `Found ${totalResults} publications`}
+          {isRecent ? `All Publications (${totalResults})` : `Found ${totalResults} publications`}
         </AnimatedHeadLine>
         {error ? (
           <div className="text-red-500">Error: {error}</div>
