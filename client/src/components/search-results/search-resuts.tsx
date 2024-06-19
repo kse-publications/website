@@ -3,7 +3,7 @@ import { useSearchContext } from '@/contexts/search-context'
 
 import { SearchResultItem } from './search-result-item'
 import { LoadingTrigger } from './search-loading-trigger'
-import { MostViewedPublications } from './most-viewed'
+import { MostViewedPublications } from '../publications/most-viewed'
 
 import { AnimatedHeadLine } from '../ui/animated-headline'
 import { AnimatedCardWrapper } from '../ui/animated-card-wrapper'

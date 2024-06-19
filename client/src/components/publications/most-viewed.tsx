@@ -2,7 +2,7 @@ import Masonry from 'react-masonry-css'
 import { getRecentStatistics } from '@/services/search/get-stats'
 import type { PublicationSummary } from '@/types/publication-summary/publication-summary'
 
-import { SearchResultItem } from './search-result-item'
+import { SearchResultItem } from '../search-results/search-result-item'
 import { AnimatedHeadLine } from '../ui/animated-headline'
 
 const breakpointColumnsObj = {
