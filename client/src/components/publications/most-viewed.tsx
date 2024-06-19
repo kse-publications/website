@@ -21,9 +21,9 @@ let recentStats = await fetchRecentStats()
 export const MostViewedPublications = () => {
   return (
     <div className="mx-auto mb-10 max-w-[1160px] px-4">
-      <div className="flex flex-row justify-between gap-10">
+      <div className="flex gap-5">
         <AnimatedHeadLine>Most viewed publications for the past month</AnimatedHeadLine>
-        Total views: {recentStats?.recentViewsCount}
+        <p className="p-1 opacity-70">{recentStats?.recentViewsCount} total views</p>
       </div>
       <p>
         {recentStats?.topRecentlyViewedPublications.length > 0 && (

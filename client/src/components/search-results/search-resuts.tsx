@@ -23,11 +23,14 @@ export const SearchResults = () => {
 
   return (
     <div className="w-full grow bg-[#f0f0f0] pb-4 pt-8">
-      <MostViewedPublications />
+      {isRecent && <MostViewedPublications />}
       <div className="mx-auto max-w-[1160px] px-4">
-        <AnimatedHeadLine>
-          {isRecent ? `All Publications (${totalResults})` : `Found ${totalResults} publications`}
-        </AnimatedHeadLine>
+        <div className="flex gap-5">
+          <AnimatedHeadLine>
+            {isRecent ? 'All publications' : `Found ${totalResults} publications`}
+          </AnimatedHeadLine>
+          {isRecent && <p className="p-1 opacity-70">{totalResults} total publications</p>}
+        </div>
         {error ? (
           <div className="text-red-500">Error: {error}</div>
         ) : (
