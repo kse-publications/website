@@ -25,5 +25,10 @@ export const ScrollIndicator = ({ totalCards }: ScrollIndicatorProps) => {
     }
   }, [totalCards, avgCardHeight])
 
-  return <Progress value={progressWidth} className="fixed top-0 z-40 h-2 w-full rounded-none" />
+  return (
+    <Progress
+      value={progressWidth}
+      className="duration-1000ms fixed top-0 z-40 h-2 w-full rounded-none transition ease-out"
+    />
+  )
 }
