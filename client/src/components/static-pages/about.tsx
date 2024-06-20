@@ -37,7 +37,7 @@ function AboutPage({ totalPublication, totalSearches, publicationViews }: AboutP
             influencing the elevation of scientific and teaching standards throughout Ukraine.
           </p>
         </div>
-        <div className="flex justify-around">
+        <div className="flex justify-around gap-6">
           <AboutCard lable="Publications in the repository" stat={totalPublication} />
           <AboutCard lable="Total searches" stat={totalSearches} />
           <AboutCard lable="Publication views for the past month" stat={publicationViews} />
