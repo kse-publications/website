@@ -5,7 +5,6 @@ import type { PublicationSummary } from '@/types/publication-summary/publication
 import type { IFilter } from '@/types/common/fiters'
 import { SearchBackground } from './search-background'
 import ScrollToTop from 'react-scroll-to-top'
-import { ScrollIndicator } from '../layout/scroll-indicator'
 
 interface SearchSectionProps {
   initialPublications: PaginatedCollection<PublicationSummary>
@@ -27,7 +26,6 @@ export default function SearchSection({
     >
       <section className="flex grow flex-col">
         <SearchBackground />
-        <ScrollIndicator totalCards={initialPublications?.totalCount || 0} />
         <SearchResults />
         <ScrollToTop
           smooth
