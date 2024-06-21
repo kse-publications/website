@@ -53,6 +53,11 @@ public class StatisticsRepository: IStatisticsRepository
         await _db.StringIncrementAsync(nameof(OverallStats.TotalSearchesCount), searchesCount);
     }
     
+    public async Task SetTotalViewsCountAsync(int count)
+    {
+        await _db.StringSetAsync(nameof(OverallStats.TotalViewsCount), count);
+    }
+    
     public async Task SetRecentViewsCountAsync(int count)
     {
         await _db.StringSetAsync(nameof(RecentStats.RecentViewsCount), count);

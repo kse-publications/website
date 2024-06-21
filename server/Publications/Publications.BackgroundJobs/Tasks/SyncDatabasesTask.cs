@@ -242,7 +242,7 @@ public class SyncDatabasesTask(
         Dictionary<int, int> recentViews = await requestsRepository.GetResourceViews<Publication>(
             after: DateTime.Today - TimeSpan.FromDays(30));
 
-        List<Task> updateViewsTasks = new(views.Keys.Count + recentViews.Keys.Count);
+        List<Task> updateViewsTasks = new(views.Count + recentViews.Count);
             
         foreach (var publication in publications)
         {
@@ -262,7 +262,10 @@ public class SyncDatabasesTask(
                     newValue: recentViewsCount.ToString()));
             }
         }
-            
+        
+        updateViewsTasks.Add(statisticsRepository
+            .SetTotalViewsCountAsync(views.Sum(kvp => kvp.Value)));
+        
         updateViewsTasks.Add(statisticsRepository
             .SetRecentViewsCountAsync(recentViews.Sum(kvp => kvp.Value)));
             
