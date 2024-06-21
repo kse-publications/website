@@ -1,6 +1,4 @@
 ﻿using System.Text;
-using Publications.Application.DTOs;
-using Publications.Application.DTOs.Request;
 using Publications.Domain.Publications;
 
 
@@ -65,19 +63,19 @@ public class SearchQuery
         return this;
     }
     
-    public SearchQuery Filter(FilterDTO filterDTO)
+    public SearchQuery Filter(Dictionary<int, int[]> filters)
     {
-        return Filter(this, filterDTO);
+        return Filter(this, filters);
     }
     
-    public static SearchQuery CreateWithFilter(FilterDTO filterDTO)
+    public static SearchQuery CreateWithFilter(Dictionary<int, int[]> filters)
     {
-        return Filter(MatchAll(), filterDTO);
+        return Filter(MatchAll(), filters);
     }
     
-    private static SearchQuery Filter(SearchQuery query, FilterDTO filterDTO)
+    private static SearchQuery Filter(SearchQuery query, Dictionary<int, int[]> filters)
     {
-        if (filterDTO.GetParsedFilters().Keys.Count == 0)
+        if (filters.Keys.Count == 0)
             return query;
 
         SearchQuery fullQuery = query.AllowsAll() 
@@ -85,13 +83,13 @@ public class SearchQuery
             : query;
         
         SearchQuery filterGroupQuery = new();
-        var filterGroups = filterDTO.GetParsedFilters().Values
-            .Where(filters => filters.Length != 0);
+        var filterGroups = filters.Values
+            .Where(group => group.Length != 0);
         
-        foreach (int[] filters in filterGroups)
+        foreach (int[] filtersGroup in filterGroups)
         {
-            filterGroupQuery._sb.Append(FilterQuery(filters.First()));
-            foreach (var filter in filters.Skip(1))
+            filterGroupQuery._sb.Append(FilterQuery(filtersGroup.First()));
+            foreach (int filter in filtersGroup.Skip(1))
             {
                 filterGroupQuery.Or(FilterQuery(filter));
             }
@@ -104,36 +102,30 @@ public class SearchQuery
     }
     
     private static string FilterQuery(int filterId) =>
-        new SearchFieldName($"{nameof(Publication.Filters)}_{nameof(Domain.Filters.Filter.Id)}")
+        new SearchField($"{nameof(Publication.Filters)}_{nameof(Domain.Filters.Filter.Id)}")
             .EqualTo(filterId);
 
-    public SearchQuery Search(
-        string searchTerm, SearchFieldName[] searchFields)
+    public SearchQuery Search(string searchTerm)
     {
-        return Search(this, searchTerm, searchFields);
+        return Search(this, searchTerm);
     }
     
-    public static SearchQuery CreateWithSearch(
-        string searchTerm, SearchFieldName[] searchFields)
+    public static SearchQuery CreateWithSearch(string searchTerm)
     {
-        return Search(MatchAll(), searchTerm, searchFields);
+        return Search(MatchAll(), searchTerm);
     }
 
-    private static SearchQuery Search(
-        SearchQuery query, string searchTerm, SearchFieldName[] searchFields)
+    private static SearchQuery Search(SearchQuery query, string searchTerm)
     {
         const int minSearchTermLength = 2;
-        if (searchTerm.Length < minSearchTermLength || searchFields.Length == 0)
+        if (searchTerm.Length < minSearchTermLength)
             return query;
         
-        SearchQuery searchBlockQuery = Where(searchFields.First().Prefix(searchTerm))
-            .Or(searchFields.First().Search(searchTerm));
-        
-        foreach (SearchFieldName field in searchFields.Skip(1))
-        {
-            searchBlockQuery.Or(field.Prefix(searchTerm));
-            searchBlockQuery.Or(field.Search(searchTerm));
-        }
+        SearchQuery searchBlockQuery = new();
+
+        searchBlockQuery
+            .Or(SearchField.FullTextSearch(searchTerm))
+            .Or(SearchField.PrefixSearch(searchTerm));
         
         if (query.AllowsAll() || query.IsEmpty())
             return searchBlockQuery;

@@ -581,10 +581,48 @@
           }
         }
       }
+    },
+    "/sync/status": {
+      "get": {
+        "tags": [
+          "Sync"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncStatusResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncStatusResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "SyncStatusResponse": {
+        "type": "object",
+        "properties": {
+          "isRunning": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
       "Author": {
         "type": "object",
         "properties": {
@@ -678,6 +716,10 @@
           "totalSearchesCount": {
             "type": "integer",
             "format": "int64"
+          },
+          "totalViewsCount": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -745,7 +787,8 @@
             "items": {
               "type": "string"
             },
-            "nullable": true
+            "nullable": true,
+            "readOnly": true
           },
           "abstractText": {
             "type": "string",

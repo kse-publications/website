@@ -1,5 +1,4 @@
 using Publications.API;
-using Publications.API.Endpoints;
 using Publications.BackgroundJobs;
 using Publications.Infrastructure;
 
@@ -33,6 +32,5 @@ var app = builder.Build();
 }
 
 app.MapControllers();
-app.MapSyncEndpoint(app.Configuration);
 
 app.Run();

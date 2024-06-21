@@ -65,8 +65,13 @@ public class DbConfigurationService : IDbConfigurationService
     {
         foreach (var currentIndex in _indexesToCreate.Keys)
         {
-            DbVersion currentVersion = _versionService
+            DbVersion? currentVersion = _versionService
                 .GetCurrentIndexVersion(_indexesToCreate[currentIndex]);
+
+            if (currentVersion is null)
+            {
+                throw new InvalidOperationException($"Index version for {currentIndex} is not set.");
+            }
             
             if (indexes.All(i => i != currentIndex))
             {

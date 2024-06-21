@@ -94,7 +94,7 @@ public class SiteMapController : ControllerBase
 
 public record BaseUrlDTO
 {
-    private string _baseUrl;
+    private string _baseUrl = string.Empty;
     
     [Required(AllowEmptyStrings = false)]
     [Url]
