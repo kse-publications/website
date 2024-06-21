@@ -11,7 +11,7 @@ public class VectorizePublicationsTask(
     IWordsService wordsService)
     : BaseLoggableTask<VectorizePublicationsTask>(taskLogger)
 {
-    private static DateTime? _startedCurrentRunAt;
+    private static DateTime? _expiresAt;
     private static readonly TimeSpan LockTimeout = TimeSpan.FromHours(1);
     private static readonly object Lock = new();
     
@@ -25,7 +25,7 @@ public class VectorizePublicationsTask(
                 return;
             }
 
-            _startedCurrentRunAt = DateTime.UtcNow;
+            _expiresAt = DateTime.UtcNow + LockTimeout;
         }
         
         try
@@ -45,7 +45,7 @@ public class VectorizePublicationsTask(
         {
             lock (Lock)
             {
-                _startedCurrentRunAt = null;
+                _expiresAt = null;
             }
         }
     }
@@ -54,8 +54,8 @@ public class VectorizePublicationsTask(
     {
         lock (Lock)
         {
-            return _startedCurrentRunAt.HasValue && 
-                   _startedCurrentRunAt.Value.Add(LockTimeout) > DateTime.UtcNow;
+            return _expiresAt.HasValue && 
+                   _expiresAt.Value > DateTime.UtcNow;
         }
     }
 }
