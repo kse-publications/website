@@ -16,14 +16,6 @@ public class DbVersionService: IDbVersionService
         _db = connectionMultiplexer.GetDatabase();
         _redisIndexesVersions = redisIndexesVersions.Value;
     }
-
-    public async Task<bool> IsMajorVersionUpToDateAsync(Type indexType)
-    {
-        var currentVersion = _redisIndexesVersions.GetIndexVersion(indexType);
-        var dbVersion = await GetDbIndexVersionAsync(indexType);
-
-        return currentVersion.Major == dbVersion.Major;
-    }
     
     public async Task UpdateDbIndexVersionAsync(Type indexType, DbVersion dbVersion)
     {
@@ -44,7 +36,7 @@ public class DbVersionService: IDbVersionService
         return DbVersion.FromString(dbVersionValue.IsNullOrEmpty ? "0.0" : dbVersionValue.ToString());
     }
 
-    public DbVersion GetCurrentIndexVersion(Type type)
+    public DbVersion? GetCurrentIndexVersion(Type type)
     {
         return _redisIndexesVersions.GetIndexVersion(type);
     }

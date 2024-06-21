@@ -1,7 +1,7 @@
 ﻿
 namespace Publications.Application.Services;
 
-public readonly record struct DbVersion(int Major, int Minor)
+public record DbVersion(int Major, int Minor)
 {
     public static bool operator < (DbVersion v1, DbVersion v2) 
         => v1.Major < v2.Major || v1.Major == v2.Major && v1.Minor < v2.Minor;
