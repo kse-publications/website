@@ -8,3 +8,9 @@ export interface QueryParams {
 export interface SearchPublicationsQueryParams extends QueryParams {
   searchText: string
 }
+
+export interface RelatedPublicationsQueryParams {
+  id: string
+  authors: string
+  page?: number
+}

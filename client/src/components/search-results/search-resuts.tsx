@@ -1,14 +1,15 @@
-import { useState, useEffect } from 'react'
+import Masonry from 'react-masonry-css'
 import { useSearchContext } from '@/contexts/search-context'
 
 import { SearchResultItem } from './search-result-item'
-import { SearchSkeleton } from './search-skeleton'
 import { LoadingTrigger } from './search-loading-trigger'
 
 import { AnimatedHeadLine } from '../ui/animated-headline'
-import Masonry from 'react-masonry-css'
 import { AnimatedCardWrapper } from '../ui/animated-card-wrapper'
 import { Skeleton } from '../ui/skeleton'
+
+import { ScrollIndicator } from '../layout/scroll-indicator'
+import { MostViewedPublications } from '../publications/most-viewed'
 
 const breakpointColumnsObj = {
   default: 2,
@@ -19,14 +20,20 @@ const breakpointColumnsObj = {
 const SKELETON_CARDS_COUNT = 5
 
 export const SearchResults = () => {
-  const { isRecent, error, isLoading, searchResults, totalResults } = useSearchContext()
+  const { isRecent, error, isLoading, searchResults, totalResults, loadMoreHandler } =
+    useSearchContext()
 
   return (
     <div className="w-full grow bg-[#f0f0f0] pb-4 pt-8">
+      <ScrollIndicator totalCards={totalResults} />
+      {isRecent && <MostViewedPublications />}
       <div className="mx-auto max-w-[1160px] px-4">
-        <AnimatedHeadLine>
-          {isRecent ? 'Recent publications' : `Found ${totalResults} publications`}
-        </AnimatedHeadLine>
+        <div className="flex gap-5">
+          <AnimatedHeadLine>
+            {isRecent ? 'All publications' : `Found ${totalResults} publications`}
+          </AnimatedHeadLine>
+          {isRecent && <p className="p-1 opacity-70">{totalResults} total publications</p>}
+        </div>
         {error ? (
           <div className="text-red-500">Error: {error}</div>
         ) : (
@@ -51,7 +58,12 @@ export const SearchResults = () => {
                 ))}
             </Masonry>
 
-            <LoadingTrigger />
+            <LoadingTrigger
+              isLoading={isLoading}
+              resultsLength={searchResults.length}
+              totalResults={totalResults}
+              loadMoreHandler={loadMoreHandler}
+            />
           </>
         )}
       </div>

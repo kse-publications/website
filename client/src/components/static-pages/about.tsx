@@ -1,13 +1,20 @@
 import { AnimatedHeadLine } from '../ui/animated-headline'
 import MainPageButton from '../layout/to-main-button'
+import AboutCard from './about-card'
 
-function AboutPage() {
+interface AboutPageProps {
+  totalPublication: number
+  totalSearches: number
+  publicationViews: number
+}
+
+function AboutPage({ totalPublication, totalSearches, publicationViews }: AboutPageProps) {
   return (
     <>
       <MainPageButton />
-      <div className="max-w-4xl mx-auto mb-10 overflow-auto rounded-lg border border-gray-300 bg-white p-6">
+      <div className="max-w-4xl mx-auto mb-10  overflow-auto rounded-lg border border-gray-300 bg-white p-6">
         <AnimatedHeadLine>ABOUT</AnimatedHeadLine>
-        <div className="pt-6">
+        <div className="mb-5 pt-6">
           <p>
             The KSE Publications website presents a collection of the major academic and analytical
             publications produced by the KSE community. Its main objective is to disseminate KSE's
@@ -29,6 +36,11 @@ function AboutPage() {
             strategy to establish itself as the forefront institution in spearheading and
             influencing the elevation of scientific and teaching standards throughout Ukraine.
           </p>
+        </div>
+        <div className="flex justify-around gap-6">
+          <AboutCard lable="Publications in the repository" stat={totalPublication} />
+          <AboutCard lable="Total searches" stat={totalSearches} />
+          <AboutCard lable="Publication views for the past month" stat={publicationViews} />
         </div>
       </div>
     </>
