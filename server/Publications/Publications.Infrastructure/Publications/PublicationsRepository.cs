@@ -183,6 +183,14 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             ResultCount: publications.Count);
     }
 
+    public async Task<Publication[]> GetNonVectorizedAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return (await _publications.Where(p => !p.Vectorized)
+            .ToListAsync())
+            .ToArray();
+    }
+
     public async Task UpdatePropertyValueAsync(
         int publicationId,
         string propertyName, 

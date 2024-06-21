@@ -19,6 +19,7 @@ public static class Installer
             .Bind(configuration.GetSection("DbSync"));
         
         services.AddTransient<SyncDatabasesTask>();
+        services.AddTransient<VectorizePublicationsTask>();
         services.AddScheduler();
         
         services.AddTransient<StoreRequestAnalyticsTask>();
@@ -35,6 +36,7 @@ public static class Installer
             scheduler.Schedule<SyncDatabasesTask>()
                 .Cron(optionsMonitor.CurrentValue.Interval)
                 .When(() => Task.FromResult(optionsMonitor.CurrentValue.Enabled))
+                .RunOnceAtStart()
                 .PreventOverlapping(nameof(SyncDatabasesTask));
         });
     }

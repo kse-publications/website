@@ -50,6 +50,8 @@ public interface IPublicationsRepository : IEntityRepository<Publication>
         PaginationDTO paginationDTO,
         CancellationToken cancellationToken = default);
     
+    Task<Publication[]> GetNonVectorizedAsync(CancellationToken cancellationToken = default);
+    
     Task UpdatePropertyValueAsync(
         int publicationId,
         string propertyName,
