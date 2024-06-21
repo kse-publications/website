@@ -135,18 +135,18 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         CancellationToken cancellationToken = default)
     {
         Publication? currentPublication = await GetByIdAsync(currentPublicationId, cancellationToken);
-        if (currentPublication is null)
+        if (currentPublication?.SimilarityVector?.Embedding is null)
         {
             return Array.Empty<PublicationSummary>().AsReadOnly();
         }
 
         var ft = _db.FT();
         string idFilter = new SearchField(nameof(Publication.Id)).NotEqualTo(currentPublication.Id);
-        const double radius = 0.35;
+        double radius = currentPublication.Language == "Ukrainian" ? 0.18 : 0.35;
         
         var searchResult = await ft.SearchAsync(Entity.IndexName<Publication>(),
             new Query($"({idFilter}) @{SimilarityVector}:[VECTOR_RANGE {radius} $vec_param]=>{{$yield_distance_as: dist}}")
-                .AddParam("vec_param", currentPublication.SimilarityVector.Embedding!)
+                .AddParam("vec_param", currentPublication.SimilarityVector.Embedding)
                 .SetSortBy("dist", ascending: true)
                 .Dialect(3));
 
