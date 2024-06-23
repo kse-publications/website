@@ -2,6 +2,14 @@
 
 public class RecentStats
 {
-    public int RecentViewsCount { get; set; }
-    public PublicationSummary[] TopRecentlyViewedPublications { get; set; } = [];
+    public int RecentViewsCount { get; init; }
+    public PublicationSummary[] TopRecentlyViewedPublications { get; init; }
+    
+    public RecentStats(
+        int recentViewsCount,
+        PublicationSummary[] topRecentlyViewedPublications)
+    {
+        RecentViewsCount = recentViewsCount;
+        TopRecentlyViewedPublications = topRecentlyViewedPublications;
+    }
 }
