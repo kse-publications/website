@@ -1,3 +1,5 @@
+![banner](banner.png)
+
 # About
 
 **The KSE Publications website is a collection of all major academic and analytical publications produced by the KSE community.**
