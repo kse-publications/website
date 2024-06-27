@@ -39,7 +39,7 @@ function PublicationPage({ data, relatedPublications }: PublicationPageProps) {
               <h4 className="text-l scroll-m-20 font-semibold tracking-tight">Published in:</h4>
               {data.publisher.name}
             </div>
-            <div className="author mb-4 ">
+            <div className="author mb-4">
               <h4 className="text-l scroll-m-20 font-semibold tracking-tight">Authors:</h4>{' '}
               {data.authors.map((author: any, index: number) => (
                 <span key={author.slug}>

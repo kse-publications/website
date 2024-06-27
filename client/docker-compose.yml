@@ -19,6 +19,6 @@ services:
       - prod-network
 
 networks:
-  prod-network:   
+  prod-network:
     external: true
     name: prod-network

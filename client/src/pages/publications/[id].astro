@@ -10,17 +10,17 @@ import { getRelatedByAuthors } from '../../services/search/get-publications'
 import Layout from '@/layouts/Layout.astro'
 
 const { id } = Astro.params as { id: string }
-let relatedPublications: PaginatedCollection<PublicationSummary> 
+let relatedPublications: PaginatedCollection<PublicationSummary>
 
 const clientUuid = Astro.cookies.get('client-uuid')
 
 const data = await getPublication(id, clientUuid?.value).catch((error) => {
   console.log(error)
-  })
+})
 
 const authorsIds = data.authors.map((author: any) => author.id)
 
-const fetchRelatedPublications = async() => {
+const fetchRelatedPublications = async () => {
   let publications = await getRelatedByAuthors(data.id, DEFAULT_PAGE, authorsIds.join('-'))
   return publications
 }
@@ -29,5 +29,10 @@ relatedPublications = await fetchRelatedPublications()
 ---
 
 <Layout title=`KSE Publications | ${data.title}`>
-  <PublicationPage data={data} relatedPublications={relatedPublications} transition:persist client:load />
+  <PublicationPage
+    data={data}
+    relatedPublications={relatedPublications}
+    transition:persist
+    client:load
+  />
 </Layout>

@@ -8,12 +8,12 @@ import { getOverallStatistics, getRecentStatistics } from '@/services/search/get
 let overallStats
 let recentStats
 
-const fetchOverallStatistics = async() => {
+const fetchOverallStatistics = async () => {
   let stats = await getOverallStatistics()
   return stats
 }
 
-const fetchRecentStatistics = async() => {
+const fetchRecentStatistics = async () => {
   let stats = await getRecentStatistics()
   return stats
 }
@@ -23,5 +23,9 @@ recentStats = await fetchRecentStatistics()
 ---
 
 <Layout title="KSE Publications | About">
-  <AboutPage totalPublication={overallStats?.totalPublicationsCount || 0} totalSearches={overallStats?.totalSearchesCount || 0} publicationViews={recentStats?.recentViewsCount || 0} />
+  <AboutPage
+    totalPublication={overallStats?.totalPublicationsCount || 0}
+    totalSearches={overallStats?.totalSearchesCount || 0}
+    publicationViews={recentStats?.recentViewsCount || 0}
+  />
 </Layout>
