@@ -3,6 +3,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Separator } from '@/components/ui/separator'
 import { ListBulletIcon } from '@radix-ui/react-icons'
 import { captureEvent } from '@/services/posthog/posthog'
+import { SyncStatus } from '../ui/sync-status'
 
 interface IMenuItem {
   label: string
@@ -11,13 +12,17 @@ interface IMenuItem {
 
 interface MobileMenuDrawerProps {
   menuItems: IMenuItem[]
+  isSync: boolean
 }
 
-export default function MobileMenuDrawer({ menuItems }: MobileMenuDrawerProps) {
+export default function MobileMenuDrawer({ menuItems, isSync }: MobileMenuDrawerProps) {
   return (
     <Sheet key="top">
       <SheetTrigger asChild>
-        <ListBulletIcon className="h-9 w-9 rounded-full border border-white p-2" color="white" />
+        <div className="relative">
+          <ListBulletIcon className="h-9 w-9 rounded-full border border-white p-2" color="white" />
+          <SyncStatus isSync={isSync} />
+        </div>
       </SheetTrigger>
       <SheetContent side="top" className="fixed inset-0 z-50 overflow-auto bg-white">
         <div className="max-w-sm mx-auto mt-10 w-full">
