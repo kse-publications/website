@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import logoLight from '../../assets/images/logo-white.png'
 import MobileMenuDrawer from './mobile-menu'
 import { captureEvent } from '@/services/posthog/posthog'
+import { SyncStatus } from '../ui/sync-status'
 
 const menuItems = [
   { label: 'About', href: '/about' },
@@ -10,7 +11,12 @@ const menuItems = [
   { label: 'Team', href: '/team' },
 ]
 
-function Header({ light = false }) {
+interface HeaderProps {
+  light?: boolean
+  isSync: boolean
+}
+
+function Header({ light = false, isSync }: HeaderProps) {
   return (
     <header className={`mb-6 py-7 lg:mb-10 ${light ? 'bg-transparent' : 'bg-[#31452B]'}`}>
       <div className="mx-auto flex w-full max-w-[1160px] flex-row flex-wrap items-center justify-between px-4">
@@ -20,12 +26,13 @@ function Header({ light = false }) {
 
         <div className="flex items-center justify-center">
           <div className="flex items-center justify-end sm:hidden">
-            <MobileMenuDrawer menuItems={menuItems} />
+            <MobileMenuDrawer isSync={isSync} menuItems={menuItems} />
           </div>
 
           <div
-            className={`hidden space-x-5 rounded-full border border-white p-0.5 text-[17px] text-white sm:block`}
+            className={`relative hidden space-x-5 rounded-full border border-white p-0.5 text-[17px] text-white sm:block`}
           >
+            <SyncStatus isSync={isSync} />
             {menuItems.map((item) => (
               <a
                 onClick={() => captureEvent('menu_item_click', { item: item.label })}
