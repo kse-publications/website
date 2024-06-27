@@ -35,7 +35,7 @@ export const AnimatedCardWrapper = ({ children, className }: AnimatedCardWrapper
   return (
     <Card
       ref={ref}
-      className={`${isVisible ? 'in-view' : ''} search-result-item mb-2 h-full p-4 shadow-none transition-all ease-linear hover:bg-accent hover:shadow-lg`}
+      className={`${isVisible ? 'in-view' : 'noscript-in-view'} search-result-item mb-2 h-full p-4 shadow-none transition-all ease-linear hover:bg-accent hover:shadow-lg`}
     >
       {children}
     </Card>
