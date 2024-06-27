@@ -6,6 +6,7 @@ import { AnimatedHeadLine } from '../ui/animated-headline'
 
 import { ScrollIndicator } from '../layout/scroll-indicator'
 import { MostViewedPublications } from '../publications/most-viewed'
+import { SearchSkeleton } from './search-skeleton'
 
 const breakpointColumnsObj = {
   default: 2,
@@ -41,7 +42,9 @@ export const SearchResults = () => {
                 <SearchResultItem key={publication.slug} publication={publication} />
               ))}
               {isLoading &&
-                Array.from({ length: SKELETON_CARDS_COUNT }).map((_, index) => <SearchSkeleton />)}
+                Array.from({ length: SKELETON_CARDS_COUNT }).map((_, index) => (
+                  <SearchSkeleton key={index} />
+                ))}
             </Masonry>
 
             <LoadingTrigger

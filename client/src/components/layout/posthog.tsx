@@ -14,15 +14,15 @@ const PostHog = ({ pageVisitEvent }: PostHogProps) => {
     posthog.init(POSTHOG_API_KEY, {
       api_host: POSTHOG_HOST,
       ui_host: 'https://eu.posthog.com',
-      
+
       autocapture: false,
       disable_surveys: true,
-  
+
       capture_pageview: false,
       capture_pageleave: true,
 
       enable_recording_console_log: false,
-      enable_heatmaps: true
+      enable_heatmaps: true,
     })
 
     window.posthog = posthog

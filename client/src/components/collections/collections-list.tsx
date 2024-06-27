@@ -8,8 +8,6 @@ interface CollectionListProps {
 }
 
 export const CollectionList = ({ collections }: CollectionListProps) => {
-  console.log(collections)
-
   return (
     <nav aria-label="collections" className="mx-auto mt-6">
       <ul className="flex flex-wrap justify-center gap-4">
