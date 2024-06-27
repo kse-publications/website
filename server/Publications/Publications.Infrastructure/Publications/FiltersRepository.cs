@@ -3,9 +3,11 @@ using NRedisStack.RedisStackCommands;
 using NRedisStack.Search;
 using NRedisStack.Search.Aggregation;
 using Publications.Application.DTOs;
+using Publications.Application.DTOs.Request;
 using Publications.Application.Repositories;
 using Publications.Domain.Filters;
 using Publications.Domain.Publications;
+using Publications.Domain.Shared;
 using Publications.Infrastructure.Shared;
 using Redis.OM;
 using Redis.OM.Searching;
@@ -57,14 +59,13 @@ public class FiltersRepository: IFiltersRepository
                 
                 filtersWithoutCurrentGroup.Remove(entityFilter.GroupId);
                 
-                var newFilter = FilterDTO.CreateFromFilters(
-                    filtersWithoutCurrentGroup);
+                var newFilter = FilterDTO.CreateFromFilters(filtersWithoutCurrentGroup);
                 
                 SearchQuery query = SearchQuery
                     .CreateWithSearch(searchDTO.SearchTerm, searchFields)
                     .Filter(newFilter);
                 
-                var result = await ft.AggregateAsync(Publication.IndexName,
+                var result = await ft.AggregateAsync(Entity.IndexName<Publication>(),
                     new AggregationRequest(query.Build())
                         .Load(new FieldName(entityFilter.PropertyName))
                         .GroupBy($"@{entityFilter.PropertyName}", Reducers.Count().As("count"))

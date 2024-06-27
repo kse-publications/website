@@ -16,8 +16,12 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - Notion__AuthToken=${NOTION_AUTH_TOKEN}
+      - DbSync__Key=${DB_SYNC_KEY}
     volumes:
       - sqlite-data-production:/app/sqlite_db
+    networks:
+      - backend-network
+      - prod-network
 
   redis:
     image: redis/redis-stack
@@ -30,7 +34,16 @@ services:
       retries: 5
     volumes:
       - redis-data-production:/data
+    networks:
+      - backend-network
 
 volumes:
   redis-data-production:
   sqlite-data-production:
+
+networks:
+  prod-network:
+    external: true
+    name: prod-network
+  backend-network:
+    driver: bridge

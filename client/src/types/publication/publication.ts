@@ -12,13 +12,14 @@ interface Publisher {
 }
 
 export interface Publication {
+  id: number
   title: string
   type: string
   language: string
   year: number
   link: string
   keywords: string[]
-  abstract: string
+  abstracttext: string
   authors: Author[]
   publisher: Publisher
   lastmodified: string

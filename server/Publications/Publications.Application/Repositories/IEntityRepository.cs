@@ -1,10 +1,9 @@
-﻿
+﻿using Publications.Application.DTOs.Response;
 using Publications.Domain.Shared;
 
 namespace Publications.Application.Repositories;
 
-public interface IEntityRepository<TEntity>
-    where TEntity : Entity<TEntity>
+public interface IEntityRepository<TEntity> where TEntity : Entity
 {
     Task<TEntity?> GetByIdAsync(
         int resourceId,
@@ -13,11 +12,15 @@ public interface IEntityRepository<TEntity>
     Task<IReadOnlyCollection<SiteMapResourceMetadata>> GetSiteMapMetadataAsync(
         CancellationToken cancellationToken = default);
     
-    Task InsertOrUpdateAsync(
+    Task InsertAsync(
         IEnumerable<TEntity> entities,
         CancellationToken cancellationToken = default);
     
-    Task SynchronizeAsync(
-        DateTime lastSyncDateTime,
+    Task UpdateAsync(
+        IEnumerable<TEntity> entities,
+        CancellationToken cancellationToken = default);
+    
+    Task DeleteAsync(
+        IEnumerable<TEntity> entities,
         CancellationToken cancellationToken = default);
 }
