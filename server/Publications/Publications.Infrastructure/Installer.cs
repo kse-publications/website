@@ -93,6 +93,7 @@ public static class Installer
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddScoped<IPublicationsService, PublicationsService>();
+        services.AddScoped<ICollectionsService, CollectionsService>();
         services.AddScoped<IFiltersService, FiltersService>();
         services.AddScoped<IWordsService, WordsService>();
         services.AddScoped<IDbVersionService, DbVersionService>();

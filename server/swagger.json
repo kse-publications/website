@@ -12,7 +12,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -53,7 +53,6 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "style": "simple",
             "schema": {
               "pattern": "^(?:[a-zA-Z0-9]+-)*\\d+$",
               "type": "string"
@@ -62,7 +61,6 @@
           {
             "name": "Page",
             "in": "query",
-            "style": "form",
             "schema": {
               "maximum": 2147483647,
               "minimum": 1,
@@ -73,7 +71,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "style": "form",
             "schema": {
               "maximum": 101,
               "minimum": 1,
@@ -84,21 +81,41 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Collection"
+                  "$ref": "#/components/schemas/CollectionData"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Collection"
+                  "$ref": "#/components/schemas/CollectionData"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Collection"
+                  "$ref": "#/components/schemas/CollectionData"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
@@ -115,7 +132,6 @@
           {
             "name": "Filters",
             "in": "query",
-            "style": "form",
             "schema": {
               "pattern": "^\\d+:(?:\\d+(?:-\\d+)*)(?:;\\d+:(?:\\d+(?:-\\d+)*))*;?$",
               "type": "string"
@@ -124,7 +140,6 @@
           {
             "name": "Page",
             "in": "query",
-            "style": "form",
             "schema": {
               "maximum": 2147483647,
               "minimum": 1,
@@ -135,7 +150,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "style": "form",
             "schema": {
               "maximum": 101,
               "minimum": 1,
@@ -146,7 +160,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -178,7 +192,6 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "style": "simple",
             "schema": {
               "pattern": "^(?:[a-zA-Z0-9]+-)*\\d+$",
               "type": "string"
@@ -187,7 +200,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -239,7 +252,6 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "style": "simple",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -248,7 +260,6 @@
           {
             "name": "Page",
             "in": "query",
-            "style": "form",
             "schema": {
               "maximum": 2147483647,
               "minimum": 1,
@@ -259,7 +270,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "style": "form",
             "schema": {
               "maximum": 101,
               "minimum": 1,
@@ -270,7 +280,6 @@
           {
             "name": "Authors",
             "in": "query",
-            "style": "form",
             "schema": {
               "pattern": "^\\d+(?:-\\d+)*$",
               "type": "string"
@@ -279,7 +288,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -311,7 +320,6 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "style": "simple",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -320,7 +328,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -360,7 +368,6 @@
           {
             "name": "Filters",
             "in": "query",
-            "style": "form",
             "schema": {
               "pattern": "^\\d+:(?:\\d+(?:-\\d+)*)(?:;\\d+:(?:\\d+(?:-\\d+)*))*;?$",
               "type": "string"
@@ -369,7 +376,6 @@
           {
             "name": "Page",
             "in": "query",
-            "style": "form",
             "schema": {
               "maximum": 2147483647,
               "minimum": 1,
@@ -380,7 +386,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "style": "form",
             "schema": {
               "maximum": 101,
               "minimum": 1,
@@ -391,7 +396,6 @@
           {
             "name": "SearchTerm",
             "in": "query",
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -399,7 +403,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -430,7 +434,6 @@
           {
             "name": "Filters",
             "in": "query",
-            "style": "form",
             "schema": {
               "pattern": "^\\d+:(?:\\d+(?:-\\d+)*)(?:;\\d+:(?:\\d+(?:-\\d+)*))*;?$",
               "type": "string"
@@ -439,7 +442,6 @@
           {
             "name": "Page",
             "in": "query",
-            "style": "form",
             "schema": {
               "maximum": 2147483647,
               "minimum": 1,
@@ -450,7 +452,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "style": "form",
             "schema": {
               "maximum": 101,
               "minimum": 1,
@@ -461,7 +462,6 @@
           {
             "name": "SearchTerm",
             "in": "query",
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -469,7 +469,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -510,7 +510,6 @@
             "name": "BaseUrl",
             "in": "query",
             "required": true,
-            "style": "form",
             "schema": {
               "type": "string",
               "format": "uri"
@@ -519,7 +518,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           }
         }
       }
@@ -531,7 +530,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -560,7 +559,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -575,6 +574,35 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RecentStats"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sync/status": {
+      "get": {
+        "tags": [
+          "Sync"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncStatusResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncStatusResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncStatusResponse"
                 }
               }
             }
@@ -629,6 +657,18 @@
         },
         "additionalProperties": false
       },
+      "CollectionData": {
+        "type": "object",
+        "properties": {
+          "collection": {
+            "$ref": "#/components/schemas/Collection"
+          },
+          "publications": {
+            "$ref": "#/components/schemas/PublicationSummaryPaginatedCollection"
+          }
+        },
+        "additionalProperties": false
+      },
       "Filter": {
         "type": "object",
         "properties": {
@@ -668,6 +708,16 @@
         },
         "additionalProperties": false
       },
+      "Keyword": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "OverallStats": {
         "type": "object",
         "properties": {
@@ -678,6 +728,10 @@
           "totalSearchesCount": {
             "type": "integer",
             "format": "int64"
+          },
+          "totalViewsCount": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -745,7 +799,8 @@
             "items": {
               "type": "string"
             },
-            "nullable": true
+            "nullable": true,
+            "readOnly": true
           },
           "abstractText": {
             "type": "string",
@@ -860,6 +915,15 @@
               "$ref": "#/components/schemas/PublicationSummary"
             },
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SyncStatusResponse": {
+        "type": "object",
+        "properties": {
+          "isRunning": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false

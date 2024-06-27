@@ -9,6 +9,7 @@ public interface IStatisticsRepository
     
     Task SetTotalPublicationsCountAsync(int count);
     Task IncrementTotalSearchesAsync(int searchesCount = 1);
+    Task SetTotalViewsCountAsync(int count);
     
     Task SetRecentViewsCountAsync(int count);
     Task SetTopRecentlyViewedPublicationsAsync(

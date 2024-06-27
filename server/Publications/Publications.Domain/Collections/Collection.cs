@@ -48,16 +48,11 @@ public class Collection: Entity
     }
     
     public static Collection InitWithId(int id) => new(id);
-    
-    public Collection HydrateDynamicFields(IWordsService wordsService)
-    {
-        UpdateSlug(wordsService);
-        return this;
-    }
 
-    private void UpdateSlug(IWordsService wordsService)
+    public Collection HydrateSlug(IWordsService wordsService)
     {
         Slug = SlugFactory.Create(Name, Id.ToString(), IsoLanguageCode.English, wordsService);
+        return this;
     }
     
     public int[] GetPublicationIds() => GetPublicationIds(PublicationsIds);

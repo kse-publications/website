@@ -16,31 +16,23 @@ public class StatisticsRepository: IStatisticsRepository
     
     public async Task<OverallStats> GetOverallStatsAsync(CancellationToken cancellationToken = default)
     {
-        var totalPublicationsCount = await _db
-            .StringGetAsync(nameof(OverallStats.TotalPublicationsCount));
-        var totalSearchesCount = await _db
-            .StringGetAsync(nameof(OverallStats.TotalSearchesCount));
-        
-        return new OverallStats
-        {
-            TotalPublicationsCount = (int)totalPublicationsCount,
-            TotalSearchesCount = (long)totalSearchesCount
-        };
+        return new OverallStats(
+            totalPublicationsCount: (int)await _db.StringGetAsync(nameof(OverallStats.TotalPublicationsCount)),
+            totalSearchesCount: (long)await _db.StringGetAsync(nameof(OverallStats.TotalSearchesCount)),
+            totalViewsCount: (int)await _db.StringGetAsync(nameof(OverallStats.TotalViewsCount)));
     }
 
     public async Task<RecentStats> GetRecentStatsAsync(CancellationToken cancellationToken = default)
     {
         var recentViewsCount = await _db
             .StringGetAsync(nameof(RecentStats.RecentViewsCount));
-        var topRecentlyViewedPublications = await _db
-            .StringGetAsync(nameof(RecentStats.TopRecentlyViewedPublications));
-        
-        return new RecentStats
-        {
-            RecentViewsCount = (int)recentViewsCount,
-            TopRecentlyViewedPublications = JsonSerializer
-                .Deserialize<PublicationSummary[]>((string?)topRecentlyViewedPublications ?? "[]")!
-        };
+        var topRecentlyViewedPublications = (string?)await _db
+            .StringGetAsync(nameof(RecentStats.TopRecentlyViewedPublications)) ?? "[]";
+
+        return new RecentStats(
+            recentViewsCount: (int)recentViewsCount,
+            topRecentlyViewedPublications: JsonSerializer
+                .Deserialize<PublicationSummary[]>(topRecentlyViewedPublications)!);
     }
 
     public async Task SetTotalPublicationsCountAsync(int count)
@@ -51,6 +43,11 @@ public class StatisticsRepository: IStatisticsRepository
     public async Task IncrementTotalSearchesAsync(int searchesCount = 1)
     {
         await _db.StringIncrementAsync(nameof(OverallStats.TotalSearchesCount), searchesCount);
+    }
+    
+    public async Task SetTotalViewsCountAsync(int count)
+    {
+        await _db.StringSetAsync(nameof(OverallStats.TotalViewsCount), count);
     }
     
     public async Task SetRecentViewsCountAsync(int count)

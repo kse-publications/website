@@ -7,7 +7,7 @@ namespace Publications.Infrastructure.Services;
 
 public class FiltersService: IFiltersService
 {
-    public async Task<IReadOnlyCollection<FilterGroup>> GetFiltersForPublicationsAsync(
+    public async Task<FilterGroup[]> GetFiltersForPublicationsAsync(
         IEnumerable<Publication> publications)
     {
         List<Task<FilterGroup>> filtersTasks = Publication
@@ -18,12 +18,11 @@ public class FiltersService: IFiltersService
 
         return (await Task.WhenAll(filtersTasks))
             .OrderBy(f => f.Id)
-            .ToList()
-            .AsReadOnly();
+            .ToArray();
     }
     
     public IList<Publication> AssignFiltersToPublications(
-        ICollection<Publication> publications, ICollection<FilterGroup> filters)
+        IList<Publication> publications, IList<FilterGroup> filters)
     {
         foreach (Publication publication in publications)
         {

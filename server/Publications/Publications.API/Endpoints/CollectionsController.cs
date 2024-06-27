@@ -1,12 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Publications.API.Serialization;
-using Publications.Application;
-using Publications.Application.DTOs;
 using Publications.Application.DTOs.Request;
 using Publications.Application.DTOs.Response;
-using Publications.Application.Repositories;
+using Publications.Application.Services;
 using Publications.Domain.Collections;
-using Publications.Domain.Publications;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Publications.API.Endpoints;
@@ -15,15 +12,11 @@ namespace Publications.API.Endpoints;
 [Route("collections")]
 public class CollectionsController: ControllerBase
 {
-    private readonly ICollectionsRepository _collectionsRepository;
-    private readonly IPublicationsRepository _publicationsRepository;
+    private readonly ICollectionsService _collectionsService;
 
-    public CollectionsController(
-        ICollectionsRepository collectionsRepository,
-        IPublicationsRepository publicationsRepository)
+    public CollectionsController(ICollectionsService collectionsService)
     {
-        _collectionsRepository = collectionsRepository;
-        _publicationsRepository = publicationsRepository;
+        _collectionsService = collectionsService;
     }
     
     [HttpGet]
@@ -33,14 +26,15 @@ public class CollectionsController: ControllerBase
         Description = "Returns all collections.")]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
-        IReadOnlyCollection<Collection> collections = await _collectionsRepository
+        IReadOnlyCollection<Collection> collections = await _collectionsService
             .GetAllAsync(cancellationToken);
         
         return Ok(collections);
     }
     
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(Collection), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(CollectionData), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(
         Summary = "Get collection by its ID",
         Description = "Returns paginated publications from the collection with the provided ID.")]
@@ -49,9 +43,12 @@ public class CollectionsController: ControllerBase
         [FromQuery]PaginationDTO paginationDTO,
         CancellationToken cancellationToken)
     {
-        PaginatedCollection<PublicationSummary> publications = await _publicationsRepository
-            .GetFromCollectionAsync(slug.GetId(), paginationDTO, cancellationToken);
+        CollectionData? collection = await _collectionsService
+            .GetByIdAsync(slug.GetId(), paginationDTO, cancellationToken);
         
-        return Ok(publications);
+        if (collection is null)
+            return NotFound();
+        
+        return Ok(collection);
     }
 }
