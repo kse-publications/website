@@ -106,6 +106,14 @@ const hostUrl = import.meta.env.PUBLIC_HOST_URL
         "description": "The KSE Publications website presents a collection of the major academic and analytical publications produced by the KSE community."
       }
     </script>
+    <noscript>
+      <style>
+        .noscript-in-view {
+          opacity: 1 !important;
+          transform: translateY(0) !important;
+        }
+      </style>
+    </noscript>
   </head>
   <body class="min-h-screen flex flex-col">
     {isProduction && <PostHog pageVisitEvent={title} client:only />}
