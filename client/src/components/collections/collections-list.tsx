@@ -7,7 +7,13 @@ interface CollectionListProps {
   collections: ICollection[]
 }
 
+const DISABLE_COLLECTIONS = import.meta.env.PUBLIC_DISABLE_COLLECTIONS
+
 export const CollectionList = ({ collections }: CollectionListProps) => {
+  if (DISABLE_COLLECTIONS === 'true') {
+    return null
+  }
+
   return (
     <nav aria-label="collections" className="mx-auto mt-6">
       <ul className="flex flex-wrap justify-center gap-4">
