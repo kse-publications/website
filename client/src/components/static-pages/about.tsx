@@ -39,8 +39,8 @@ function AboutPage({ totalPublication, totalSearches, publicationViews }: AboutP
         </div>
         <div className="flex justify-around gap-6">
           <AboutCard lable="Publications in the repository" stat={totalPublication} />
-          <AboutCard lable="Total searches" stat={totalSearches} />
-          <AboutCard lable="Publication views for the past month" stat={publicationViews} />
+          <AboutCard lable="Total search queries" stat={totalSearches} />
+          <AboutCard lable="Total publication views" stat={publicationViews} />
         </div>
       </div>
     </>

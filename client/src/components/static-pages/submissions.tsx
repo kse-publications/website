@@ -1,5 +1,6 @@
 import { AnimatedHeadLine } from '../ui/animated-headline'
 import MainPageButton from '../layout/to-main-button'
+import { Button } from '../ui/button'
 
 function SubmissionsPage() {
   return (
@@ -71,7 +72,11 @@ function SubmissionsPage() {
           <p>
             For any inquiries or further assistance, please contact{' '}
             <span className="font-bold">
-              <a href="mailto:publications@kse.org.ua">publications@kse.org.ua</a>
+              <a href="mailto:publications@kse.org.ua">
+                <Button variant="link" className="p-0">
+                  publications@kse.org.ua
+                </Button>
+              </a>
             </span>
           </p>
         </div>
