@@ -11,6 +11,8 @@ const breakpointColumnsObj = {
   600: 1,
 }
 
+const SKELETON_CARDS_COUNT = 5
+
 export default function RelatedAuthorsResults() {
   const { error, isLoading, relatedResults, totalResults, loadMoreHandler } =
     useRelatedAuthorsContext()
@@ -32,9 +34,12 @@ export default function RelatedAuthorsResults() {
             {relatedResults.map((publication) => (
               <SearchResultItem key={publication.slug} publication={publication} />
             ))}
+            {isLoading &&
+              Array.from({ length: SKELETON_CARDS_COUNT }).map((_, index) => (
+                <SearchSkeleton key={index} />
+              ))}
           </Masonry>
 
-          {isLoading && <SearchSkeleton />}
           <LoadingTrigger
             isLoading={isLoading}
             resultsLength={relatedResults.length}
