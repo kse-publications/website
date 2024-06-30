@@ -1,23 +1,26 @@
-﻿using Publications.Application.DTOs.Response;
-using Publications.Application.Repositories;
+﻿using NRedisStack;
+using NRedisStack.RedisStackCommands;
+using Publications.Application.DTOs.Response;
 using Publications.Domain.Shared;
 using Redis.OM;
 using Redis.OM.Aggregation;
-using Redis.OM.Contracts;
 using Redis.OM.Searching;
+using StackExchange.Redis;
 
 namespace Publications.Infrastructure.Shared;
 
-public class EntityRepository<TEntity> : IEntityRepository<TEntity> 
-    where TEntity : Entity
+public class EntityRepository<TEntity> where TEntity : Entity
 {
     private readonly IRedisCollection<TEntity> _collection;
     private readonly RedisAggregationSet<TEntity> _aggregationSet;
-
-    protected EntityRepository(IRedisConnectionProvider connectionProvider)
+    private readonly IDatabase _db;
+        
+    protected EntityRepository(IConnectionMultiplexer connection)
     {
-        _collection = connectionProvider.RedisCollection<TEntity>();
-        _aggregationSet = connectionProvider.AggregationSet<TEntity>();
+        RedisConnectionProvider provider = new(connection);
+        _collection = provider.RedisCollection<TEntity>();
+        _aggregationSet = provider.AggregationSet<TEntity>();
+        _db = connection.GetDatabase();
     }
     
     public async Task<TEntity?> GetByIdAsync(
@@ -51,14 +54,18 @@ public class EntityRepository<TEntity> : IEntityRepository<TEntity>
         IEnumerable<TEntity> entities, 
         CancellationToken cancellationToken = default)
     {
-        await _collection.UpdateAsync(entities);
+        await _collection.InsertAsync(entities);
     }
-    
-    public virtual async Task DeleteAsync(
-        IEnumerable<TEntity> entities, 
-        CancellationToken cancellationToken = default)
+
+    public async Task DeleteAsync(
+        IEnumerable<int> ids,
+        Func<int, string> keyFunc,
+        CancellationToken cancellationToken)
     {
-        await _collection.DeleteAsync(entities);
+        JsonCommands json = _db.JSON();
+        foreach (var id in ids)
+        {
+            await json.DelAsync(keyFunc(id));
+        }
     }
-    
 }
