@@ -3,7 +3,6 @@ using Coravel.Queuing.Interfaces;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Primitives;
 using Publications.API.Serialization;
-using Publications.BackgroundJobs;
 using Publications.BackgroundJobs.Tasks;
 using Publications.Domain.Requests;
 using Publications.Domain.Shared;

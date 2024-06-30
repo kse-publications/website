@@ -5,7 +5,6 @@ using Publications.Application.DTOs.Request;
 using Publications.Application.Repositories;
 using Publications.Domain.Filters;
 using Publications.Domain.Publications;
-using Publications.Domain.Shared;
 using Publications.Infrastructure.Services.DbConfiguration;
 using Publications.Infrastructure.Shared;
 using Redis.OM;

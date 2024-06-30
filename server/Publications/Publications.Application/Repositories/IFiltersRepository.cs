@@ -1,5 +1,4 @@
-﻿using Publications.Application.DTOs;
-using Publications.Application.DTOs.Request;
+﻿using Publications.Application.DTOs.Request;
 using Publications.Domain.Filters;
 using SearchDTO = Publications.Application.DTOs.Request.SearchDTO;
 
