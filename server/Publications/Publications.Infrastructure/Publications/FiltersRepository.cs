@@ -6,6 +6,7 @@ using Publications.Application.Repositories;
 using Publications.Domain.Filters;
 using Publications.Domain.Publications;
 using Publications.Domain.Shared;
+using Publications.Infrastructure.Services.DbConfiguration;
 using Publications.Infrastructure.Shared;
 using Redis.OM;
 using Redis.OM.Searching;
@@ -57,7 +58,7 @@ public class FiltersRepository: IFiltersRepository
                     .Filter(newFilter.GetParsedFilters());
 
                 const int maxAllowedLimit = 10_000;
-                var searchResult = await ft.SearchAsync(Entity.IndexName<Publication>(), 
+                var searchResult = await ft.SearchAsync(RedisIndexVersionInfo.GetIndexName(typeof(Publication)), 
                     new Query(query.Build())
                         .LimitFields(Publication.GetSearchableFields())
                         .Limit(0, maxAllowedLimit)

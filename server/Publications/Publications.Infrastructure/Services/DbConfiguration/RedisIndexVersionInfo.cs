@@ -3,7 +3,7 @@ using Publications.Application.Services;
 
 namespace Publications.Infrastructure.Services.DbConfiguration;
 
-public class RedisIndexesVersions
+public class RedisIndexVersionInfo
 {
     [RegularExpression(@"^\d+\.\d+$")] 
     public string Publication { get; set; } = null!;

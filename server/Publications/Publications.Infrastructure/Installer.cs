@@ -50,7 +50,7 @@ public static class Installer
     private static IServiceCollection AddDbConfigurationServices(this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddOptionsWithValidateOnStart<RedisIndexesVersions>()
+        services.AddOptionsWithValidateOnStart<RedisIndexVersionInfo>()
             .ValidateDataAnnotations()
             .Bind(configuration.GetSection("Redis:IndexesVersions"));
         
