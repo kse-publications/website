@@ -10,9 +10,5 @@
       <PackageReference Include="Redis.OM" Version="0.7.1" />
       <PackageReference Include="Redis.OM.Vectorizers.AllMiniLML6V2" Version="0.6.1" />
     </ItemGroup>
-    
-    <ItemGroup>
-        <InternalsVisibleTo Include="Publications.BackgroundJobs" />
-    </ItemGroup>
 
 </Project>
