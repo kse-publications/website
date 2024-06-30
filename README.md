@@ -33,7 +33,7 @@ Also, don't forget to create a `.env` file based on `env.example` for both `clie
 
 # The Team
 
-- Mark Motliuk ([@marchellodev](https://github.com/marchellodev)) is the project's Engineering Manager.
+- Mark Motliuk ([@marchellodev](https://github.com/marchellodev)) is the Technical Manager.
 - Back-end development is led by Vlad Prudius ([@PrudiusVladislav](https://github.com/PrudiusVladislav)), and assisted by Anna Opanasenko ([@Pivdenna](https://github.com/Pivdenna)).
 - Front-end development is led by Dmytro Kolisnyk ([@DmytroKolisnyk2](https://github.com/DmytroKolisnyk2)), and asisted by Tetiana Stasiuk ([@yeontannie](https://github.com/yeontannie)).
 
