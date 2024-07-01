@@ -80,6 +80,7 @@ public class SyncDatabasesTask(
         await filtersRepository.ReplaceWithNewAsync(_sourceFilters);
         
         await UpdatePublicationsViews(_sourcePublications!);
+        await UpdateViewsCountStats();
         PublicationSummary[] topRecentlyViewedPublications = await publicationsRepository
             .GetTopPublicationsByRecentViews();
         
@@ -233,17 +234,20 @@ public class SyncDatabasesTask(
         return deletedIds.ToArray();
     }
 
-    private async Task UpdatePublicationsViews(IEnumerable<Publication> publications) 
+    private async Task UpdatePublicationsViews(IEnumerable<Publication> publications)
     {
-        Dictionary<int, int> views = await requestsRepository.GetResourceViews<Publication>();
-        Dictionary<int, int> recentViews = await requestsRepository.GetResourceViews<Publication>(
-            after: DateTime.Today - TimeSpan.FromDays(30));
+        DateTime lastMonth = DateTime.Today - TimeSpan.FromDays(30);
+        
+        Dictionary<int, int> totalViewsDistribution = await requestsRepository
+            .GetRequestsDistributionAsync<Publication>();
+        Dictionary<int, int> recentViewsDistribution = await requestsRepository
+            .GetRequestsDistributionAsync<Publication>(after: lastMonth);
 
-        List<Task> updateViewsTasks = new(views.Count + recentViews.Count);
+        List<Task> updateViewsTasks = new(totalViewsDistribution.Count + recentViewsDistribution.Count);
             
         foreach (var publication in publications)
         {
-            if (views.TryGetValue(publication.Id, out var viewsCount))
+            if (totalViewsDistribution.TryGetValue(publication.Id, out var viewsCount))
             {
                 updateViewsTasks.Add(publicationsRepository.UpdateAsync(
                     publication.Id,
@@ -251,22 +255,30 @@ public class SyncDatabasesTask(
                     newValue: viewsCount.ToString()));
             }
                 
-            if (recentViews.TryGetValue(publication.Id, out var recentViewsCount))
+            if (recentViewsDistribution.TryGetValue(publication.Id, out var recentViews))
             {
                 updateViewsTasks.Add(publicationsRepository.UpdateAsync(
                     publication.Id,
                     propertyName: nameof(Publication.RecentViews),
-                    newValue: recentViewsCount.ToString()));
+                    newValue: recentViews.ToString()));
             }
         }
-        
-        updateViewsTasks.Add(statisticsRepository
-            .SetTotalViewsCountAsync(views.Sum(kvp => kvp.Value)));
-        
-        updateViewsTasks.Add(statisticsRepository
-            .SetRecentViewsCountAsync(recentViews.Sum(kvp => kvp.Value)));
             
         await Task.WhenAll(updateViewsTasks);
+    }
+
+    private async Task UpdateViewsCountStats()
+    {
+        DateTime lastMonth = DateTime.Today - TimeSpan.FromDays(30);
+        
+        int totalViewsCount = await requestsRepository
+            .GetRequestsCountAsync<Publication>(distinct: false);
+        int recentViewsCount = await requestsRepository
+            .GetRequestsCountAsync<Publication>(after: lastMonth, distinct: false);
+        
+        await statisticsRepository.SetTotalViewsCountAsync(totalViewsCount);
+        
+        await statisticsRepository.SetRecentViewsCountAsync(recentViewsCount);
     }
 
     private IList<Publication> HydratePublications(IList<Publication> publications)
