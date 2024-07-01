@@ -60,6 +60,7 @@ public class SyncController: ControllerBase
     {
         if (!_mutex.TryGetLock(nameof(SyncDatabasesTask), timeoutMinutes: 30))
         {
+            _logger.LogInformation("SyncDatabasesTask is already running. Skipping this run.");
             return;
         }
         
