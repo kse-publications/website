@@ -22,8 +22,8 @@ public class Publication: Entity
 
     [Indexed(DistanceMetric = DistanceMetric.COSINE, Algorithm = VectorAlgorithm.HNSW)]
     [SentenceVectorizer]
-    [IgnoreInResponse]
     [JsonInclude]
+    [IgnoreInResponse]
     public Vector<string>? SimilarityVector { get; set; }
     
     [Indexed(Sortable = true)]
@@ -74,14 +74,13 @@ public class Publication: Entity
     [Indexed(JsonPath = "$.Id")]
     [Searchable(JsonPath = "$.Name", Weight = 0.8)]
     [JsonInclude]
+    [IgnoreInResponse]
     public Collection[] Collections { get; set; } = Array.Empty<Collection>();
     
     [Indexed(Sortable = true)]
     [JsonInclude]
     [IgnoreInResponse]
     public bool Vectorized { get; set; }
-    
-    private Publication(int id) { Id = id; }
     
     [JsonConstructor]
     public Publication( 
@@ -102,8 +101,6 @@ public class Publication: Entity
         LastModifiedAt = lastModifiedAt;
         LastSynchronizedAt = DateTime.UtcNow;
     }
-
-    internal static Publication InitWithId(int id) => new(id);
     
     public Publication HydrateSlug(IWordsService wordsService)
     {
@@ -140,8 +137,6 @@ public class Publication: Entity
         $"{nameof(Publisher)}_{nameof(Publisher.Name)}",
         $"{nameof(Collections)}_{nameof(Collection.Name)}"
     ];
-    
-    public static string GetKey(int id) => $"publication:{id}";
 
     public string GetSimilarityValue() =>
         string.Join(" ", Enumerable.Repeat(Title, 2)) + " " +

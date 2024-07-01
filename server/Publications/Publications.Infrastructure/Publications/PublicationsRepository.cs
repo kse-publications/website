@@ -8,10 +8,9 @@ using Publications.Application.DTOs.Response;
 using Publications.Application.Repositories;
 using Publications.Domain.Collections;
 using Publications.Domain.Publications;
-using Publications.Domain.Shared;
+using Publications.Infrastructure.Services.DbConfiguration;
 using Publications.Infrastructure.Shared;
 using Redis.OM;
-using Redis.OM.Contracts;
 using Redis.OM.Searching;
 using StackExchange.Redis;
 using JsonSerializer = System.Text.Json.JsonSerializer;
@@ -20,18 +19,20 @@ namespace Publications.Infrastructure.Publications;
 
 public class PublicationsRepository: EntityRepository<Publication>, IPublicationsRepository
 {
+    private readonly string _publicationIndex = RedisIndexVersionInfo.GetIndexName(typeof(Publication));
+    
     private readonly IDatabase _db;
     private readonly IRedisCollection<Publication> _publications;
     private readonly JsonSerializerOptions _jsonOptions;
     
     public PublicationsRepository(
-        IConnectionMultiplexer connectionMultiplexer,
-        IRedisConnectionProvider connectionProvider,
-        JsonSerializerOptions jsonOptions) : base(connectionProvider)
+        IConnectionMultiplexer connection,
+        JsonSerializerOptions jsonOptions) : base(connection)
     {
         _jsonOptions = jsonOptions;
-        _db = connectionMultiplexer.GetDatabase();
-        _publications = connectionProvider.RedisCollection<Publication>();
+        _db = connection.GetDatabase();
+        RedisConnectionProvider provider = new(connection);
+        _publications = provider.RedisCollection<Publication>();
     }
 
     public async Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
@@ -41,7 +42,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         SearchCommands ft = _db.FT();
         SearchQuery query = SearchQuery.CreateWithFilter(filterDTO.GetParsedFilters());
         
-        AggregationResult aggregationResult = await ft.AggregateAsync(Entity.IndexName<Publication>(),
+        AggregationResult aggregationResult = await ft.AggregateAsync(_publicationIndex,
             new AggregationRequest(query.Build())
                 .Load(
                     new FieldName(nameof(Publication.Slug)),
@@ -66,16 +67,6 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             ResultCount: publications.Count);
     }
 
-    public async Task<IReadOnlyCollection<SyncEntityMetadata>> GetAllSyncMetadataAsync(
-        CancellationToken cancellationToken = default)
-    {
-        return (await _publications.Select(e => new SyncEntityMetadata
-        {
-            Id = e.Id,
-            LastSynchronizedAt = e.LastSynchronizedAt,
-        }).ToListAsync()).AsReadOnly();
-    }
-
     public async Task<PaginatedCollection<PublicationSummary>> GetBySearchAsync(
         FilterDTO filterDTO, PaginationDTO paginationDTO, SearchDTO searchDTO,
         CancellationToken cancellationToken = default)
@@ -85,7 +76,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         SearchQuery query = SearchQuery.CreateWithSearch(searchDTO.SearchTerm)
             .Filter(filterDTO.GetParsedFilters());
         
-        var searchResult = await ft.SearchAsync(Entity.IndexName<Publication>(), 
+        var searchResult = await ft.SearchAsync(_publicationIndex, 
             new Query(query.Build())
                 .LimitFields(Publication.GetSearchableFields())
                 .Limit(paginationDTO.GetOffset(), paginationDTO.PageSize)
@@ -116,7 +107,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         }
         query.And(authorsQuery.Build());
         
-        SearchResult searchResult = await ft.SearchAsync(Entity.IndexName<Publication>(), 
+        SearchResult searchResult = await ft.SearchAsync(_publicationIndex, 
             new Query(query.Build())
                 .SetSortBy(nameof(Publication.Views), ascending: false)
                 .Limit(paginationDto.GetOffset(), paginationDto.PageSize)
@@ -144,7 +135,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         string idFilter = new SearchField(nameof(Publication.Id)).NotEqualTo(currentPublication.Id);
         double radius = currentPublication.Language == "Ukrainian" ? 0.18 : 0.35;
         
-        var searchResult = await ft.SearchAsync(Entity.IndexName<Publication>(),
+        var searchResult = await ft.SearchAsync(_publicationIndex,
             new Query($"({idFilter}) @{SimilarityVector}:[VECTOR_RANGE {radius} $vec_param]=>{{$yield_distance_as: dist}}")
                 .AddParam("vec_param", currentPublication.SimilarityVector.Embedding)
                 .SetSortBy("dist", ascending: true)
@@ -161,7 +152,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         SearchCommands ft = _db.FT();
         string query = new SearchField(CollectionId).EqualTo(collectionId);
         
-        SearchResult searchResult = await ft.SearchAsync(Entity.IndexName<Publication>(),
+        SearchResult searchResult = await ft.SearchAsync(_publicationIndex,
             new Query(query)
                 .SetSortBy(nameof(Publication.Views), ascending: false)
                 .Limit(paginationDTO.GetOffset(), paginationDTO.PageSize)
@@ -174,17 +165,9 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             TotalCount: (int)searchResult.TotalResults,
             ResultCount: publications.Count);
     }
-
-    public async Task<Publication[]> GetNonVectorizedAsync(
-        CancellationToken cancellationToken = default)
-    {
-        return (await _publications.Where(p => !p.Vectorized)
-            .ToListAsync())
-            .ToArray();
-    }
-
-    public async Task UpdatePropertyValueAsync(
-        int publicationId,
+    
+    public async Task UpdateAsync(
+        int id,
         string propertyName, 
         string newValue,
         CancellationToken cancellationToken = default)
@@ -192,13 +175,35 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         var json = _db.JSON();
         
         await json.SetAsync(
-            key: Publication.GetKey(publicationId), 
-            $"$.{propertyName}", newValue);
+            key: GetPublicationKey(id), 
+            path: $"$.{propertyName}", 
+            json: newValue);
     }
     
-    public async Task<PublicationSummary[]> GetTopPublicationsByRecentViews(
-        int count = 4, 
+    public async Task DeleteAsync(
+        IEnumerable<int> ids,
         CancellationToken cancellationToken = default)
+    {
+        await DeleteAsync(ids, GetPublicationKey, cancellationToken);
+    }
+    
+    public async Task<IReadOnlyCollection<SyncEntityMetadata>> GetAllSyncMetadataAsync()
+    {
+        return (await _publications.Select(e => new SyncEntityMetadata
+        {
+            Id = e.Id,
+            LastSynchronizedAt = e.LastSynchronizedAt,
+        }).ToListAsync()).AsReadOnly();
+    }
+
+    public async Task<Publication[]> GetNonVectorizedAsync()
+    {
+        return (await _publications.Where(p => !p.Vectorized)
+            .ToListAsync())
+            .ToArray();
+    }
+    
+    public async Task<PublicationSummary[]> GetTopPublicationsByRecentViews(int count = 4)
     {
         var topPublications = await _publications
             .OrderByDescending(pub => pub.RecentViews) 
@@ -206,38 +211,40 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             .ToListAsync();  
 
         return topPublications
-            .Select(PublicationSummary.FromPublication)
+            .Select(p => new PublicationSummary(p))
             .ToArray();
     }
 
     private static List<PublicationSummary> MapToPublicationSummaries(
         IEnumerable<Dictionary<string, RedisValue>> aggregationResults)
     {
-        return aggregationResults.Select(result => new PublicationSummary
-        {
-            Slug = result[nameof(Publication.Slug)]!,
-            Title = JsonSerializer.Deserialize<string[]>(result[nameof(Publication.Title)]!)!.First(),
-            Type = result.TryGetValue(nameof(Publication.Type), out var typeValue) ? typeValue! : string.Empty,
-            Year = result.TryGetValue(nameof(Publication.Year), out var yearValue) ? (int)yearValue! : 0,
-            Authors = JsonSerializer
+        return aggregationResults.Select(result => new PublicationSummary(
+        
+            slug: result[nameof(Publication.Slug)]!,
+            title: JsonSerializer.Deserialize<string[]>(result[nameof(Publication.Title)]!)!.First(),
+            type: result.TryGetValue(nameof(Publication.Type), out var typeValue) ? typeValue! : string.Empty,
+            year: result.TryGetValue(nameof(Publication.Year), out var yearValue) ? (int)yearValue! : 0,
+            authors: JsonSerializer
                 .Deserialize<string[]>(result
                     .TryGetValue(AuthorsName, out var authorsValue) ? authorsValue! : "[]")
                 ?.ToArray() ?? [],
-            Publisher = JsonSerializer
+            publisher: JsonSerializer
                 .Deserialize<string[]>(result
                     .TryGetValue(PublisherName, out var publisherValue) ? publisherValue! : "[]")
                 ?.First() ?? string.Empty
-        }).ToList();
+        )).ToList();
     }
 
     private List<PublicationSummary> MapToPublicationSummaries(SearchResult result)
     {
         return result
             .ToJson()
-            .Select(json => PublicationSummary.FromPublication(JsonSerializer
+            .Select(json => new PublicationSummary(JsonSerializer
                     .Deserialize<Publication[]>(json, _jsonOptions)!.First()))
             .ToList();
     }
+
+    private static string GetPublicationKey(int id) => $"publication:{id}";
 
     private static string AuthorsName => 
         $"{nameof(Publication.Authors)}_{nameof(Author.Name)}";

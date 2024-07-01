@@ -11,17 +11,18 @@ public class VectorizePublicationsTask(
     IWordsService wordsService)
     : BaseLoggableTask<VectorizePublicationsTask>(taskLogger)
 {
+    private readonly ILogger<VectorizePublicationsTask> _taskLogger = taskLogger;
     private static DateTime? _expiresAt;
     private static readonly TimeSpan LockTimeout = TimeSpan.FromHours(1);
     private static readonly object Lock = new();
-    
+
     protected override async Task DoLoggedTaskAsync()
     {
         lock (Lock)
         {
             if (IsRunning())
             {
-                taskLogger.LogInformation("Task is already running");
+                _taskLogger.LogInformation("Task is already running");
                 return;
             }
 
@@ -38,7 +39,7 @@ public class VectorizePublicationsTask(
             }
 
             await publicationsRepository.UpdateAsync(publicationsToVectorize);
-            taskLogger.LogInformation("Vectorized publications: {totalCount}",
+            _taskLogger.LogInformation("Vectorized publications: {totalCount}",
                 publicationsToVectorize.Length);
         }
         finally

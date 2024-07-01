@@ -28,12 +28,12 @@ public class SyncController: ControllerBase
 
     [HttpGet]
     [ApiExplorerSettings(IgnoreApi = true)]
-    public async Task<IActionResult> Synchronize([FromQuery]string key = "")
+    public Task<IActionResult> Synchronize([FromQuery]string key = "")
     {
         if (key != _configuration["DbSync:Key"])
         {
             _logger.LogWarning("Unauthorized access to /sync endpoint");
-            return Unauthorized();
+            return Task.FromResult<IActionResult>(Unauthorized());
         }
                 
         _logger.LogInformation("/sync endpoint hit");
@@ -43,17 +43,17 @@ public class SyncController: ControllerBase
             await ExecuteSyncDatabasesTask();
         });
                 
-        return Ok();
+        return Task.FromResult<IActionResult>(Ok());
     }
 
     [HttpGet("status")]
     [ProducesResponseType(typeof(SyncStatusResponse), StatusCodes.Status200OK)]
     [SwaggerOperation(Summary = "Returns boolean indicating if the synchronization is currently running.")]
-    public async Task<IActionResult> GetSyncStatus()
+    public Task<IActionResult> GetSyncStatus()
     {
         bool isRunning = !_mutex.TryGetLock(nameof(SyncDatabasesTask), timeoutMinutes: 0);
         
-        return Ok(new SyncStatusResponse{ IsRunning = isRunning });
+        return Task.FromResult<IActionResult>(Ok(new SyncStatusResponse{ IsRunning = isRunning }));
     }
 
     private async Task ExecuteSyncDatabasesTask()

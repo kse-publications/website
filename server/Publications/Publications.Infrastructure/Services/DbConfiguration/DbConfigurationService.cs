@@ -26,7 +26,7 @@ public class DbConfigurationService : IDbConfigurationService
         typeof(Publication),
         typeof(Collection),
         typeof(FilterGroup)
-    }.ToDictionary(RedisIndexesVersions.GetIndexName);
+    }.ToDictionary(RedisIndexVersionInfo.GetIndexName);
     
     public DbConfigurationService(
         IConnectionMultiplexer connectionMultiplexer,

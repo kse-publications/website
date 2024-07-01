@@ -3,7 +3,6 @@ using Notion.Client;
 using Publications.Application.Repositories;
 using Publications.Domain.Collections;
 using Publications.Domain.Publications;
-using Publications.Domain.Shared.Slugs;
 using Publications.Infrastructure.Source.Models;
 
 namespace Publications.Infrastructure.Source;

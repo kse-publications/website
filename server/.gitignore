@@ -6,3 +6,5 @@ riderModule.iml
 .idea/
 sqlite_db/
 **/.env
+venv/
+*.DotSettings.user

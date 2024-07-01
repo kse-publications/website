@@ -2,6 +2,7 @@
 using Microsoft.OpenApi.Models;
 using Publications.API.Middleware;
 using Publications.API.Serialization;
+using Publications.Domain.Collections;
 using Publications.Domain.Filters;
 using Publications.Domain.Publications;
 using Redis.OM.Modeling;
@@ -33,6 +34,7 @@ public static class Installer
         options.Converters.Add(new ResponseJsonConverter<Publisher>());
         options.Converters.Add(new ResponseJsonConverter<Author>());
         options.Converters.Add(new ResponseJsonConverter<FilterGroup>());
+        options.Converters.Add(new ResponseJsonConverter<Collection>());
         
         return options;
     }
