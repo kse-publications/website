@@ -1,4 +1,5 @@
-﻿using Publications.Domain.Publications;
+﻿using System.Text.Json.Serialization;
+using Publications.Domain.Publications;
 
 namespace Publications.Application.DTOs.Response;
 
@@ -15,6 +16,7 @@ public class PublicationSummary
     public string[] Authors { get; init; }
     public string Publisher { get; init; }
 
+    [JsonConstructor]
     public PublicationSummary(
         string slug,
         string title,
