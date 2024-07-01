@@ -7,3 +7,4 @@ riderModule.iml
 sqlite_db/
 **/.env
 venv/
+*.DotSettings.user
