@@ -67,3 +67,8 @@ export const getRelatedByAuthors = async (
     `${BASE_URL}/publications/${id}/related-by-authors?Page=${page}&PageSize=${DEFAULT_PAGE_SIZE}&Authors=${authors}`
   ).then((response) => response.json())
 }
+
+export const getSimilarPublications = async (id: string): Promise<PublicationSummary[]> => {
+  const BASE_URL = getBaseUrl()
+  return fetch(`${BASE_URL}/publications/${id}/similar`).then((response) => response.json())
+}
