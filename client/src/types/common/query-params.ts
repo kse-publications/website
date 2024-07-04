@@ -14,3 +14,8 @@ export interface RelatedPublicationsQueryParams {
   authors: string
   page?: number
 }
+
+export interface SimilarPublicationsQueryParams {
+  id: string
+  page?: number
+}

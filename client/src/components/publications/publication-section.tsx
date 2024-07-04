@@ -7,15 +7,18 @@ import { ChevronRightIcon } from '@radix-ui/react-icons'
 import GoBackButton from '../layout/go-back-button'
 import type { PaginatedCollection } from '@/types/common/paginated-collection'
 import type { PublicationSummary } from '@/types/publication-summary/publication-summary'
+
 import RelatedAuthorsContextProvider from '../related-by-authors-results/authors-context'
 import RelatedAuthorsResults from '../related-by-authors-results/authors-results'
+import SimilarPublicationsResults from './similar-publications'
 
 interface PublicationPageProps {
   data: Publication
   relatedPublications: PaginatedCollection<PublicationSummary>
+  similarPublications: PublicationSummary[]
 }
 
-function PublicationPage({ data, relatedPublications }: PublicationPageProps) {
+function PublicationPage({ data, relatedPublications, similarPublications }: PublicationPageProps) {
   return (
     <>
       <RelatedAuthorsContextProvider
@@ -77,6 +80,9 @@ function PublicationPage({ data, relatedPublications }: PublicationPageProps) {
             </div>
           )}
         </div>
+        {similarPublications?.length > 0 && (
+          <SimilarPublicationsResults similarResults={similarPublications} />
+        )}
         {relatedPublications?.totalCount > 0 && <RelatedAuthorsResults />}
       </RelatedAuthorsContextProvider>
     </>
