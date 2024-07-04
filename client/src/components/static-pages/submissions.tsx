@@ -73,7 +73,7 @@ function SubmissionsPage() {
             For any inquiries or further assistance, please contact{' '}
             <span className="font-bold">
               <a href="mailto:publications@kse.org.ua">
-                <Button variant="link" className="p-0">
+                <Button variant="link" className="h-0 p-0 text-base">
                   publications@kse.org.ua
                 </Button>
               </a>

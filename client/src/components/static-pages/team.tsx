@@ -18,7 +18,7 @@ function TeamPage() {
               className="underline"
               target="_blank"
             >
-              <Button variant="link" className="p-0">
+              <Button variant="link" className="h-0 p-0 text-base">
                 Dr. Larysa Tamilina
               </Button>
             </a>{' '}
@@ -30,7 +30,7 @@ function TeamPage() {
               target="_blank"
             >
               {' '}
-              <Button variant="link" className="p-0">
+              <Button variant="link" className="h-0 p-0 text-base">
                 Mark Motliuk
               </Button>
             </a>{' '}
@@ -43,7 +43,7 @@ function TeamPage() {
               className="underline"
               target="_blank"
             >
-              <Button variant="link" className="p-0">
+              <Button variant="link" className="h-0 p-0 text-base">
                 Anastasia Shevelova
               </Button>
             </a>{' '}
@@ -58,7 +58,7 @@ function TeamPage() {
               className="underline"
               target="_blank"
             >
-              <Button variant="link" className="p-0">
+              <Button variant="link" className="h-0 p-0 text-base">
                 Vlad Prudius
               </Button>
             </a>{' '}
@@ -68,7 +68,7 @@ function TeamPage() {
               className="underline"
               target="_blank"
             >
-              <Button variant="link" className="p-0">
+              <Button variant="link" className="h-0 p-0 text-base">
                 Anna Opanasenko
               </Button>
             </a>{' '}
@@ -81,7 +81,7 @@ function TeamPage() {
               className="underline"
               target="_blank"
             >
-              <Button variant="link" className="p-0">
+              <Button variant="link" className="h-0 p-0 text-base">
                 Dmytro Kolisnyk
               </Button>
             </a>{' '}
@@ -91,7 +91,7 @@ function TeamPage() {
               className="underline"
               target="_blank"
             >
-              <Button variant="link" className="p-0">
+              <Button variant="link" className="h-0 p-0 text-base">
                 Tetiana Stasiuk
               </Button>
             </a>{' '}
@@ -105,7 +105,7 @@ function TeamPage() {
               className="underline"
               target="_blank"
             >
-              <Button variant="link" className="p-0">
+              <Button variant="link" className="h-0 p-0 text-base">
                 Viktoriia Verych
               </Button>
             </a>{' '}
