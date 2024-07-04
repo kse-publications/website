@@ -1,5 +1,6 @@
 export const prerender = true
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { buttonVariants } from '@/components/ui/button'
 import type { Publication } from '@/types/publication/publication'
 import { ChevronRightIcon } from '@radix-ui/react-icons'
@@ -46,11 +47,10 @@ function PublicationPage({ data, relatedPublications, similarPublications }: Pub
               <h4 className="text-l scroll-m-20 font-semibold tracking-tight">Authors:</h4>{' '}
               {data.authors.map((author: any, index: number) => (
                 <span key={author.slug}>
-                  <a
-                    href={`/?searchText=${author.name.toLowerCase().replace(/\s/g, '+')}`}
-                    className="hover:underline"
-                  >
-                    {author.name}
+                  <a href={`/?searchText=${author.name.toLowerCase().replace(/\s/g, '+')}`}>
+                    <Button variant="link" className="h-0 p-0 text-base font-normal">
+                      {author.name}
+                    </Button>
                   </a>
                   {index < data.authors.length - 1 ? ', ' : ''}{' '}
                 </span>

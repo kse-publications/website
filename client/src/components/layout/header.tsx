@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { GitHubLogoIcon } from '@radix-ui/react-icons'
 
 import logoLight from '../../assets/images/logo-white.png'
 import MobileMenuDrawer from './mobile-menu'
@@ -40,11 +41,16 @@ function Header({ light = false, isSync }: HeaderProps) {
                 href={item.href}
                 aria-label={`Go to ${item.label} page`}
               >
-                <Button variant="ghost" className="rounded-full">
+                <Button variant="ghost" className="rounded-full align-middle">
                   {item.label}
                 </Button>
               </a>
             ))}
+            <a href="https://github.com/kse-publications/website" target="_blank">
+              <Button variant="ghost" className="h-11 rounded-full px-2 align-middle">
+                <GitHubLogoIcon className="h-7 w-7" />
+              </Button>
+            </a>
           </div>
         </div>
       </div>
