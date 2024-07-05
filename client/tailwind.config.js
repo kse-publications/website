@@ -24,7 +24,7 @@ export default {
         22.5: '5.625rem',
       },
       colors: {
-        accent: {
+        yellow: {
           DEFAULT: '#e4e541',
         },
         border: 'hsl(var(--border))',

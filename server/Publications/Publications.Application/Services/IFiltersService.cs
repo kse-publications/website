@@ -5,9 +5,9 @@ namespace Publications.Application.Services;
 
 public interface IFiltersService
 {
-    Task<IReadOnlyCollection<FilterGroup>> GetFiltersForPublicationsAsync(
+    Task<FilterGroup[]> GetFiltersForPublicationsAsync(
         IEnumerable<Publication> publications);
     
     IList<Publication> AssignFiltersToPublications(
-        ICollection<Publication> publications, ICollection<FilterGroup> filters);
+        IList<Publication> publications, IList<FilterGroup> filters);
 }

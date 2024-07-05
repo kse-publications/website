@@ -5,8 +5,14 @@ import bgImageAvif from '../../assets/images/bg-image.avif'
 import { SearchInput } from './search-input'
 import { SearchFilters } from './search-filters'
 import { useSearchContext } from '@/contexts/search-context'
+import type { ICollection } from '@/types/common/collection'
+import { CollectionList } from '../collections/collections-list'
 
-export const SearchBackground = () => {
+interface SearchBackgroundProps {
+  collections: ICollection[]
+}
+
+export const SearchBackground = ({ collections }: SearchBackgroundProps) => {
   const { isRecent } = useSearchContext()
 
   return (
@@ -24,18 +30,19 @@ export const SearchBackground = () => {
 
       <CSSTransition in={!isRecent} timeout={400} classNames="change-padding">
         <div
-          className={`relative mx-auto max-w-[1160px] px-4 pt-6 ${isRecent ? 'pb-10 lg:pb-32' : 'pb-6 '}`}
+          className={`relative mx-auto max-w-[1160px] px-4 pt-6 ${isRecent ? 'pb-10 lg:pb-14' : 'pb-6 '}`}
         >
           <CSSTransition in={isRecent} timeout={400} classNames="slide" unmountOnExit>
-            <p
+            <h1
               className={`text-center text-2xl text-white md:text-4xl xl:px-8 ${isRecent ? 'mb-[77px]' : ''}`}
             >
               KSE Publications is a collection of the major academic and analytical publications
               produced by the KSE community.
-            </p>
+            </h1>
           </CSSTransition>
           <SearchInput />
           <SearchFilters />
+          <CollectionList collections={collections} />
         </div>
       </CSSTransition>
     </div>

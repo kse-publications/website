@@ -1,14 +1,12 @@
-import { useState, useEffect } from 'react'
-import { useSearchContext } from '@/contexts/search-context'
-
-import { SearchResultItem } from './search-result-item'
-import { SearchSkeleton } from './search-skeleton'
-import { LoadingTrigger } from './search-loading-trigger'
-
-import { AnimatedHeadLine } from '../ui/animated-headline'
 import Masonry from 'react-masonry-css'
-import { AnimatedCardWrapper } from '../ui/animated-card-wrapper'
-import { Skeleton } from '../ui/skeleton'
+import { useSearchContext } from '@/contexts/search-context'
+import { SearchResultItem } from './search-result-item'
+import { LoadingTrigger } from './search-loading-trigger'
+import { AnimatedHeadLine } from '../ui/animated-headline'
+
+import { ScrollIndicator } from '../layout/scroll-indicator'
+import { MostViewedPublications } from '../publications/most-viewed'
+import { SearchSkeleton } from './search-skeleton'
 
 const breakpointColumnsObj = {
   default: 2,
@@ -16,17 +14,25 @@ const breakpointColumnsObj = {
   600: 1,
 }
 
-const SKELETON_CARDS_COUNT = 5
+const SKELETON_CARDS_COUNT = 4
 
 export const SearchResults = () => {
-  const { isRecent, error, isLoading, searchResults, totalResults } = useSearchContext()
+  const { isRecent, error, isLoading, searchResults, totalResults, loadMoreHandler } =
+    useSearchContext()
 
   return (
     <div className="w-full grow bg-[#f0f0f0] pb-4 pt-8">
+      <ScrollIndicator totalCards={totalResults} />
+      {isRecent && <MostViewedPublications />}
       <div className="mx-auto max-w-[1160px] px-4">
-        <AnimatedHeadLine>
-          {isRecent ? 'Recent publications' : `Found ${totalResults} publications`}
-        </AnimatedHeadLine>
+        <div className="flex flex-col sm:flex-row sm:gap-5">
+          <AnimatedHeadLine>
+            {isRecent ? 'All publications' : `Found ${totalResults} publications`}
+          </AnimatedHeadLine>
+          {isRecent && (
+            <p className="-mt-3 mb-2 pt-1 opacity-70 sm:m-0">{totalResults} total publications</p>
+          )}
+        </div>
         {error ? (
           <div className="text-red-500">Error: {error}</div>
         ) : (
@@ -39,19 +45,16 @@ export const SearchResults = () => {
               ))}
               {isLoading &&
                 Array.from({ length: SKELETON_CARDS_COUNT }).map((_, index) => (
-                  <AnimatedCardWrapper key={index}>
-                    <div className="mb-4 flex h-6 gap-2">
-                      <Skeleton className="h-6 w-14" />
-                      <Skeleton className="h-6 w-40" />
-                    </div>
-                    <Skeleton className="mb-2 h-14 w-full" />
-                    <Skeleton className="mb-1 h-4 w-1/2" />
-                    <Skeleton className="h-4 w-1/2" />
-                  </AnimatedCardWrapper>
+                  <SearchSkeleton key={index} />
                 ))}
             </Masonry>
 
-            <LoadingTrigger />
+            <LoadingTrigger
+              isLoading={isLoading}
+              resultsLength={searchResults.length}
+              totalResults={totalResults}
+              loadMoreHandler={loadMoreHandler}
+            />
           </>
         )}
       </div>

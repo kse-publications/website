@@ -33,8 +33,6 @@ public class Collection: Entity
     [JsonInclude]
     public int PublicationsCount { get; set; }
     
-    private Collection(int id) { Id = id; }
-
     [JsonConstructor]
     public Collection(
         int id,
@@ -47,17 +45,10 @@ public class Collection: Entity
         LastModifiedAt = lastModifiedAt;
     }
     
-    public static Collection InitWithId(int id) => new(id);
-    
-    public Collection HydrateDynamicFields(IWordsService wordsService)
-    {
-        UpdateSlug(wordsService);
-        return this;
-    }
-
-    private void UpdateSlug(IWordsService wordsService)
+    public Collection HydrateSlug(IWordsService wordsService)
     {
         Slug = SlugFactory.Create(Name, Id.ToString(), IsoLanguageCode.English, wordsService);
+        return this;
     }
     
     public int[] GetPublicationIds() => GetPublicationIds(PublicationsIds);

@@ -5,6 +5,8 @@ import Header from '@/components/layout/header'
 import LoadingIndicator from '@/components/layout/loading-indicator.astro'
 import PostHog from '@/components/layout/posthog'
 
+import { getSyncStatus } from '@/services/sync/get-sync-status'
+
 import { v4 as uuidv4 } from 'uuid'
 
 interface Props {
@@ -23,6 +25,8 @@ if (!clientUuid) {
     path: '/',
   })
 }
+
+const isSync = await getSyncStatus()
 
 const ENVIRONMENT = import.meta.env.PUBLIC_ENVIRONMENT
 
@@ -106,10 +110,18 @@ const hostUrl = import.meta.env.PUBLIC_HOST_URL
         "description": "The KSE Publications website presents a collection of the major academic and analytical publications produced by the KSE community."
       }
     </script>
+    <noscript>
+      <style>
+        .noscript-in-view {
+          opacity: 1 !important;
+          transform: translateY(0) !important;
+        }
+      </style>
+    </noscript>
   </head>
   <body class="min-h-screen flex flex-col">
     {isProduction && <PostHog pageVisitEvent={title} client:only />}
-    <Header light={light} client:load />
+    <Header isSync={isSync} light={light} client:load />
     <main class={`mx-auto grow w-full flex flex-col ${!fullSize ? 'max-w-[1160px] px-4' : ''}`}>
       <slot />
     </main>

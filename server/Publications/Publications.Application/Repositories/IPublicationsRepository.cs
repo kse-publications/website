@@ -15,9 +15,6 @@ public interface IPublicationsRepository : IEntityRepository<Publication>
         PaginationDTO paginationDTO,
         CancellationToken cancellationToken = default);
     
-    Task<IReadOnlyCollection<SyncEntityMetadata>> GetAllSyncMetadataAsync(
-        CancellationToken cancellationToken = default);
-    
     /// <summary>
     /// Returns publications that match the provided search and filter criteria.
     /// </summary>
@@ -50,13 +47,15 @@ public interface IPublicationsRepository : IEntityRepository<Publication>
         PaginationDTO paginationDTO,
         CancellationToken cancellationToken = default);
     
-    Task UpdatePropertyValueAsync(
+    Task<IReadOnlyCollection<SyncEntityMetadata>> GetAllSyncMetadataAsync();
+    
+    Task<Publication[]> GetNonVectorizedAsync();
+    
+    Task UpdateAsync(
         int publicationId,
         string propertyName,
         string newValue,
         CancellationToken cancellationToken = default);
     
-     Task<PublicationSummary[]> GetTopPublicationsByRecentViews(
-         int count = 4,
-         CancellationToken cancellationToken = default);
+     Task<PublicationSummary[]> GetTopPublicationsByRecentViews(int count = 4);
 }

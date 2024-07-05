@@ -12,4 +12,6 @@ public record PaginationDTO
 
     [Range(1, 101, ErrorMessage = "PageSize must be between 1 and 100 (inclusive).")]
     public int PageSize { get; init; } = 20;
+    
+    public int GetOffset() => PageSize * (Page - 1);
 }

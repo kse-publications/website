@@ -8,6 +8,7 @@ import type { PublicationSummary } from '@/types/publication-summary/publication
 import { DEFAULT_PAGE } from '@/config/search-params'
 import { getFilters } from '@/services/filters/filters'
 import { getFiltersFromString } from '@/utils/parse-filters'
+import { getAllCollections } from '@/services/search/get-collections'
 
 let initialPublications: PaginatedCollection<PublicationSummary>
 const searchParams = Astro.url.searchParams
@@ -35,6 +36,8 @@ if (!searchText) {
   }
   initialPublications = await searchPublications(searchData)
 }
+
+const collections = await getAllCollections()
 ---
 
 <Layout fullSize light title="KSE Publications | Search">
@@ -42,6 +45,7 @@ if (!searchText) {
     filters={filters}
     initialPublications={initialPublications}
     isRecent={isRecent}
-    client:only
+    collections={collections}
+    client:load
   />
 </Layout>

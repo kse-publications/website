@@ -16,6 +16,7 @@ namespace Publications.BackgroundJobs.Tasks;
 public class SyncDatabasesTask(
     ILogger<SyncDatabasesTask> taskLogger,
     IOptionsSnapshot<DbSyncOptions> options,
+    VectorizePublicationsTask vectorizePublicationsTask,
     ISourceRepository sourceRepository,
     IPublicationsRepository publicationsRepository,
     ICollectionsRepository collectionsRepository,
@@ -26,6 +27,7 @@ public class SyncDatabasesTask(
     IStatisticsRepository statisticsRepository)
     : BaseRetriableTask<SyncDatabasesTask>(taskLogger, options.Value.RetryOptions)
 {
+    private readonly ILogger<SyncDatabasesTask> _taskLogger = taskLogger;
     private IReadOnlyCollection<Publication>? _sourcePublications;
     private IReadOnlyCollection<FilterGroup>? _sourceFilters;
     private IReadOnlyCollection<Collection>? _sourceCollections;
@@ -37,8 +39,8 @@ public class SyncDatabasesTask(
     private IReadOnlyCollection<SyncCollectionMetadata>? _localCollectionsMetadata;
     
     private Dictionary<int, SyncEntityMetadata>? _localPublicationsMetadataDict;
-    private Dictionary<int, SyncEntityMetadata>? _localCollectionsMetadataDict;
-    
+    private Dictionary<int, SyncCollectionMetadata>? _localCollectionsMetadataDict;
+
     protected override async Task DoRetriableTaskAsync()
     {
         (_sourcePublications, _sourceCollections) = await sourceRepository.GetPublicationsAndCollectionsAsync();
@@ -52,45 +54,55 @@ public class SyncDatabasesTask(
         int[] deletedPublicationIds = await DeletePublicationsNotInSourceAsync();
         int[] deletedCollectionIds = await DeleteCollectionsNotInSourceAsync();
         
-        List<Collection> newCollections = FindNewEntities(_localCollectionsMetadataDict!, _sourceCollections!);
-        List<Collection> updatedCollections = FindUpdatedCollections();
+        IList<Collection> newCollections = FindNewEntities(_localCollectionsMetadataDict!, _sourceCollections!);
+        IList<Collection> updatedCollections = GetUpdatedCollections();
         
-        List<Publication> newPublications = FindNewEntities(_localPublicationsMetadataDict!, _sourcePublications!);
-        HashSet<int> newPublicationIds = newPublications.Select(p => p.Id).ToHashSet();
-        List<Publication> updatedPublications = 
-            FindUpdatedPublications(updatedCollections, newCollections, deletedCollectionIds)
-                .Where(p => !newPublicationIds.Contains(p.Id)).ToList();
-
+        newCollections = HydrateCollections(newCollections);
+        updatedCollections = HydrateCollections(updatedCollections);
+        
         _sourceFilters = await filtersService.GetFiltersForPublicationsAsync(_sourcePublications!);
         
-        await UpdatePublicationsAsync(updatedPublications);
-        await InsertNewPublicationsAsync(newPublications);
+        IList<Publication> newPublications = FindNewEntities(_localPublicationsMetadataDict!, _sourcePublications!);
+        HashSet<int> newPublicationIds = newPublications.Select(p => p.Id).ToHashSet();
+        IList<Publication> updatedPublications = 
+            GetUpdatedPublications(updatedCollections, newCollections, deletedCollectionIds)
+                .Where(p => !newPublicationIds.Contains(p.Id)).ToList();
         
-        await UpdateCollectionsAsync(updatedCollections);
-        await InsertNewCollectionsAsync(newCollections);
+        newPublications = HydratePublications(newPublications);
+        updatedPublications = HydratePublications(updatedPublications);
         
-        await UpdatePublicationsViews(_sourcePublications!);
+        await publicationsRepository.UpdateAsync(updatedPublications);
+        await publicationsRepository.InsertAsync(newPublications);
+        
+        await collectionsRepository.UpdateAsync(updatedCollections);
+        await collectionsRepository.InsertAsync(newCollections);
+        
         await filtersRepository.ReplaceWithNewAsync(_sourceFilters);
         
-        var topRecentlyViewedPublications = await publicationsRepository.GetTopPublicationsByRecentViews();
+        await UpdatePublicationsViews(_sourcePublications!);
+        await UpdateViewsCountStats();
+        PublicationSummary[] topRecentlyViewedPublications = await publicationsRepository
+            .GetTopPublicationsByRecentViews();
+        
         await statisticsRepository.SetTopRecentlyViewedPublicationsAsync(topRecentlyViewedPublications);
         await statisticsRepository.SetTotalPublicationsCountAsync(_sourcePublications!.Count);
         
-        taskLogger.LogInformation(
+        _taskLogger.LogInformation(
             "Databases synchronized successfully. " +
             "Publications: {0} added, {1} updated, {2} deleted. " +
             "Collections: {3} added, {4} updated, {5} deleted.",
             newPublications.Count, updatedPublications.Count, deletedPublicationIds.Length,
             newCollections.Count, updatedCollections.Count, deletedCollectionIds.Length);
+        
+        _ = Task.Run(async () => await vectorizePublicationsTask.Invoke()); 
     }
-
+     
     private void InitializeDataStructures()
     {
         _sourcePublicationIds = _sourcePublications!.Select(p => p.Id).ToHashSet();
         _sourceCollectionIds = _sourceCollections!.Select(c => c.Id).ToHashSet();
         _localPublicationsMetadataDict = _localPublicationsMetadata!.ToDictionary(p => p.Id);
-        _localCollectionsMetadataDict = _localCollectionsMetadata!
-            .ToDictionary(c => c.Id, c => (SyncEntityMetadata)c);
+        _localCollectionsMetadataDict = _localCollectionsMetadata!.ToDictionary(c => c.Id);
     }
     
     private async Task SetLocalEntitiesMetadataAsync()
@@ -99,9 +111,9 @@ public class SyncDatabasesTask(
         _localCollectionsMetadata = await collectionsRepository.GetAllSyncMetadataAsync();
     }
 
-    private List<Publication> FindUpdatedPublications(
-        List<Collection> updatedCollections,
-        List<Collection> newCollections,
+    private IList<Publication> GetUpdatedPublications(
+        IList<Collection> updatedCollections,
+        IList<Collection> newCollections,
         IEnumerable<int> deletedCollectionIds)
     {
         var updatedPublications = FindUpdatedEntities(
@@ -121,21 +133,21 @@ public class SyncDatabasesTask(
             .ToList();
     }
     
-    private List<Collection> FindUpdatedCollections()
+    private IList<Collection> GetUpdatedCollections()
     {
         return FindUpdatedEntities(_localCollectionsMetadataDict!, _sourceCollections!);
     }
     
     private List<Publication> FindPublicationsInChangedCollections(
-        List<Collection> updatedCollections,
-        List<Collection> newCollections,
+        IList<Collection> updatedCollections,
+        IList<Collection> newCollections,
         IEnumerable<int> deletedCollectionIds)
     {
         HashSet<int> publicationIdsInChangedCollections = updatedCollections
             .Concat(newCollections)
             .SelectMany(c => c.GetPublicationIds())
             .Concat(updatedCollections
-                .SelectMany(c => ((SyncCollectionMetadata)_localCollectionsMetadataDict![c.Id]).PublicationsIds))
+                .SelectMany(c => _localCollectionsMetadataDict![c.Id].PublicationsIds))
             .ToHashSet();
         
         return _sourcePublications!
@@ -145,7 +157,7 @@ public class SyncDatabasesTask(
             .ToList();
     }
     
-    private List<Publication> FindPublicationsWithUpdatedAuthors()
+    private IList<Publication> FindPublicationsWithUpdatedAuthors()
     {
         return _sourcePublications!
             .Where(p => 
@@ -154,7 +166,7 @@ public class SyncDatabasesTask(
             .ToList();
     }
     
-    private List<Publication> FindPublicationsWithUpdatedPublishers()
+    private IList<Publication> FindPublicationsWithUpdatedPublishers()
     {
         return _sourcePublications!
             .Where(p => 
@@ -164,9 +176,11 @@ public class SyncDatabasesTask(
             .ToList();
     }
     
-    private static List<TEntity> FindUpdatedEntities<TEntity>(
-        Dictionary<int, SyncEntityMetadata> localEntitiesMetadataDict,
-        IReadOnlyCollection<TEntity> sourceEntities) where TEntity : Entity
+    private static IList<TEntity> FindUpdatedEntities<TEntity, TMetadata>(
+        Dictionary<int, TMetadata> localEntitiesMetadataDict,
+        IReadOnlyCollection<TEntity> sourceEntities) 
+        where TEntity : Entity
+        where TMetadata : SyncEntityMetadata
     {
         List<TEntity> updatedEntities = sourceEntities
             .Where(sourceEntity =>
@@ -176,10 +190,12 @@ public class SyncDatabasesTask(
 
         return updatedEntities;
     }
-    
-    private static List<TEntity> FindNewEntities<TEntity>(
-        Dictionary<int, SyncEntityMetadata> localEntitiesMetadataDict,
-        IReadOnlyCollection<TEntity> sourceEntities) where TEntity : Entity
+
+    private static IList<TEntity> FindNewEntities<TEntity, TMetadata>(
+        Dictionary<int, TMetadata> localEntitiesMetadataDict,
+        IReadOnlyCollection<TEntity> sourceEntities) 
+        where TEntity : Entity 
+        where TMetadata : SyncEntityMetadata
     {
         return sourceEntities
             .Where(e => !localEntitiesMetadataDict.ContainsKey(e.Id))
@@ -188,14 +204,12 @@ public class SyncDatabasesTask(
     
     private async Task<int[]> DeletePublicationsNotInSourceAsync()
     {
-        List<Publication> publicationsToDelete = _localPublicationsMetadata!
-            .Where(sm => !_sourcePublicationIds!.Contains(sm.Id))
-            .Select(sm => Publication.InitWithId(sm.Id))
-            .ToList();
+        int[] deletedIds = _localPublicationsMetadata!
+            .Where(meta => !_sourcePublicationIds!.Contains(meta.Id))
+            .Select(meta => meta.Id)
+            .ToArray();
 
-        await publicationsRepository.DeleteAsync(publicationsToDelete);
-
-        var deletedIds = publicationsToDelete.Select(p => p.Id);
+        await publicationsRepository.DeleteAsync(deletedIds);
         
         _localPublicationsMetadata = _localPublicationsMetadata!
             .Where(p => !deletedIds.Contains(p.Id))
@@ -206,14 +220,12 @@ public class SyncDatabasesTask(
     
     private async Task<int[]> DeleteCollectionsNotInSourceAsync()
     {
-        List<Collection> collectionsToDelete = _localCollectionsMetadata!
-            .Where(sm => !_sourceCollectionIds!.Contains(sm.Id))
-            .Select(sm => Collection.InitWithId(sm.Id))
-            .ToList();
+        int[] deletedIds = _localCollectionsMetadata!
+            .Where(meta => !_sourceCollectionIds!.Contains(meta.Id))
+            .Select(meta => meta.Id)
+            .ToArray();
 
-        await collectionsRepository.DeleteAsync(collectionsToDelete);
-
-        var deletedIds = collectionsToDelete.Select(c => c.Id);
+        await collectionsRepository.DeleteAsync(deletedIds);
         
         _localCollectionsMetadata = _localCollectionsMetadata!
             .Where(c => !deletedIds.Contains(c.Id))
@@ -222,79 +234,63 @@ public class SyncDatabasesTask(
         return deletedIds.ToArray();
     }
 
-    private async Task UpdatePublicationsViews(IEnumerable<Publication> publications) 
+    private async Task UpdatePublicationsViews(IEnumerable<Publication> publications)
     {
-        Dictionary<int, int> views = await requestsRepository.GetResourceViews<Publication>();
-        Dictionary<int, int> recentViews = await requestsRepository.GetResourceViews<Publication>(
-            after: DateTime.Today - TimeSpan.FromDays(30));
+        DateTime lastMonth = DateTime.Today - TimeSpan.FromDays(30);
+        
+        Dictionary<int, int> totalViewsDistribution = await requestsRepository
+            .GetRequestsDistributionAsync<Publication>();
+        Dictionary<int, int> recentViewsDistribution = await requestsRepository
+            .GetRequestsDistributionAsync<Publication>(after: lastMonth);
 
-        List<Task> updateViewsTasks = new(views.Keys.Count + recentViews.Keys.Count);
+        List<Task> updateViewsTasks = new(totalViewsDistribution.Count + recentViewsDistribution.Count);
             
         foreach (var publication in publications)
         {
-            if (views.TryGetValue(publication.Id, out var viewsCount))
+            if (totalViewsDistribution.TryGetValue(publication.Id, out var viewsCount))
             {
-                updateViewsTasks.Add(publicationsRepository.UpdatePropertyValueAsync(
+                updateViewsTasks.Add(publicationsRepository.UpdateAsync(
                     publication.Id,
-                    nameof(Publication.Views),
+                    propertyName: nameof(Publication.Views),
                     newValue: viewsCount.ToString()));
             }
                 
-            if (recentViews.TryGetValue(publication.Id, out var recentViewsCount))
+            if (recentViewsDistribution.TryGetValue(publication.Id, out var recentViews))
             {
-                updateViewsTasks.Add(publicationsRepository.UpdatePropertyValueAsync(
+                updateViewsTasks.Add(publicationsRepository.UpdateAsync(
                     publication.Id,
-                    nameof(Publication.RecentViews),
-                    newValue: recentViewsCount.ToString()));
+                    propertyName: nameof(Publication.RecentViews),
+                    newValue: recentViews.ToString()));
             }
         }
             
-        updateViewsTasks.Add(statisticsRepository
-            .SetRecentViewsCountAsync(recentViews.Sum(kvp => kvp.Value)));
-            
         await Task.WhenAll(updateViewsTasks);
     }
+
+    private async Task UpdateViewsCountStats()
+    {
+        DateTime lastMonth = DateTime.Today - TimeSpan.FromDays(30);
+        
+        int totalViewsCount = await requestsRepository
+            .GetRequestsCountAsync<Publication>(distinct: false);
+        int recentViewsCount = await requestsRepository
+            .GetRequestsCountAsync<Publication>(after: lastMonth, distinct: false);
+        
+        await statisticsRepository.SetTotalViewsCountAsync(totalViewsCount);
+        
+        await statisticsRepository.SetRecentViewsCountAsync(recentViewsCount);
+    }
+
+    private IList<Publication> HydratePublications(IList<Publication> publications)
+    {
+        return filtersService.AssignFiltersToPublications(publications, _sourceFilters!.ToList())
+            .Select(p => p.HydrateSlug(wordsService))
+            .ToList();
+    }
     
-    private async Task UpdatePublicationsAsync(List<Publication> updatedPublications)
+    private IList<Collection> HydrateCollections(IList<Collection> collections)
     {
-        if (updatedPublications.Count == 0)
-            return;
-        
-        var updatedPublicationsWithFilters = filtersService
-            .AssignFiltersToPublications(updatedPublications, _sourceFilters!.ToList())
-            .Select(p => p.HydrateDynamicFields(wordsService));
-
-        await publicationsRepository.UpdateAsync(updatedPublicationsWithFilters);
-    }
-
-    private async Task InsertNewPublicationsAsync(List<Publication> newPublications)
-    {
-        if (newPublications.Count == 0)
-            return;
-        
-        var newPublicationsWithFilters = filtersService
-            .AssignFiltersToPublications(newPublications, _sourceFilters!.ToList())
-            .Select(p => p.HydrateDynamicFields(wordsService));
-
-        await publicationsRepository.InsertAsync(newPublicationsWithFilters);
-    }
-
-    private async Task UpdateCollectionsAsync(List<Collection> updatedCollections)
-    {
-        if (updatedCollections.Count == 0)
-            return;
-        
-        await collectionsRepository.UpdateAsync(updatedCollections.Select(c 
-            => c.HydrateDynamicFields(wordsService)));
-    }
-
-    private async Task InsertNewCollectionsAsync(List<Collection> newCollections)
-    {
-        if (newCollections.Count == 0)
-            return;
-        
-        await collectionsRepository.InsertAsync(newCollections.Select(c 
-            => c.HydrateDynamicFields(wordsService)));
+        return collections.Select(c => c.HydrateSlug(wordsService)).ToList();
     }
     
     private static bool WasModifiedAfterLastSync(

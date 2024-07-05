@@ -22,9 +22,9 @@ public class Publication: Entity
 
     [Indexed(DistanceMetric = DistanceMetric.COSINE, Algorithm = VectorAlgorithm.HNSW)]
     [SentenceVectorizer]
-    [IgnoreInResponse]
     [JsonInclude]
-    public Vector<string> SimilarityVector { get; set; } = null!;
+    [IgnoreInResponse]
+    public Vector<string>? SimilarityVector { get; set; }
     
     [Indexed(Sortable = true)]
     public string Type { get; init; }
@@ -45,7 +45,7 @@ public class Publication: Entity
     
     public string[] Keywords => SearchableKeywords.Select(k => k.Value).ToArray();
 
-    [Searchable(Weight = 0.7)] 
+    [Searchable(Weight = 0.6)] 
     public string AbstractText { get; init; }
     
     [Indexed(JsonPath = "$.Id")]
@@ -74,9 +74,13 @@ public class Publication: Entity
     [Indexed(JsonPath = "$.Id")]
     [Searchable(JsonPath = "$.Name", Weight = 0.8)]
     [JsonInclude]
+    [IgnoreInResponse]
     public Collection[] Collections { get; set; } = Array.Empty<Collection>();
     
-    private Publication(int id) { Id = id; }
+    [Indexed(Sortable = true)]
+    [JsonInclude]
+    [IgnoreInResponse]
+    public bool Vectorized { get; set; }
     
     [JsonConstructor]
     public Publication( 
@@ -97,14 +101,24 @@ public class Publication: Entity
         LastModifiedAt = lastModifiedAt;
         LastSynchronizedAt = DateTime.UtcNow;
     }
-
-    public static Publication InitWithId(int id) => new(id);
     
-    public Publication HydrateDynamicFields(IWordsService wordsService)
+    public Publication HydrateSlug(IWordsService wordsService)
     {
-        UpdateSlug(wordsService);
-        UpdateVectors(wordsService);
+        Slug = SlugFactory.Create(
+            Title, Id.ToString(), IsoLanguageCode.Create(Language), wordsService);
+        
         return this;
+    }
+    
+    public void Vectorize(IWordsService wordsService)
+    {
+        SimilarityVector = Vector.Of(GetSimilarityValue()
+            .ToLower()
+            .RemoveStopWords(IsoLanguageCode.Create(Language), wordsService)
+            .Transliterate(wordsService)
+            .RemoveSpecialChars());
+        
+        Vectorized = true;
     }
     
     public static EntityFilter[] GetEntityFilters() =>
@@ -120,27 +134,13 @@ public class Publication: Entity
         nameof(AbstractText),
         $"{nameof(SearchableKeywords)}_{nameof(Keyword.Value)}",
         $"{nameof(Authors)}_{nameof(Author.Name)}",
-        $"{nameof(Publisher)}_{nameof(Publisher.Name)}"
+        $"{nameof(Publisher)}_{nameof(Publisher.Name)}",
+        $"{nameof(Collections)}_{nameof(Collection.Name)}"
     ];
-    
-    public static string GetKey(int id) => $"publication:{id}";
 
-    private void UpdateSlug(IWordsService wordsService)
-    {
-        Slug = SlugFactory.Create(
-            Title, Id.ToString(), IsoLanguageCode.Create(Language), wordsService);
-    }
-    
-    private void UpdateVectors(IWordsService wordsService)
-    {
-        SimilarityVector = Vector.Of(wordsService
-            .Transliterate(GetSimilarityValue())
-            .RemoveSpecialChars());
-    }
-    
-    private string GetSimilarityValue() =>
-        Title + " " + 
-        AbstractText + " " +
-        string.Join(" ", SearchableKeywords.Select(k => k.Value)) + " " +
-        string.Join(" ", Collections.Select(c => c.Name));
+    public string GetSimilarityValue() =>
+        string.Join(" ", Enumerable.Repeat(Title, 2)) + " " +
+        string.Join(" ", Keywords) + " " +
+        string.Join(" ", Collections.Select(c => c.Name)) + " " +
+        AbstractText;
 }

@@ -8,10 +8,16 @@ public class IncrementTotalSearchesTask: IInvocable
 {
     private readonly IStatisticsRepository _statisticsRepository;
     private readonly ILogger<IncrementTotalSearchesTask> _logger;
+    private static int _searchesCount;
 
     public static bool IsQueued { get; private set; }
-    public static int SearchesCount { get; private set; }
-    
+
+    public static int SearchesCount
+    {
+        get => _searchesCount;
+        private set => _searchesCount = value;
+    }
+
     public IncrementTotalSearchesTask(
         IStatisticsRepository statisticsRepository,
         ILogger<IncrementTotalSearchesTask> logger)
@@ -42,6 +48,6 @@ public class IncrementTotalSearchesTask: IInvocable
     
     public static void Increment()
     {
-        SearchesCount++;
+        Interlocked.Increment(ref _searchesCount);
     }
 }

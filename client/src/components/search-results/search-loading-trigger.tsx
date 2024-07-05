@@ -1,8 +1,18 @@
-import { useSearchContext } from '@/contexts/search-context'
 import { useEffect, useMemo, useRef } from 'react'
 
-export const LoadingTrigger = () => {
-  const { isLoading, searchResults, totalResults, loadMoreHandler } = useSearchContext()
+interface LoadingTriggerProps {
+  isLoading: boolean
+  resultsLength: number
+  totalResults: number
+  loadMoreHandler: () => void
+}
+
+export const LoadingTrigger = ({
+  isLoading,
+  resultsLength,
+  totalResults,
+  loadMoreHandler,
+}: LoadingTriggerProps) => {
   const observer = useRef<IntersectionObserver | null>(null)
   const triggerRef = useRef<HTMLDivElement>(null)
 
@@ -10,7 +20,7 @@ export const LoadingTrigger = () => {
     observer.current = new IntersectionObserver(
       (entries) => {
         const target = entries[0]
-        if (target.isIntersecting && searchResults.length < totalResults && !isLoading) {
+        if (target.isIntersecting && resultsLength < totalResults && !isLoading) {
           loadMoreHandler()
         }
       },
@@ -28,11 +38,11 @@ export const LoadingTrigger = () => {
         observer.current.unobserve(triggerRef.current)
       }
     }
-  }, [loadMoreHandler])
+  }, [loadMoreHandler, isLoading, resultsLength, totalResults])
 
   const isTriggerHidden = useMemo(
-    () => searchResults.length && searchResults.length >= totalResults && !isLoading,
-    [searchResults, totalResults, isLoading]
+    () => resultsLength && resultsLength >= totalResults && !isLoading,
+    [resultsLength, totalResults, isLoading]
   )
 
   if (isTriggerHidden) {

@@ -50,7 +50,7 @@ public static class Installer
     private static IServiceCollection AddDbConfigurationServices(this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddOptionsWithValidateOnStart<RedisIndexesVersions>()
+        services.AddOptionsWithValidateOnStart<RedisIndexVersionInfo>()
             .ValidateDataAnnotations()
             .Bind(configuration.GetSection("Redis:IndexesVersions"));
         
@@ -93,6 +93,7 @@ public static class Installer
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddScoped<IPublicationsService, PublicationsService>();
+        services.AddScoped<ICollectionsService, CollectionsService>();
         services.AddScoped<IFiltersService, FiltersService>();
         services.AddScoped<IWordsService, WordsService>();
         services.AddScoped<IDbVersionService, DbVersionService>();

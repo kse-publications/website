@@ -136,7 +136,7 @@ body {
 }
 
 .change-padding-enter {
-  padding-bottom: 128px;
+  padding-bottom: 56px;
   padding-top: 24px;
 }
 
@@ -154,7 +154,7 @@ body {
 }
 
 .change-padding-exit-active {
-  padding-bottom: 128px;
+  padding-bottom: 56px;
   padding-top: 24px;
   transition: padding var(--basic-transition) var(--basic-timing);
 }
@@ -210,4 +210,22 @@ body {
 .line-grow {
   width: 0;
   animation: growLine 1s forwards;
+}
+
+.spinner {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

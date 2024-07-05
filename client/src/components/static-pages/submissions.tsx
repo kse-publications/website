@@ -1,11 +1,12 @@
 import { AnimatedHeadLine } from '../ui/animated-headline'
 import MainPageButton from '../layout/to-main-button'
+import { Button } from '../ui/button'
 
 function SubmissionsPage() {
   return (
     <>
       <MainPageButton />
-      <div className="max-w-4xl mx-auto mb-10 overflow-auto rounded-lg border border-gray-300 bg-white p-6">
+      <div className="mx-auto mb-10 w-full max-w-[1128px] overflow-auto rounded-lg border border-gray-300 bg-white p-6">
         <AnimatedHeadLine>SUBMISSIONS</AnimatedHeadLine>
         <div className="pt-6">
           <p>
@@ -71,7 +72,11 @@ function SubmissionsPage() {
           <p>
             For any inquiries or further assistance, please contact{' '}
             <span className="font-bold">
-              <a href="mailto:publications@kse.org.ua">publications@kse.org.ua</a>
+              <a href="mailto:publications@kse.org.ua">
+                <Button variant="link" className="h-0 p-0 text-base">
+                  publications@kse.org.ua
+                </Button>
+              </a>
             </span>
           </p>
         </div>

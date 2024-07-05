@@ -1,3 +1,4 @@
+import { Button } from '../ui/button'
 import { AnimatedHeadLine } from '../ui/animated-headline'
 import MainPageButton from '../layout/to-main-button'
 
@@ -5,7 +6,7 @@ function TeamPage() {
   return (
     <>
       <MainPageButton />
-      <div className="max-w-4xl mx-auto mb-10 overflow-auto rounded-lg border border-gray-300 bg-white p-6">
+      <div className="mx-auto mb-10 w-full max-w-[1128px] overflow-auto rounded-lg border border-gray-300 bg-white p-6">
         <AnimatedHeadLine>TEAM</AnimatedHeadLine>
         <div className="pt-6">
           <p>
@@ -17,7 +18,9 @@ function TeamPage() {
               className="underline"
               target="_blank"
             >
-              Dr. Larysa Tamilina
+              <Button variant="link" className="h-0 p-0 text-base">
+                Dr. Larysa Tamilina
+              </Button>
             </a>{' '}
             (Associate Professor at KSE). All aspects of the website's creation are supervised and
             guided by{' '}
@@ -26,7 +29,10 @@ function TeamPage() {
               className="underline"
               target="_blank"
             >
-              Mark Motliuk
+              {' '}
+              <Button variant="link" className="h-0 p-0 text-base">
+                Mark Motliuk
+              </Button>
             </a>{' '}
             (KSE BA '25).
           </p>
@@ -37,7 +43,9 @@ function TeamPage() {
               className="underline"
               target="_blank"
             >
-              Anastasia Shevelova
+              <Button variant="link" className="h-0 p-0 text-base">
+                Anastasia Shevelova
+              </Button>
             </a>{' '}
             (KSE BA '25) takes up the position of a content manager.
           </p>
@@ -50,7 +58,9 @@ function TeamPage() {
               className="underline"
               target="_blank"
             >
-              Vlad Prudius
+              <Button variant="link" className="h-0 p-0 text-base">
+                Vlad Prudius
+              </Button>
             </a>{' '}
             (KSE BA '27) and assisted by{' '}
             <a
@@ -58,7 +68,9 @@ function TeamPage() {
               className="underline"
               target="_blank"
             >
-              Anna Opanasenko
+              <Button variant="link" className="h-0 p-0 text-base">
+                Anna Opanasenko
+              </Button>
             </a>{' '}
             (KSE BA '27);
           </p>
@@ -69,7 +81,9 @@ function TeamPage() {
               className="underline"
               target="_blank"
             >
-              Dmytro Kolisnyk
+              <Button variant="link" className="h-0 p-0 text-base">
+                Dmytro Kolisnyk
+              </Button>
             </a>{' '}
             (KSE BA '27) and assisted by{' '}
             <a
@@ -77,7 +91,9 @@ function TeamPage() {
               className="underline"
               target="_blank"
             >
-              Tetiana Stasiuk
+              <Button variant="link" className="h-0 p-0 text-base">
+                Tetiana Stasiuk
+              </Button>
             </a>{' '}
             (KSE MA '24).
           </p>
@@ -89,7 +105,9 @@ function TeamPage() {
               className="underline"
               target="_blank"
             >
-              Viktoriia Verych
+              <Button variant="link" className="h-0 p-0 text-base">
+                Viktoriia Verych
+              </Button>
             </a>{' '}
             (KSE BA '26).
           </p>

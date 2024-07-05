@@ -21,6 +21,6 @@ public interface IEntityRepository<TEntity> where TEntity : Entity
         CancellationToken cancellationToken = default);
     
     Task DeleteAsync(
-        IEnumerable<TEntity> entities,
+        IEnumerable<int> ids,
         CancellationToken cancellationToken = default);
 }

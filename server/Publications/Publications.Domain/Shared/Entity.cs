@@ -23,6 +23,4 @@ public abstract class Entity
     [IgnoreInResponse]
     [JsonInclude]
     public DateTime LastModifiedAt { get; set; }
-    
-    public static string IndexName<T>() => $"{typeof(T).Name.ToLower()}-idx";
 }

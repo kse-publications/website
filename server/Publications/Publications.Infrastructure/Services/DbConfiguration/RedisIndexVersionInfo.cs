@@ -3,7 +3,7 @@ using Publications.Application.Services;
 
 namespace Publications.Infrastructure.Services.DbConfiguration;
 
-public class RedisIndexesVersions
+public class RedisIndexVersionInfo
 {
     [RegularExpression(@"^\d+\.\d+$")] 
     public string Publication { get; set; } = null!;
@@ -14,12 +14,16 @@ public class RedisIndexesVersions
     [RegularExpression(@"^\d+\.\d+$")]
     public string FilterGroup { get; set; } = null!;
     
-    public DbVersion GetIndexVersion(Type type)
+    public DbVersion? GetIndexVersion(Type type)
     {
-        return DbVersion.FromString(GetType()
-            .GetProperty(type.Name)!
-            .GetValue(this)!
-            .ToString()!);
+        string? versionValue = GetType()
+            .GetProperty(type.Name)?
+            .GetValue(this)?
+            .ToString();
+        
+        return versionValue is null 
+            ? null
+            : DbVersion.FromString(versionValue);
     }
     
     public static string GetIndexName(Type type) => $"{type.Name.ToLower()}-idx"; 

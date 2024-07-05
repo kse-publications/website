@@ -1,18 +1,53 @@
 ---
 import '@/styles/globals.css'
-import { getPublication } from '@/services/search/get-publications'
-import PublicationPage from '@/components/publications/publication-section'
+import { DEFAULT_PAGE } from '@/config/search-params'
+import type { PaginatedCollection } from '@/types/common/paginated-collection'
+import type { PublicationSummary } from '@/types/publication-summary/publication-summary'
+
 import Layout from '@/layouts/Layout.astro'
+import PublicationPage from '@/components/publications/publication-section'
+
+import { getPublication } from '@/services/search/get-publications'
+import { getRelatedByAuthors } from '../../services/search/get-publications'
+import { getSimilarPublications } from '../../services/search/get-publications'
 
 const { id } = Astro.params as { id: string }
+let relatedPublications: PaginatedCollection<PublicationSummary>
+let similarPublications: PublicationSummary[]
 
 const clientUuid = Astro.cookies.get('client-uuid')
 
 const data = await getPublication(id, clientUuid?.value).catch((error) => {
   console.log(error)
 })
+
+interface AuthorData {
+  id: number
+  name: string
+}
+
+const authorsIds = data.authors.map((author: AuthorData) => author.id)
+
+const fetchRelatedPublications = async () => {
+  let publications = await getRelatedByAuthors(data.id, DEFAULT_PAGE, authorsIds.join('-'))
+  return publications
+}
+
+const fetchSimilarPublications = async () => {
+  let similar = await getSimilarPublications(data.id)
+  return similar
+}
+
+relatedPublications = await fetchRelatedPublications()
+similarPublications = await fetchSimilarPublications()
 ---
 
 <Layout title=`KSE Publications | ${data.title}`>
-  <PublicationPage data={data} transition:persist client:load />
+  <PublicationPage
+    data={data}
+    relatedPublications={relatedPublications}
+    similarPublications={similarPublications}
+    transition:persist
+    client:load
+  />
 </Layout>

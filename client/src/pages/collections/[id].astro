@@ -1,0 +1,14 @@
+---
+import '@/styles/globals.css'
+import { getDetailedCollection } from '@/services/search/get-collections'
+import Layout from '@/layouts/Layout.astro'
+import CollectionPage from '@/components/collections/collections-section'
+
+const { id } = Astro.params as { id: string }
+
+const collection = await getDetailedCollection(id)
+---
+
+<Layout title=`KSE Publications | ${collection.collection.name}`>
+  <CollectionPage client:load collection={collection} />
+</Layout>

@@ -1,13 +1,11 @@
 ﻿using NRedisStack;
 using NRedisStack.RedisStackCommands;
 using NRedisStack.Search;
-using NRedisStack.Search.Aggregation;
-using Publications.Application.DTOs;
 using Publications.Application.DTOs.Request;
 using Publications.Application.Repositories;
 using Publications.Domain.Filters;
 using Publications.Domain.Publications;
-using Publications.Domain.Shared;
+using Publications.Infrastructure.Services.DbConfiguration;
 using Publications.Infrastructure.Shared;
 using Redis.OM;
 using Redis.OM.Searching;
@@ -46,42 +44,34 @@ public class FiltersRepository: IFiltersRepository
         CancellationToken cancellationToken = default)
     {
         SearchCommands ft = _db.FT();
-        SearchFieldName[] searchFields = Publication.GetSearchableFields()
-            .Select(fieldName => new SearchFieldName(fieldName))
-            .ToArray();
         
         List<Task<Dictionary<string, int>>> aggregationTasks = Publication
             .GetEntityFilters()
             .Select(async entityFilter =>
             {
-                Dictionary<int, int[]> filtersWithoutCurrentGroup = new(filterDTO
-                    .GetParsedFilters());
-                
+                Dictionary<int, int[]> filtersWithoutCurrentGroup = new(filterDTO.GetParsedFilters());
                 filtersWithoutCurrentGroup.Remove(entityFilter.GroupId);
-                
                 var newFilter = FilterDTO.CreateFromFilters(filtersWithoutCurrentGroup);
                 
-                SearchQuery query = SearchQuery
-                    .CreateWithSearch(searchDTO.SearchTerm, searchFields)
-                    .Filter(newFilter);
-                
-                var result = await ft.AggregateAsync(Entity.IndexName<Publication>(),
-                    new AggregationRequest(query.Build())
-                        .Load(new FieldName(entityFilter.PropertyName))
-                        .GroupBy($"@{entityFilter.PropertyName}", Reducers.Count().As("count"))
-                        .Dialect(3));
+                SearchQuery query = SearchQuery.CreateWithSearch(searchDTO.SearchTerm)
+                    .Filter(newFilter.GetParsedFilters());
 
-                return result.GetResults()
-                    .Select(dict => new
-                    {
-                        Value = dict[entityFilter.PropertyName].ToString(),
-                        Count = (int)dict["count"]
-                    })
-                    .ToDictionary(x => x.Value, x => x.Count);  
+                const int maxAllowedLimit = 10_000;
+                var searchResult = await ft.SearchAsync(RedisIndexVersionInfo.GetIndexName(typeof(Publication)), 
+                    new Query(query.Build())
+                        .LimitFields(Publication.GetSearchableFields())
+                        .Limit(0, maxAllowedLimit)
+                        .ReturnFields(entityFilter.PropertyName)
+                        .Dialect(3));
+                
+                Dictionary<string, int> filtersCounts = searchResult.Documents
+                    .GroupBy(d => d[entityFilter.PropertyName].ToString())
+                    .ToDictionary(g => g.Key, g => g.Count());
+                
+                return filtersCounts;
             })
             .ToList();
-
-
+        
         return (await Task.WhenAll(aggregationTasks))
             .SelectMany(dict => dict)
             .ToDictionary(pair => pair.Key, pair => pair.Value);

@@ -5,17 +5,20 @@ import type { PublicationSummary } from '@/types/publication-summary/publication
 import type { IFilter } from '@/types/common/fiters'
 import { SearchBackground } from './search-background'
 import ScrollToTop from 'react-scroll-to-top'
+import type { ICollection } from '@/types/common/collection'
 
 interface SearchSectionProps {
   initialPublications: PaginatedCollection<PublicationSummary>
   isRecent?: boolean
   filters: IFilter[]
+  collections: ICollection[]
 }
 
 export default function SearchSection({
   initialPublications,
   isRecent = false,
   filters,
+  collections,
 }: SearchSectionProps) {
   return (
     <SearchContextProvider
@@ -25,7 +28,7 @@ export default function SearchSection({
       initialIsRecent={isRecent}
     >
       <section className="flex grow flex-col">
-        <SearchBackground />
+        <SearchBackground collections={collections} />
         <SearchResults />
         <ScrollToTop
           smooth

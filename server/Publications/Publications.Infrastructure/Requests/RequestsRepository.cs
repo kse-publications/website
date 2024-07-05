@@ -19,21 +19,52 @@ public class RequestsRepository: IRequestsRepository
         await _dbContext.Requests.AddAsync(request);
         await _dbContext.SaveChangesAsync();
     }
-    
-    public async Task<Dictionary<int, int>> GetResourceViews<TResource>(
+
+    public async Task<Dictionary<int, int>> GetRequestsDistributionAsync<TResource>(
         DateTime? after = null,
         DateTime? before = null,
         bool distinct = true) where TResource : Entity
+    {
+        IQueryable<Request> query = ApplyResourceNameFilter<TResource>(_dbContext.Requests);
+        query = ApplyDateRangeFilter(query, after, before);
+
+        return await query
+            .GroupBy(r => r.ResourceId)
+            .Select(group => new
+            {
+                ResourceId = group.Key,
+                Requests = distinct 
+                    ? group.Select(r => r.SessionId).Distinct().Count() 
+                    : group.Count()
+            })
+            .ToDictionaryAsync(k => k.ResourceId, v => v.Requests);
+    }
+    
+    public async Task<int> GetRequestsCountAsync<TResource>(
+        DateTime? after = null, 
+        DateTime? before = null, 
+        bool distinct = true) where TResource : Entity
+    {
+        IQueryable<Request> query = ApplyResourceNameFilter<TResource>(_dbContext.Requests);
+        query = ApplyDateRangeFilter(query, after, before);
+
+        return distinct 
+            ? await query.Select(r => r.SessionId).Distinct().CountAsync() 
+            : await query.CountAsync();
+    }
+    
+    private IQueryable<Request> ApplyResourceNameFilter<TResource>(IQueryable<Request> query)
+    {
+        string resourceName = ResourceHelper.GetResourceName<TResource>();
+        return query.Where(r => r.ResourceName == resourceName);
+    }
+    
+    private IQueryable<Request> ApplyDateRangeFilter(IQueryable<Request> query, DateTime? after, DateTime? before)
     {
         if (after.HasValue && before.HasValue && after.Value > before.Value)
         {
             throw new ArgumentException("After date cannot be greater than before date.");
         }
-        
-        string resourceName = ResourceHelper.GetResourceName<TResource>();
-
-        var query = _dbContext.Requests
-            .Where(r => r.ResourceName == resourceName);
 
         if (after.HasValue)
         {
@@ -44,16 +75,7 @@ public class RequestsRepository: IRequestsRepository
         {
             query = query.Where(r => r.RequestedAt <= before.Value);
         }
-
-        return await query
-            .GroupBy(r => r.ResourceId)
-            .Select(group => new
-            {
-                ResourceId = group.Key,
-                Views = distinct 
-                    ? group.Select(r => r.SessionId).Distinct().Count() 
-                    : group.Count()
-            })
-            .ToDictionaryAsync(k => k.ResourceId, v => v.Views);
+        
+        return query;
     }
 }
