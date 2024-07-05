@@ -23,13 +23,16 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
     
     private readonly IDatabase _db;
     private readonly IRedisCollection<Publication> _publications;
+    private readonly ICollectionsRepository _collectionsRepository;
     private readonly JsonSerializerOptions _jsonOptions;
     
     public PublicationsRepository(
         IConnectionMultiplexer connection,
-        JsonSerializerOptions jsonOptions) : base(connection)
+        JsonSerializerOptions jsonOptions,
+        ICollectionsRepository collectionsRepository) : base(connection)
     {
         _jsonOptions = jsonOptions;
+        _collectionsRepository = collectionsRepository;
         _db = connection.GetDatabase();
         RedisConnectionProvider provider = new(connection);
         _publications = provider.RedisCollection<Publication>();
@@ -88,6 +91,26 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             Items: publications.AsReadOnly(),
             TotalCount: (int)searchResult.TotalResults,
             ResultCount: publications.Count);
+    }
+
+    public async Task<Publication[]> GetAllMatchedByKeywordsAsync(
+        string[] keywords, CancellationToken cancellationToken = default)
+    {
+        SearchCommands ft = _db.FT();
+        SearchQuery query = SearchQuery.CreateWithSearch(keywords.First());
+        
+        foreach (string keyword in keywords.Skip(1))
+        {
+            query.Or(SearchQuery.CreateWithSearch(keyword).Build());
+        }
+        
+        SearchResult searchResult = await ft.SearchAsync(_publicationIndex, 
+            new Query(query.Build())
+                .LimitFields(nameof(Publication.Title))
+                .Limit(0, 10_000)
+                .Dialect(3));
+
+        return MapToPublication(searchResult).ToArray();
     }
 
     public async Task<PaginatedCollection<PublicationSummary>> GetRelatedByAuthorsAsync(
@@ -149,12 +172,33 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         PaginationDTO paginationDTO,
         CancellationToken cancellationToken = default)
     {
+        Collection? collection = await _collectionsRepository.GetByIdAsync(collectionId, cancellationToken);
+        if (collection is null)
+        {
+            return PaginatedCollection<PublicationSummary>.GetEmpty();
+        }
+
         SearchCommands ft = _db.FT();
-        string query = new SearchField(CollectionId).EqualTo(collectionId);
+        SearchField idField = new(nameof(Publication.Id));
+        SearchQuery query = SearchQuery.CreateWithSearch(collection.Keywords.First());
+        foreach (string keyword in collection.Keywords.Skip(1))
+        {
+            query.Or(SearchQuery.CreateWithSearch(keyword).Build());
+        }
+
+        foreach (int id in collection.GetPublicationIds())
+        {
+            query.Or(idField.EqualTo(id));
+        }
+        
+        foreach (int id in collection.IgnoredPublicationIds)
+        {
+            query.And(idField.NotEqualTo(id));
+        }
         
         SearchResult searchResult = await ft.SearchAsync(_publicationIndex,
-            new Query(query)
-                .SetSortBy(nameof(Publication.Views), ascending: false)
+            new Query(query.Build())
+                .LimitFields(nameof(Publication.Title))
                 .Limit(paginationDTO.GetOffset(), paginationDTO.PageSize)
                 .Dialect(3));
 
@@ -203,6 +247,13 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             .ToArray();
     }
     
+    // public async Task<Publication[]> GetWithNonPopulatedCollectionsAsync()
+    // {
+    //     return (await _publications.Where(p => !p.PopulatedCollections)
+    //         .ToListAsync())
+    //         .ToArray();
+    // }
+    
     public async Task<PublicationSummary[]> GetTopPublicationsByRecentViews(int count = 4)
     {
         var topPublications = await _publications
@@ -243,6 +294,15 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
                     .Deserialize<Publication[]>(json, _jsonOptions)!.First()))
             .ToList();
     }
+    
+    private List<Publication> MapToPublication(SearchResult result)
+    {
+        return result
+            .ToJson()
+            .Select(json => JsonSerializer
+                .Deserialize<Publication[]>(json, _jsonOptions)!.First())
+            .ToList();
+    }
 
     private static string GetPublicationKey(int id) => $"publication:{id}";
 
@@ -255,8 +315,8 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
     private static string AuthorId =>
         $"{nameof(Publication.Authors)}_{nameof(Author.Id)}";
     
-    private static string CollectionId =>
-        $"{nameof(Publication.Collections)}_{nameof(Collection.Id)}";
+    // private static string CollectionId =>
+    //     $"{nameof(Publication.Collections)}_{nameof(Collection.Id)}";
     
     private static string SimilarityVector =>
         $"{nameof(Publication.SimilarityVector)}";

@@ -36,7 +36,7 @@ public class CollectionsRepository: EntityRepository<Collection>, ICollectionsRe
         {
             Id = values.Id,
             LastSynchronizedAt = values.LastModifiedAt,
-            PublicationsIds = Collection.GetPublicationIds(values.PublicationsIds)
+            PublicationsIds = Collection.ParsePublicationIds(values.PublicationsIds)
         }).ToList().AsReadOnly();
     }
 
