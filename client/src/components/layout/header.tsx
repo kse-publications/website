@@ -30,31 +30,33 @@ function Header({ light = false, isSync }: HeaderProps) {
             <MobileMenuDrawer isSync={isSync} menuItems={menuItems} />
           </div>
 
-          <div
-            className={`relative hidden space-x-5 rounded-full border border-white p-0.5 text-[17px] text-white sm:block`}
-          >
+          <nav role="navigation" className="relative hidden sm:block">
             <SyncStatus isSync={isSync} />
-            {menuItems.map((item) => (
-              <a
-                onClick={() => captureEvent('menu_item_click', { item: item.label })}
-                key={item.label}
-                href={item.href}
-                aria-label={`Go to ${item.label} page`}
-              >
-                <Button variant="ghost" className="rounded-full align-middle">
-                  {item.label}
+            <div
+              className={`space-x-5 rounded-full border border-white p-0.5 text-[17px] text-white`}
+            >
+              {menuItems.map((item) => (
+                <a
+                  onClick={() => captureEvent('menu_item_click', { item: item.label })}
+                  key={item.label}
+                  href={item.href}
+                  aria-label={`Go to ${item.label} page`}
+                >
+                  <Button variant="ghost" className="rounded-full align-middle">
+                    {item.label}
+                  </Button>
+                </a>
+              ))}
+              <a href="https://github.com/kse-publications/website" target="_blank">
+                <Button
+                  variant="ghost"
+                  className="h-9 rounded-full px-2 align-middle opacity-70 hover:opacity-100"
+                >
+                  <GitHubLogoIcon className="h-5 w-5" />
                 </Button>
               </a>
-            ))}
-            <a href="https://github.com/kse-publications/website" target="_blank">
-              <Button
-                variant="ghost"
-                className="h-9 rounded-full px-2 align-middle opacity-70 hover:opacity-100"
-              >
-                <GitHubLogoIcon className="h-5 w-5" />
-              </Button>
-            </a>
-          </div>
+            </div>
+          </nav>
         </div>
       </div>
     </header>
