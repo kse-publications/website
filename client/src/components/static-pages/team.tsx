@@ -6,7 +6,7 @@ function TeamPage() {
   return (
     <>
       <MainPageButton />
-      <div className="max-w-4xl mx-auto mb-10 overflow-auto rounded-lg border border-gray-300 bg-white p-6">
+      <div className="mx-auto mb-10 w-full max-w-[1128px] overflow-auto rounded-lg border border-gray-300 bg-white p-6">
         <AnimatedHeadLine>TEAM</AnimatedHeadLine>
         <div className="pt-6">
           <p>
