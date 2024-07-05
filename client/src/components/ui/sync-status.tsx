@@ -32,7 +32,7 @@ export const SyncStatus = ({ isSync: isSyncProps }: SyncStatusProps) => {
 
   return (
     <div className="absolute -left-9 top-1/2 flex -translate-y-1/2 items-center justify-center text-lg text-white">
-      <TooltipProvider>
+      <TooltipProvider delayDuration={100}>
         <Tooltip>
           <TooltipTrigger>
             <div className="spinner"></div>

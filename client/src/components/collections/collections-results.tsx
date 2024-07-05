@@ -32,19 +32,14 @@ export default function CollectionsResults({ collection }: CollectionsResultsPro
 
   return (
     <section>
-      <h1 className="pb-3 pt-6 text-center text-2xl text-black md:text-4xl xl:px-8">
+      <h1 className="pt-6 text-center text-2xl text-black md:text-4xl xl:px-8">
         {`${collection.collection.icon} ${collection.collection.name} collection`}
       </h1>
+      <p className="text-center text-lg text-black opacity-70">
+        {totalCount} {totalCount > 1 ? 'publications' : 'publication'} in collection
+      </p>
 
-      <div className="flex justify-between">
-        <GoBackButton />
-
-        <span className="text-lg text-black opacity-70">
-          {totalCount} {totalCount > 1 ? 'publications' : 'publication'}
-        </span>
-
-        <div></div>
-      </div>
+      <GoBackButton />
 
       {error ? (
         <div className="text-red-500">Error: {error}</div>
