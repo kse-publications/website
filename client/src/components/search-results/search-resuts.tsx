@@ -14,22 +14,26 @@ const breakpointColumnsObj = {
   600: 1,
 }
 
-const SKELETON_CARDS_COUNT = 5
+const SKELETON_CARDS_COUNT = 4
 
 export const SearchResults = () => {
   const { isRecent, error, isLoading, searchResults, totalResults, loadMoreHandler } =
     useSearchContext()
+
+  console.log('searchResults', searchResults.length, totalResults)
 
   return (
     <div className="w-full grow bg-[#f0f0f0] pb-4 pt-8">
       <ScrollIndicator totalCards={totalResults} />
       {isRecent && <MostViewedPublications />}
       <div className="mx-auto max-w-[1160px] px-4">
-        <div className="flex gap-5">
+        <div className="flex flex-col sm:flex-row sm:gap-5">
           <AnimatedHeadLine>
             {isRecent ? 'All publications' : `Found ${totalResults} publications`}
           </AnimatedHeadLine>
-          {isRecent && <p className="p-1 opacity-70">{totalResults} total publications</p>}
+          {isRecent && (
+            <p className="-mt-3 mb-2 pt-1 opacity-70 sm:m-0">{totalResults} total publications</p>
+          )}
         </div>
         {error ? (
           <div className="text-red-500">Error: {error}</div>

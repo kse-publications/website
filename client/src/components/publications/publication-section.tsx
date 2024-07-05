@@ -29,13 +29,13 @@ function PublicationPage({ data, relatedPublications, similarPublications }: Pub
         authors={data.authors.map((author: any) => author.id).join('-')}
       >
         <GoBackButton />
-        <div className="max-w-4xl mx-auto mb-10 overflow-auto rounded-lg border border-gray-300 bg-white p-6">
+        <div className="mx-auto mb-10 w-full max-w-[1128px] overflow-auto rounded-lg border border-gray-300 bg-white p-6">
           <Badge className="mb-3" variant="secondary">
             {data.type}
           </Badge>
           <h1 className="mb-5 text-4xl font-bold text-gray-800">{data.title}</h1>
 
-          <div className="metadata flex flex-row gap-10">
+          <div className="flex flex-col gap-5  sm:flex-row sm:gap-10">
             <div className="year">
               <h4 className="text-l scroll-m-20 font-semibold tracking-tight">Year:</h4> {data.year}
             </div>

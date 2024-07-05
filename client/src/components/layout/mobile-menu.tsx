@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Separator } from '@/components/ui/separator'
-import { ListBulletIcon } from '@radix-ui/react-icons'
+import { HamburgerMenuIcon } from '@radix-ui/react-icons'
 import { captureEvent } from '@/services/posthog/posthog'
 import { SyncStatus } from '../ui/sync-status'
 
@@ -20,7 +20,7 @@ export default function MobileMenuDrawer({ menuItems, isSync }: MobileMenuDrawer
     <Sheet key="top">
       <SheetTrigger asChild>
         <div className="relative">
-          <ListBulletIcon className="h-9 w-9 rounded-full border border-white p-2" color="white" />
+          <HamburgerMenuIcon className="relative -top-1 h-7 w-7" color="white" />
           <SyncStatus isSync={isSync} />
         </div>
       </SheetTrigger>
@@ -32,7 +32,7 @@ export default function MobileMenuDrawer({ menuItems, isSync }: MobileMenuDrawer
                 <Button
                   onClick={() => captureEvent('menu_item_click', { item: item.label })}
                   variant="link"
-                  className="mb-1 mt-1 pl-0"
+                  className="mb-1 mt-1 pl-0 text-lg"
                 >
                   {item.label}
                 </Button>
