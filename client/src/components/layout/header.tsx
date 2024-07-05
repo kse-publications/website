@@ -47,8 +47,11 @@ function Header({ light = false, isSync }: HeaderProps) {
               </a>
             ))}
             <a href="https://github.com/kse-publications/website" target="_blank">
-              <Button variant="ghost" className="h-11 rounded-full px-2 align-middle">
-                <GitHubLogoIcon className="h-7 w-7" />
+              <Button
+                variant="ghost"
+                className="h-9 rounded-full px-2 align-middle opacity-70 hover:opacity-100"
+              >
+                <GitHubLogoIcon className="h-5 w-5" />
               </Button>
             </a>
           </div>
