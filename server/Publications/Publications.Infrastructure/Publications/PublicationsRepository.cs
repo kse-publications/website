@@ -180,8 +180,8 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
 
         SearchCommands ft = _db.FT();
         SearchField idField = new(nameof(Publication.Id));
-        SearchQuery query = SearchQuery.CreateWithSearch(collection.Keywords.First());
-        foreach (string keyword in collection.Keywords.Skip(1))
+        SearchQuery query = SearchQuery.MatchAll();
+        foreach (string keyword in collection.Keywords)
         {
             query.Or(SearchQuery.CreateWithSearch(keyword).Build());
         }
