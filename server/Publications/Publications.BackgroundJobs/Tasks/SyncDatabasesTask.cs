@@ -43,7 +43,8 @@ public class SyncDatabasesTask(
 
     protected override async Task DoRetriableTaskAsync()
     {
-        (_sourcePublications, _sourceCollections) = await sourceRepository.GetPublicationsAndCollectionsAsync();
+        _sourcePublications = await sourceRepository.GetPublicationsAsync();
+        _sourceCollections = await sourceRepository.GetCollectionsAsync();
     }
 
     protected override async Task OnSuccessAsync()
@@ -65,7 +66,7 @@ public class SyncDatabasesTask(
         IList<Publication> newPublications = FindNewEntities(_localPublicationsMetadataDict!, _sourcePublications!);
         HashSet<int> newPublicationIds = newPublications.Select(p => p.Id).ToHashSet();
         IList<Publication> updatedPublications = 
-            GetUpdatedPublications(updatedCollections, newCollections, deletedCollectionIds)
+            GetUpdatedPublications()
                 .Where(p => !newPublicationIds.Contains(p.Id)).ToList();
         
         newPublications = HydratePublications(newPublications);
@@ -111,22 +112,15 @@ public class SyncDatabasesTask(
         _localCollectionsMetadata = await collectionsRepository.GetAllSyncMetadataAsync();
     }
 
-    private IList<Publication> GetUpdatedPublications(
-        IList<Collection> updatedCollections,
-        IList<Collection> newCollections,
-        IEnumerable<int> deletedCollectionIds)
+    private IList<Publication> GetUpdatedPublications()
     {
         var updatedPublications = FindUpdatedEntities(
             _localPublicationsMetadataDict!, _sourcePublications!);
-        
-        var publicationsInUpdatedCollections = FindPublicationsInChangedCollections(
-            updatedCollections, newCollections, deletedCollectionIds);
         
         var publicationsWithUpdatedAuthors = FindPublicationsWithUpdatedAuthors();
         var publicationsWithUpdatedPublishers = FindPublicationsWithUpdatedPublishers();
         
         return updatedPublications
-            .Concat(publicationsInUpdatedCollections)
             .Concat(publicationsWithUpdatedAuthors)
             .Concat(publicationsWithUpdatedPublishers)
             .DistinctBy(p => p.Id)
@@ -136,25 +130,6 @@ public class SyncDatabasesTask(
     private IList<Collection> GetUpdatedCollections()
     {
         return FindUpdatedEntities(_localCollectionsMetadataDict!, _sourceCollections!);
-    }
-    
-    private List<Publication> FindPublicationsInChangedCollections(
-        IList<Collection> updatedCollections,
-        IList<Collection> newCollections,
-        IEnumerable<int> deletedCollectionIds)
-    {
-        HashSet<int> publicationIdsInChangedCollections = updatedCollections
-            .Concat(newCollections)
-            .SelectMany(c => c.GetPublicationIds())
-            .Concat(updatedCollections
-                .SelectMany(c => _localCollectionsMetadataDict![c.Id].PublicationsIds))
-            .ToHashSet();
-        
-        return _sourcePublications!
-            .Where(p => 
-                publicationIdsInChangedCollections.Contains(p.Id) || 
-                p.Collections.Any(c => deletedCollectionIds.Contains(c.Id)))
-            .ToList();
     }
     
     private IList<Publication> FindPublicationsWithUpdatedAuthors()
