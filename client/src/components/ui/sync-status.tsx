@@ -1,10 +1,33 @@
+import { useEffect, useState } from 'react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip'
+import { getSyncStatus } from '@/services/sync/get-sync-status'
 
 interface SyncStatusProps {
   isSync: boolean
 }
 
-export const SyncStatus = ({ isSync }: SyncStatusProps) => {
+const SYNC_POLL_INTERVAL = 10000
+
+export const SyncStatus = ({ isSync: isSyncProps }: SyncStatusProps) => {
+  const [isSync, setIsSync] = useState(isSyncProps)
+
+  useEffect(() => {
+    if (!isSync) return
+
+    const pollSyncStatus = async () => {
+      try {
+        const isSync = await getSyncStatus()
+        setIsSync(isSync)
+      } catch (error) {
+        console.error('Error polling sync status:', error)
+      }
+    }
+
+    const timeout = setTimeout(pollSyncStatus, SYNC_POLL_INTERVAL)
+
+    return () => clearTimeout(timeout)
+  }, [isSync])
+
   if (!isSync) return null
 
   return (
