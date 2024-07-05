@@ -16,11 +16,6 @@ public interface ISourceRepository
     Task<IReadOnlyCollection<Collection>> GetCollectionsAsync();
     
     /// <summary>
-    /// Returns joined publications and collections.
-    /// </summary>
-    Task<(IReadOnlyCollection<Publication>, IReadOnlyCollection<Collection>)> GetPublicationsAndCollectionsAsync();
-    
-    /// <summary>
     /// Returns all authors.
     /// </summary>
     Task<IReadOnlyCollection<Author>> GetAuthorsAsync();

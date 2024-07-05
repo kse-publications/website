@@ -23,6 +23,9 @@ public interface IPublicationsRepository : IEntityRepository<Publication>
         PaginationDTO paginationDTO,
         SearchDTO searchDTO,
         CancellationToken cancellationToken = default);
+    
+    // Task<Publication[]> GetAllMatchedByKeywordsAsync(
+    //     string[] keywords, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Returns paginated collection of publications
@@ -50,6 +53,7 @@ public interface IPublicationsRepository : IEntityRepository<Publication>
     Task<IReadOnlyCollection<SyncEntityMetadata>> GetAllSyncMetadataAsync();
     
     Task<Publication[]> GetNonVectorizedAsync();
+    // Task<Publication[]> GetWithNonPopulatedCollectionsAsync();
     
     Task UpdateAsync(
         int publicationId,

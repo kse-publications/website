@@ -1,5 +1,4 @@
 ﻿using Notion.Client;
-using Publications.Domain.Collections;
 using Publications.Domain.Publications;
 
 namespace Publications.Infrastructure.Source.Models;
@@ -7,7 +6,6 @@ namespace Publications.Infrastructure.Source.Models;
 internal class NotionPublication : Publication
 {
     private readonly string _notionId;
-    private readonly ICollection<Collection> _updatableCollections = [];
 
     private NotionPublication(
         string notionId,
@@ -53,8 +51,6 @@ internal class NotionPublication : Publication
     
     internal string GetNotionId() => _notionId;
     
-    internal void AddCollection(Collection collection) => _updatableCollections.Add(collection);
-    
     internal NotionPublication JoinAuthors(Page page, ICollection<NotionAuthor> authors)
     {
         if (!page.TryGetRelationProperty("Authors", out var authorsRelation))
@@ -89,7 +85,6 @@ internal class NotionPublication : Publication
 
     internal Publication ToPublication()
     {
-        Collections = _updatableCollections.ToArray();
         return this;
     }
 }

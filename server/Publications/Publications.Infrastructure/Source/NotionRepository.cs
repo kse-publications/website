@@ -12,10 +12,10 @@ public class NotionRepository: ISourceRepository
     private readonly INotionClient _notionClient;
     private readonly NotionDatabaseOptions _databaseOptions;
 
-    private IReadOnlyCollection<NotionPublisher>? _publishers;
-    private IReadOnlyCollection<NotionAuthor>? _authors;
-    private IReadOnlyCollection<NotionPublication>? _publications;
-    private IReadOnlyCollection<NotionCollection>? _collections;
+    private NotionPublisher[]? _publishers;
+    private NotionAuthor[]? _authors;
+    private NotionPublication[]? _publications;
+    private NotionCollection[]? _collections;
     
     public NotionRepository(
         INotionClient notionClient, 
@@ -36,18 +36,8 @@ public class NotionRepository: ISourceRepository
     public async Task<IReadOnlyCollection<Collection>> GetCollectionsAsync()
     {
         return (await GetNotionCollectionsAsync())
-            .Select(c => c.ToCollection()).ToList();
-    }
-
-    public async Task<(IReadOnlyCollection<Publication>, IReadOnlyCollection<Collection>)> GetPublicationsAndCollectionsAsync()
-    {
-        var publications = await GetNotionPublicationsAsync();
-        var collections = await GetNotionCollectionsAsync();
-        
-        JoinPublicationsCollections(publications, collections);
-        
-        return (publications.Select(p => p.ToPublication()).ToList().AsReadOnly(),
-            collections.Select(c => c.ToCollection()).ToList().AsReadOnly());
+            .Select(c => c.ToCollection())
+            .ToList();
     }
 
     public async Task<IReadOnlyCollection<Author>> GetAuthorsAsync()
@@ -79,29 +69,29 @@ public class NotionRepository: ISourceRepository
                 .JoinAuthors(page, authors)
                 .JoinPublisher(page, publishers))
             .Where(publication => publication is not null)
-            .ToList()
-            .AsReadOnly()!;
+            .ToArray()!;
         
         return _publications;
     }
 
-    private async Task<IReadOnlyCollection<NotionCollection>> GetNotionCollectionsAsync()
+    private async Task<NotionCollection[]> GetNotionCollectionsAsync()
     {
         if (_collections is not null)
             return _collections;
-        
+
+        var publications = await GetNotionPublicationsAsync();
         List<Page> collectionsPages = await GetAllPagesAsync(_databaseOptions.CollectionsDbId);
         
-        _collections = collectionsPages
+        NotionCollection[] collections = collectionsPages
             .Select(page => NotionCollection.MapFromPage(page))
             .Where(collection => collection is not null)
-            .ToList()
-            .AsReadOnly()!;
+            .ToArray()!;
         
+        _collections = NotionCollection.JoinPublications(collections, publications);
         return _collections;
     }
 
-    private async Task<IReadOnlyCollection<NotionAuthor>> GetNotionAuthorsAsync()
+    private async Task<NotionAuthor[]> GetNotionAuthorsAsync()
     {
         if (_authors is not null)
             return _authors;
@@ -111,13 +101,12 @@ public class NotionRepository: ISourceRepository
         _authors = authorsPages
             .Select(page => NotionAuthor.MapFromPage(page))
             .Where(author => author is not null)
-            .ToList()
-            .AsReadOnly()!;
+            .ToArray()!;
         
         return _authors;
     }
     
-    private async Task<IReadOnlyCollection<NotionPublisher>> GetNotionPublishersAsync()
+    private async Task<NotionPublisher[]> GetNotionPublishersAsync()
     {
         if (_publishers is not null)
             return _publishers;
@@ -127,30 +116,9 @@ public class NotionRepository: ISourceRepository
         _publishers = publishersPages
             .Select(page => NotionPublisher.MapFromPage(page))
             .Where(publisher => publisher is not null)
-            .ToList()
-            .AsReadOnly()!;
+            .ToArray()!;
         
         return _publishers;
-    }
-    
-    private static void JoinPublicationsCollections(
-        IEnumerable<NotionPublication> publications, 
-        IEnumerable<NotionCollection> collections)
-    {
-        Dictionary<string, NotionPublication> publicationsDictionary = publications
-            .ToDictionary(p => p.GetNotionId());
-
-        foreach (var collection in collections)
-        {
-            foreach (var relationId in collection.GetPublicationsRelation())
-            {
-                if (!publicationsDictionary.TryGetValue(relationId.Id, out NotionPublication? publication)) 
-                    continue;
-                
-                publication.AddCollection(collection);
-                collection.AddPublicationId(publication.Id);
-            }
-        }
     }
     
     private async Task<List<Page>> GetAllPagesAsync(string databaseId)
