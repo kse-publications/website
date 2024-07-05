@@ -20,8 +20,6 @@ export const SearchResults = () => {
   const { isRecent, error, isLoading, searchResults, totalResults, loadMoreHandler } =
     useSearchContext()
 
-  console.log('searchResults', searchResults.length, totalResults)
-
   return (
     <div className="w-full grow bg-[#f0f0f0] pb-4 pt-8">
       <ScrollIndicator totalCards={totalResults} />
