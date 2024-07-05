@@ -30,7 +30,7 @@ export const SearchBackground = ({ collections }: SearchBackgroundProps) => {
 
       <CSSTransition in={!isRecent} timeout={400} classNames="change-padding">
         <div
-          className={`relative mx-auto max-w-[1160px] px-4 pt-6 ${isRecent ? 'pb-10 lg:pb-32' : 'pb-6 '}`}
+          className={`relative mx-auto max-w-[1160px] px-4 pt-6 ${isRecent ? 'pb-10 lg:pb-14' : 'pb-6 '}`}
         >
           <CSSTransition in={isRecent} timeout={400} classNames="slide" unmountOnExit>
             <h1

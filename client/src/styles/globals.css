@@ -136,7 +136,7 @@ body {
 }
 
 .change-padding-enter {
-  padding-bottom: 128px;
+  padding-bottom: 56px;
   padding-top: 24px;
 }
 
@@ -154,7 +154,7 @@ body {
 }
 
 .change-padding-exit-active {
-  padding-bottom: 128px;
+  padding-bottom: 56px;
   padding-top: 24px;
   transition: padding var(--basic-transition) var(--basic-timing);
 }
