@@ -28,10 +28,16 @@ public class Collection: Entity
     [IgnoreInResponse] 
     [JsonInclude]
     public string PublicationsIds { get; set; } = string.Empty;
-
-    [Indexed(Sortable = true)]
+    
+    [Indexed]
+    [IgnoreInResponse]
     [JsonInclude]
-    public int PublicationsCount { get; set; }
+    public string[] Keywords { get; set; } = Array.Empty<string>();
+    
+    [Indexed]
+    [IgnoreInResponse]
+    [JsonInclude]
+    public int[] IgnoredPublicationIds { get; set; } = Array.Empty<int>();
     
     [JsonConstructor]
     public Collection(
@@ -51,9 +57,9 @@ public class Collection: Entity
         return this;
     }
     
-    public int[] GetPublicationIds() => GetPublicationIds(PublicationsIds);
+    public int[] GetPublicationIds() => ParsePublicationIds(PublicationsIds);
     
-    public static int[] GetPublicationIds(string publicationIds)
+    public static int[] ParsePublicationIds(string publicationIds)
     {
         return publicationIds.Split(',').Select(int.Parse).ToArray();
     }
@@ -61,6 +67,5 @@ public class Collection: Entity
     protected void SetPublicationIds(int[] publicationIds)
     {
         PublicationsIds = string.Join(',', publicationIds);
-        PublicationsCount = publicationIds.Length;
     }
 }
