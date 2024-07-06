@@ -29,7 +29,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
     public PublicationsRepository(
         IConnectionMultiplexer connection,
         JsonSerializerOptions jsonOptions,
-        ICollectionsRepository collectionsRepository) : base(connection)
+        ICollectionsRepository collectionsRepository) : base(connection, jsonOptions)
     {
         _jsonOptions = jsonOptions;
         _collectionsRepository = collectionsRepository;
@@ -37,6 +37,8 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         RedisConnectionProvider provider = new(connection);
         _publications = provider.RedisCollection<Publication>();
     }
+
+    protected override string GetKey(int id) => $"publication:{id}";
 
     public async Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
         FilterDTO filterDTO, PaginationDTO paginationDTO,
@@ -91,26 +93,6 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             Items: publications.AsReadOnly(),
             TotalCount: (int)searchResult.TotalResults,
             ResultCount: publications.Count);
-    }
-
-    public async Task<Publication[]> GetAllMatchedByKeywordsAsync(
-        string[] keywords, CancellationToken cancellationToken = default)
-    {
-        SearchCommands ft = _db.FT();
-        SearchQuery query = SearchQuery.CreateWithSearch(keywords.First());
-        
-        foreach (string keyword in keywords.Skip(1))
-        {
-            query.Or(SearchQuery.CreateWithSearch(keyword).Build());
-        }
-        
-        SearchResult searchResult = await ft.SearchAsync(_publicationIndex, 
-            new Query(query.Build())
-                .LimitFields(nameof(Publication.Title))
-                .Limit(0, 10_000)
-                .Dialect(3));
-
-        return MapToPublication(searchResult).ToArray();
     }
 
     public async Task<PaginatedCollection<PublicationSummary>> GetRelatedByAuthorsAsync(
@@ -219,7 +201,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         var json = _db.JSON();
         
         await json.SetAsync(
-            key: GetPublicationKey(id), 
+            key: GetKey(id), 
             path: $"$.{propertyName}", 
             json: newValue);
     }
@@ -228,7 +210,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         IEnumerable<int> ids,
         CancellationToken cancellationToken = default)
     {
-        await DeleteAsync(ids, GetPublicationKey, cancellationToken);
+        await DeleteAsync(ids, GetKey, cancellationToken);
     }
     
     public async Task<IReadOnlyCollection<SyncEntityMetadata>> GetAllSyncMetadataAsync()
@@ -246,13 +228,6 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             .ToListAsync())
             .ToArray();
     }
-    
-    // public async Task<Publication[]> GetWithNonPopulatedCollectionsAsync()
-    // {
-    //     return (await _publications.Where(p => !p.PopulatedCollections)
-    //         .ToListAsync())
-    //         .ToArray();
-    // }
     
     public async Task<PublicationSummary[]> GetTopPublicationsByRecentViews(int count = 4)
     {
@@ -295,17 +270,6 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
             .ToList();
     }
     
-    private List<Publication> MapToPublication(SearchResult result)
-    {
-        return result
-            .ToJson()
-            .Select(json => JsonSerializer
-                .Deserialize<Publication[]>(json, _jsonOptions)!.First())
-            .ToList();
-    }
-
-    private static string GetPublicationKey(int id) => $"publication:{id}";
-
     private static string AuthorsName => 
         $"{nameof(Publication.Authors)}_{nameof(Author.Name)}";
     
@@ -314,9 +278,6 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
     
     private static string AuthorId =>
         $"{nameof(Publication.Authors)}_{nameof(Author.Id)}";
-    
-    // private static string CollectionId =>
-    //     $"{nameof(Publication.Collections)}_{nameof(Collection.Id)}";
     
     private static string SimilarityVector =>
         $"{nameof(Publication.SimilarityVector)}";

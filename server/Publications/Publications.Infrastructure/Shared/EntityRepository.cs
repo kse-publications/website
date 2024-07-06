@@ -1,4 +1,5 @@
-﻿using NRedisStack;
+﻿using System.Text.Json;
+using NRedisStack;
 using NRedisStack.RedisStackCommands;
 using Publications.Application.DTOs.Response;
 using Publications.Domain.Shared;
@@ -9,25 +10,32 @@ using StackExchange.Redis;
 
 namespace Publications.Infrastructure.Shared;
 
-public class EntityRepository<TEntity> where TEntity : Entity
+public abstract class EntityRepository<TEntity> where TEntity : Entity
 {
     private readonly IRedisCollection<TEntity> _collection;
     private readonly RedisAggregationSet<TEntity> _aggregationSet;
     private readonly IDatabase _db;
+    private readonly JsonSerializerOptions _options;
         
-    protected EntityRepository(IConnectionMultiplexer connection)
+    protected EntityRepository(
+        IConnectionMultiplexer connection, 
+        JsonSerializerOptions jsonOptions)
     {
         RedisConnectionProvider provider = new(connection);
         _collection = provider.RedisCollection<TEntity>();
         _aggregationSet = provider.AggregationSet<TEntity>();
         _db = connection.GetDatabase();
+        _options = jsonOptions;
     }
+
+    protected abstract string GetKey(int id);
     
     public async Task<TEntity?> GetByIdAsync(
         int resourceId, 
         CancellationToken cancellationToken = default)
     {
-        return await _collection.FindByIdAsync(resourceId.ToString());
+        JsonCommands json = _db.JSON();
+        return await json.GetAsync<TEntity>(GetKey(resourceId), serializerOptions: _options);
     }
 
     public virtual async Task<IReadOnlyCollection<SiteMapResourceMetadata>> GetSiteMapMetadataAsync(
