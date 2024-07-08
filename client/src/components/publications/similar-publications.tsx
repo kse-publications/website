@@ -16,7 +16,7 @@ export default function SimilarPublicationsResults({ similarResults }: SimilarPu
   return (
     <div className="more-publications mb-10">
       <div className="mb-5 flex content-center gap-5">
-        <h3 className="w-fit text-center text-2xl font-bold">Similar publications</h3>
+        <h3 className="w-fit text-center text-2xl font-bold">Recommended</h3>
         <p className="flex items-center pl-1 pt-1 opacity-70">
           {similarResults.length} publications found
         </p>
