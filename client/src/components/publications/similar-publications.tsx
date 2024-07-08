@@ -28,6 +28,9 @@ export default function SimilarPublicationsResults({ similarResults }: SimilarPu
           ))}
         </Masonry>
       }
+      <p className="pt-2 text-center text-sm text-muted-foreground">
+        You have reached the end of the list
+      </p>
     </div>
   )
 }
