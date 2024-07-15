@@ -15,7 +15,7 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.0-preview.4.24266.19" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.0-preview.6.24327.7" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
         <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.6.2" />
     </ItemGroup>
