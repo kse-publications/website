@@ -13,7 +13,7 @@
     <ItemGroup>
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0-preview.3.24172.4" />
       <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.0-preview.4.24266.19" />
-      <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="9.0.0-preview.4.24266.19" />
+      <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="9.0.0-preview.6.24327.7" />
       <PackageReference Include="Notion.Net" Version="4.2.0" />
         <PackageReference Include="dotnet-stop-words" Version="1.1.0" />
         <PackageReference Include="NRedisStack" Version="0.12.0" />
