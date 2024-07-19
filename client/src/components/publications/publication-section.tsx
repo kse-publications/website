@@ -1,17 +1,20 @@
 export const prerender = true
+import { ChevronRightIcon } from '@radix-ui/react-icons'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { buttonVariants } from '@/components/ui/button'
-import type { Publication } from '@/types/publication/publication'
-import { ChevronRightIcon } from '@radix-ui/react-icons'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-import GoBackButton from '../layout/go-back-button'
+import type { Publication } from '@/types/publication/publication'
 import type { PaginatedCollection } from '@/types/common/paginated-collection'
 import type { PublicationSummary } from '@/types/publication-summary/publication-summary'
 
+import GoBackButton from '../layout/go-back-button'
 import RelatedAuthorsContextProvider from '../related-by-authors-results/authors-context'
 import RelatedAuthorsResults from '../related-by-authors-results/authors-results'
 import SimilarPublicationsResults from './similar-publications'
+import { AnimatedHeadLine } from '../ui/animated-headline'
 
 interface PublicationPageProps {
   data: Publication
@@ -35,7 +38,7 @@ function PublicationPage({ data, relatedPublications, similarPublications }: Pub
           </Badge>
           <h1 className="mb-5 text-4xl font-bold text-gray-800">{data.title}</h1>
 
-          <div className="flex flex-col gap-5  sm:flex-row sm:gap-10">
+          <div className="flex flex-col gap-5 sm:flex-row sm:gap-10">
             <div className="year">
               <h4 className="text-l scroll-m-20 font-semibold tracking-tight">Year:</h4> {data.year}
             </div>
@@ -80,10 +83,40 @@ function PublicationPage({ data, relatedPublications, similarPublications }: Pub
             </div>
           )}
         </div>
-        {similarPublications?.length > 0 && (
-          <SimilarPublicationsResults similarResults={similarPublications} />
+        {similarPublications?.length > 0 && relatedPublications?.totalCount > 0 && (
+          <>
+            <Tabs defaultValue="author">
+              <div className="flex items-start gap-5">
+                <AnimatedHeadLine>Other publications by</AnimatedHeadLine>
+                <p className="text-black opacity-70">
+                  <TabsContent value="topic">
+                    {similarPublications.length} publications found
+                  </TabsContent>
+                  <TabsContent value="author">
+                    {relatedPublications.totalCount} publications found
+                  </TabsContent>
+                </p>
+              </div>
+              <TabsList className="my-2">
+                <TabsTrigger className="!py-2 px-4 text-xl" value="author">
+                  Author
+                </TabsTrigger>
+                <TabsTrigger className="!py-2 px-4 text-xl" value="topic">
+                  Topic
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="author">
+                <RelatedAuthorsResults hideHeadline />
+              </TabsContent>
+              <TabsContent value="topic">
+                <SimilarPublicationsResults hideHeadline similarResults={similarPublications} />
+              </TabsContent>
+            </Tabs>
+          </>
         )}
-        {relatedPublications?.totalCount > 0 && <RelatedAuthorsResults />}
+        {similarPublications?.length == 0 && relatedPublications?.totalCount > 0 && (
+          <RelatedAuthorsResults />
+        )}
       </RelatedAuthorsContextProvider>
     </>
   )

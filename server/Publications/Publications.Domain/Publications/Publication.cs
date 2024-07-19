@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using Publications.Domain.Collections;
 using Publications.Domain.Filters;
 using Publications.Domain.Shared;
 using Publications.Domain.Shared.Serialization;
@@ -71,12 +70,6 @@ public class Publication: Entity
     [JsonInclude]
     public Filter[] Filters { get; set; } = Array.Empty<Filter>();
     
-    [Indexed(JsonPath = "$.Id")]
-    [Searchable(JsonPath = "$.Name", Weight = 0.8)]
-    [JsonInclude]
-    [IgnoreInResponse]
-    public Collection[] Collections { get; set; } = Array.Empty<Collection>();
-    
     [Indexed(Sortable = true)]
     [JsonInclude]
     [IgnoreInResponse]
@@ -135,12 +128,10 @@ public class Publication: Entity
         $"{nameof(SearchableKeywords)}_{nameof(Keyword.Value)}",
         $"{nameof(Authors)}_{nameof(Author.Name)}",
         $"{nameof(Publisher)}_{nameof(Publisher.Name)}",
-        $"{nameof(Collections)}_{nameof(Collection.Name)}"
     ];
 
     public string GetSimilarityValue() =>
         string.Join(" ", Enumerable.Repeat(Title, 2)) + " " +
         string.Join(" ", Keywords) + " " +
-        string.Join(" ", Collections.Select(c => c.Name)) + " " +
         AbstractText;
 }

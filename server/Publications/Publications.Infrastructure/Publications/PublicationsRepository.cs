@@ -23,17 +23,22 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
     
     private readonly IDatabase _db;
     private readonly IRedisCollection<Publication> _publications;
+    private readonly ICollectionsRepository _collectionsRepository;
     private readonly JsonSerializerOptions _jsonOptions;
     
     public PublicationsRepository(
         IConnectionMultiplexer connection,
-        JsonSerializerOptions jsonOptions) : base(connection)
+        JsonSerializerOptions jsonOptions,
+        ICollectionsRepository collectionsRepository) : base(connection, jsonOptions)
     {
         _jsonOptions = jsonOptions;
+        _collectionsRepository = collectionsRepository;
         _db = connection.GetDatabase();
         RedisConnectionProvider provider = new(connection);
         _publications = provider.RedisCollection<Publication>();
     }
+
+    protected override string GetKey(int id) => $"publication:{id}";
 
     public async Task<PaginatedCollection<PublicationSummary>> GetAllAsync(
         FilterDTO filterDTO, PaginationDTO paginationDTO,
@@ -149,12 +154,33 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         PaginationDTO paginationDTO,
         CancellationToken cancellationToken = default)
     {
+        Collection? collection = await _collectionsRepository.GetByIdAsync(collectionId, cancellationToken);
+        if (collection is null)
+        {
+            return PaginatedCollection<PublicationSummary>.GetEmpty();
+        }
+
         SearchCommands ft = _db.FT();
-        string query = new SearchField(CollectionId).EqualTo(collectionId);
+        SearchField idField = new(nameof(Publication.Id));
+        SearchQuery query = SearchQuery.MatchAll();
+        foreach (string keyword in collection.Keywords)
+        {
+            query.Or(SearchQuery.CreateWithSearch(keyword).Build());
+        }
+
+        foreach (int id in collection.GetPublicationIds())
+        {
+            query.Or(idField.EqualTo(id));
+        }
+        
+        foreach (int id in collection.IgnoredPublicationIds)
+        {
+            query.And(idField.NotEqualTo(id));
+        }
         
         SearchResult searchResult = await ft.SearchAsync(_publicationIndex,
-            new Query(query)
-                .SetSortBy(nameof(Publication.Views), ascending: false)
+            new Query(query.Build())
+                .LimitFields(nameof(Publication.Title))
                 .Limit(paginationDTO.GetOffset(), paginationDTO.PageSize)
                 .Dialect(3));
 
@@ -175,7 +201,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         var json = _db.JSON();
         
         await json.SetAsync(
-            key: GetPublicationKey(id), 
+            key: GetKey(id), 
             path: $"$.{propertyName}", 
             json: newValue);
     }
@@ -184,7 +210,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         IEnumerable<int> ids,
         CancellationToken cancellationToken = default)
     {
-        await DeleteAsync(ids, GetPublicationKey, cancellationToken);
+        await DeleteAsync(ids, GetKey, cancellationToken);
     }
     
     public async Task<IReadOnlyCollection<SyncEntityMetadata>> GetAllSyncMetadataAsync()
@@ -243,9 +269,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
                     .Deserialize<Publication[]>(json, _jsonOptions)!.First()))
             .ToList();
     }
-
-    private static string GetPublicationKey(int id) => $"publication:{id}";
-
+    
     private static string AuthorsName => 
         $"{nameof(Publication.Authors)}_{nameof(Author.Name)}";
     
@@ -254,9 +278,6 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
     
     private static string AuthorId =>
         $"{nameof(Publication.Authors)}_{nameof(Author.Id)}";
-    
-    private static string CollectionId =>
-        $"{nameof(Publication.Collections)}_{nameof(Collection.Id)}";
     
     private static string SimilarityVector =>
         $"{nameof(Publication.SimilarityVector)}";

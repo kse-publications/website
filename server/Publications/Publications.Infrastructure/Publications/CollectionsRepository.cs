@@ -1,4 +1,5 @@
-﻿using Publications.Application.DTOs.Response;
+﻿using System.Text.Json;
+using Publications.Application.DTOs.Response;
 using Publications.Application.Repositories;
 using Publications.Domain.Collections;
 using Publications.Infrastructure.Shared;
@@ -11,13 +12,17 @@ namespace Publications.Infrastructure.Publications;
 public class CollectionsRepository: EntityRepository<Collection>, ICollectionsRepository
 {
     private readonly IRedisCollection<Collection> _collections;
-    public CollectionsRepository(IConnectionMultiplexer connection) 
-        : base(connection)
+    public CollectionsRepository(
+        IConnectionMultiplexer connection,
+        JsonSerializerOptions jsonOptions) 
+        : base(connection, jsonOptions)
     {
         RedisConnectionProvider provider = new(connection);
         _collections = provider.RedisCollection<Collection>();
     }
-    
+
+    protected override string GetKey(int id) => $"collection:{id}";
+
     public async Task<IReadOnlyCollection<Collection>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
@@ -36,7 +41,7 @@ public class CollectionsRepository: EntityRepository<Collection>, ICollectionsRe
         {
             Id = values.Id,
             LastSynchronizedAt = values.LastModifiedAt,
-            PublicationsIds = Collection.GetPublicationIds(values.PublicationsIds)
+            PublicationsIds = Collection.ParsePublicationIds(values.PublicationsIds)
         }).ToList().AsReadOnly();
     }
 
@@ -44,8 +49,6 @@ public class CollectionsRepository: EntityRepository<Collection>, ICollectionsRe
         IEnumerable<int> ids, 
         CancellationToken cancellationToken = default)
     {
-        await DeleteAsync(ids, GetCollectionKey, cancellationToken);
+        await DeleteAsync(ids, GetKey, cancellationToken);
     }
-
-    private static string GetCollectionKey(int id) => $"collection:{id}";
 }

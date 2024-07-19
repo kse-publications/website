@@ -7,14 +7,13 @@ interface AnimatedCardWrapperProps {
 }
 
 export const AnimatedCardWrapper = ({ children, className }: AnimatedCardWrapperProps) => {
-  const [isVisible, setIsVisible] = useState(false)
-  const ref = useRef(null)
+  const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry], observer) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true)
+        if (entry.isIntersecting && ref.current) {
+          ref.current.classList.add('in-view')
           observer.disconnect()
         }
       },
@@ -35,7 +34,7 @@ export const AnimatedCardWrapper = ({ children, className }: AnimatedCardWrapper
   return (
     <Card
       ref={ref}
-      className={`${isVisible ? 'in-view' : 'noscript-in-view'} search-result-item mb-2 h-full p-4 shadow-none transition-all ease-linear hover:bg-accent hover:shadow-lg`}
+      className={`search-result-item mb-2 h-full p-4 shadow-none transition-all ease-linear hover:bg-accent hover:shadow-lg`}
     >
       {children}
     </Card>

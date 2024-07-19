@@ -15,7 +15,7 @@ export const CollectionList = ({ collections }: CollectionListProps) => {
   }
 
   return (
-    <nav aria-label="collections" className="mx-auto mt-[54px]">
+    <nav aria-label="collections" className="mx-auto mt-[77px]">
       <ul className="flex flex-wrap justify-center gap-4">
         {collections.map((collection) => (
           <li key={collection.id}>
@@ -24,7 +24,10 @@ export const CollectionList = ({ collections }: CollectionListProps) => {
               href={`/collections/${collection.slug}`}
               onClick={() => captureEvent('collection_click', { collection: collection.slug })}
             >
-              <Button className="button flex items-center gap-3 rounded-lg bg-yellow px-4 py-2 text-black transition-colors hover:bg-[#ffe629]">
+              <Button
+                variant="ghost"
+                className="flex items-center gap-3 rounded-full border border-white text-white hover:text-black"
+              >
                 <span>{collection.icon}</span>
                 <h3>{collection.name}</h3>
                 <ArrowRightIcon className="h-5 w-5" />

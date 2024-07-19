@@ -11,18 +11,24 @@ const breakpointColumnsObj = {
   600: 1,
 }
 
+interface RelatedAuthorsResultsProps {
+  hideHeadline?: boolean
+}
+
 const SKELETON_CARDS_COUNT = 5
 
-export default function RelatedAuthorsResults() {
+export default function RelatedAuthorsResults({ hideHeadline }: RelatedAuthorsResultsProps) {
   const { error, isLoading, relatedResults, totalResults, loadMoreHandler } =
     useRelatedAuthorsContext()
 
   return (
     <div className="more-publications mb-10">
-      <div className="mb-5 flex content-center gap-5">
-        <h3 className="w-fit text-center text-2xl font-bold">Other publications by authors</h3>
-        <p className="flex items-center pl-1 pt-1 opacity-70">{totalResults} publications found</p>
-      </div>
+      {!hideHeadline && (
+        <div className="mb-5 flex items-center gap-5">
+          <h3 className="w-fit text-center text-2xl font-bold">Related by autor</h3>
+          <p className="mt-0.5 text-black opacity-70">{totalResults} publications found</p>
+        </div>
+      )}
       {error ? (
         <div className="text-red-500">Error: {error}</div>
       ) : (

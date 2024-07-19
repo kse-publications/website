@@ -22,7 +22,7 @@ export const MostViewedPublications = () => {
   return (
     <div className="mx-auto mb-10 max-w-[1160px] px-4">
       <div className="flex flex-col md:flex-row md:gap-5">
-        <AnimatedHeadLine>Most viewed publications for the past month</AnimatedHeadLine>
+        <AnimatedHeadLine>Trending</AnimatedHeadLine>
         <p className="-mt-3 mb-2 pt-1 opacity-70 md:m-0">
           {recentStats?.recentViewsCount} total views
         </p>
