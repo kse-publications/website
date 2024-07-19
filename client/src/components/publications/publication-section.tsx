@@ -14,6 +14,7 @@ import GoBackButton from '../layout/go-back-button'
 import RelatedAuthorsContextProvider from '../related-by-authors-results/authors-context'
 import RelatedAuthorsResults from '../related-by-authors-results/authors-results'
 import SimilarPublicationsResults from './similar-publications'
+import { AnimatedHeadLine } from '../ui/animated-headline'
 
 interface PublicationPageProps {
   data: Publication
@@ -83,18 +84,35 @@ function PublicationPage({ data, relatedPublications, similarPublications }: Pub
           )}
         </div>
         {similarPublications?.length > 0 && relatedPublications?.totalCount > 0 && (
-          <Tabs defaultValue="related">
-            <TabsList>
-              <TabsTrigger value="related">Related</TabsTrigger>
-              <TabsTrigger value="recommended">Recommended</TabsTrigger>
-            </TabsList>
-            <TabsContent value="related">
-              <RelatedAuthorsResults />
-            </TabsContent>
-            <TabsContent value="recommended">
-              <SimilarPublicationsResults similarResults={similarPublications} />
-            </TabsContent>
-          </Tabs>
+          <>
+            <Tabs defaultValue="author">
+              <div className="flex items-start gap-5">
+                <AnimatedHeadLine>Other publications by</AnimatedHeadLine>
+                <p className="text-black opacity-70">
+                  <TabsContent value="topic">
+                    {similarPublications.length} publications found
+                  </TabsContent>
+                  <TabsContent value="author">
+                    {relatedPublications.totalCount} publications found
+                  </TabsContent>
+                </p>
+              </div>
+              <TabsList className="my-2">
+                <TabsTrigger className="!py-2 px-4 text-xl" value="author">
+                  Author
+                </TabsTrigger>
+                <TabsTrigger className="!py-2 px-4 text-xl" value="topic">
+                  Topic
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="author">
+                <RelatedAuthorsResults hideHeadline />
+              </TabsContent>
+              <TabsContent value="topic">
+                <SimilarPublicationsResults hideHeadline similarResults={similarPublications} />
+              </TabsContent>
+            </Tabs>
+          </>
         )}
         {similarPublications?.length == 0 && relatedPublications?.totalCount > 0 && (
           <RelatedAuthorsResults />
