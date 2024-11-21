@@ -25,7 +25,7 @@ export default function RelatedAuthorsResults({ hideHeadline }: RelatedAuthorsRe
     <div className="more-publications mb-10">
       {!hideHeadline && (
         <div className="mb-5 flex items-center gap-5">
-          <h3 className="w-fit text-center text-2xl font-bold">Related by autor</h3>
+          <h3 className="w-fit text-center text-2xl font-bold">Related by author</h3>
           <p className="mt-0.5 text-black opacity-70">{totalResults} publications found</p>
         </div>
       )}
