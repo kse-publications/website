@@ -26,6 +26,6 @@ recentStats = await fetchRecentStatistics()
   <AboutPage
     totalPublication={overallStats?.totalPublicationsCount || 0}
     totalSearches={overallStats?.totalSearchesCount || 0}
-    publicationViews={recentStats?.recentViewsCount || 0}
+    publicationViews={overallStats?.totalViewsCount || 0}
   />
 </Layout>
