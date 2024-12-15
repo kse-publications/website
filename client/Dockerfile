@@ -21,7 +21,7 @@ ENV PUBLIC_DISABLE_COLLECTIONS=$PUBLIC_DISABLE_COLLECTIONS
 
 COPY package*.json ./
 
-RUN npm ci --audit=false --fund=false
+RUN npm ci --audit=false --fund=false --force
 
 FROM base AS build
 COPY . .
