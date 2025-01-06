@@ -16,7 +16,9 @@ export const SearchResultItem = ({ publication }: { publication: PublicationSumm
           <Badge className="text-left">{publication.year}</Badge>
           <Badge className="text-left">{publication.type}</Badge>
         </div>
-        <CardTitle className="mb-4 text-left">{publication.title}</CardTitle>
+        <CardTitle className="mb-4 break-keep text-left">
+          {publication.title.replace(/(\S+)-(\S+)/g, '$1‑$2')}
+        </CardTitle>
         <CardDescription className="mb-1.5 text-left">
           Publisher: {publication.publisher}
         </CardDescription>
