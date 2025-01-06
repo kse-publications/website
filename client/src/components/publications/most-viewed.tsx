@@ -27,7 +27,7 @@ export const MostViewedPublications = () => {
           {recentStats?.recentViewsCount} total views
         </p>
       </div>
-      <p>
+      <div>
         {recentStats?.topRecentlyViewedPublications.length > 0 && (
           <>
             <Masonry breakpointCols={breakpointColumnsObj} className="masonry-grid">
@@ -37,7 +37,7 @@ export const MostViewedPublications = () => {
             </Masonry>
           </>
         )}
-      </p>
+      </div>
     </div>
   )
 }
