@@ -28,6 +28,7 @@ const PostHog = ({ pageVisitEvent }: PostHogProps) => {
     window.posthog = posthog
 
     captureEvent('page_visit', { page: pageVisitEvent })
+    captureEvent('$pageview')
   }, [])
   return <></>
 }
