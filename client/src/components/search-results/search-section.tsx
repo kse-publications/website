@@ -4,7 +4,7 @@ import type { PaginatedCollection } from '@/types/common/paginated-collection'
 import type { PublicationSummary } from '@/types/publication-summary/publication-summary'
 import type { IFilter } from '@/types/common/fiters'
 import { SearchBackground } from './search-background'
-import ScrollToTop from 'react-scroll-to-top'
+import ScrollToTop from '@/components/search-results/scroll-to-top-button.tsx'
 import type { ICollection } from '@/types/common/collection'
 
 interface SearchSectionProps {
@@ -30,12 +30,7 @@ export default function SearchSection({
       <section className="flex grow flex-col">
         <SearchBackground collections={collections} />
         <SearchResults />
-        <ScrollToTop
-          smooth
-          height="15px"
-          className="flex items-center justify-center"
-          style={{ borderRadius: '50%' }}
-        />
+        <ScrollToTop smooth />
       </section>
     </SearchContextProvider>
   )
