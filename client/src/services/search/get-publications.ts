@@ -48,7 +48,8 @@ export const searchPublications = async ({
 
 export const getPublication = async (id: string, clientUuid?: string): Promise<any> => {
   const BASE_URL = getBaseUrl()
-  const response = await fetch(`${BASE_URL}/publications/${id}`, {
+  const cleanId = id.replace(/[^a-zA-Z0-9-]/g, '')
+  const response = await fetch(`${BASE_URL}/publications/${cleanId}`, {
     headers: clientUuid
       ? {
           'Client-Uuid': clientUuid,
