@@ -17,9 +17,14 @@ let similarPublications: PublicationSummary[]
 
 const clientUuid = Astro.cookies.get('client-uuid')
 
-const data = await getPublication(id, clientUuid?.value).catch((error) => {
+const { status, data } = await getPublication(id, clientUuid?.value).catch((error) => {
   console.log(error)
+  return { status: 500, data: null }
 })
+
+if (status === 404) {
+  return Astro.redirect('/404')
+}
 
 interface AuthorData {
   id: number

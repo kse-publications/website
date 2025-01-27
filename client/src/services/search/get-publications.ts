@@ -48,13 +48,15 @@ export const searchPublications = async ({
 
 export const getPublication = async (id: string, clientUuid?: string): Promise<any> => {
   const BASE_URL = getBaseUrl()
-  return fetch(`${BASE_URL}/publications/${id}`, {
+  const response = await fetch(`${BASE_URL}/publications/${id}`, {
     headers: clientUuid
       ? {
           'Client-Uuid': clientUuid,
         }
       : {},
-  }).then((response) => response.json())
+  })
+  const data = await response.json()
+  return { status: response.status, data }
 }
 
 export const getRelatedByAuthors = async (
