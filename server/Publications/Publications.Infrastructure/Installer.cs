@@ -36,8 +36,13 @@ public static class Installer
     private static IServiceCollection AddRedis(this IServiceCollection services,
         IConfiguration configuration)
     {
+        var redisPassword = configuration["Redis:Password"];
+        if (string.IsNullOrWhiteSpace(redisPassword))
+            throw new InvalidOperationException("Redis password was not provided.");
+
+        var connectionString = configuration.GetConnectionString("Redis")!;
         var connectionMultiplexer = ConnectionMultiplexer
-            .Connect(configuration.GetConnectionString("Redis")!);
+            .Connect($"{connectionString},password={redisPassword}");
         
         services.AddSingleton<IConnectionMultiplexer>(connectionMultiplexer);
         

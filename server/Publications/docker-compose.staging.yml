@@ -17,6 +17,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Staging
       - Notion__AuthToken=${NOTION_AUTH_TOKEN}
       - DbSync__Key=${DB_SYNC_KEY}
+      - Redis__Password=${REDIS_PASSWORD}
     volumes:
       - sqlite-data-staging:/app/sqlite_db
 
@@ -24,11 +25,15 @@ services:
     image: redis/redis-stack
     container_name: redis.staging
     restart: on-failure
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_ARGS=--requirepass ${REDIS_PASSWORD}
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     volumes:
       - redis-data-staging:/data
 
