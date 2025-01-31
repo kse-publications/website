@@ -6,6 +6,7 @@ namespace Publications.Infrastructure.Source.Models;
 internal class NotionPublication : Publication
 {
     private readonly string _notionId;
+    private readonly List<ObjectId> _collectionsRelation;
 
     private NotionPublication(
         string notionId,
@@ -15,10 +16,12 @@ internal class NotionPublication : Publication
         int year,
         string link,
         string abstractText,
-        DateTime lastModifiedAt) 
+        DateTime lastModifiedAt,
+        List<ObjectId> collectionsRelation) 
         : base(id, title, type, year, link, abstractText, lastModifiedAt)
     {
         _notionId = notionId;
+        _collectionsRelation = collectionsRelation;
     }
     
     internal static NotionPublication? MapFromPage(Page page)
@@ -31,7 +34,8 @@ internal class NotionPublication : Publication
               page.TryGetRichTextProperty("Abstract", out string abstractText) &&
               page.TryGetCheckBoxProperty("Visible", out bool visible) && visible))
             return null;
-        
+
+        var collections = page.GetRelationPropertyOrDefault("Collections");
         return new NotionPublication(
             notionId: page.Id,
             id: id,
@@ -40,7 +44,8 @@ internal class NotionPublication : Publication
             year: (int)year,
             link: url,
             abstractText: abstractText,
-            lastModifiedAt: page.LastEditedTime)
+            lastModifiedAt: page.LastEditedTime,
+            collectionsRelation: collections)
         {
             Language = page.GetSelectPropertyOrDefault("Language"),
             SearchableKeywords = page.GetSeparatedRichTextProperty("Keywords", ',')
@@ -50,6 +55,7 @@ internal class NotionPublication : Publication
     }
     
     internal string GetNotionId() => _notionId;
+    internal List<ObjectId> GetCollectionsRelation() => _collectionsRelation;
     
     internal NotionPublication JoinAuthors(Page page, ICollection<NotionAuthor> authors)
     {

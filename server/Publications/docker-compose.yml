@@ -17,25 +17,31 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - Notion__AuthToken=${NOTION_AUTH_TOKEN}
       - DbSync__Key=${DB_SYNC_KEY}
+      - Redis__Password=${REDIS_PASSWORD}
     volumes:
       - sqlite-data-production:/app/sqlite_db
     networks:
-      - backend-network
       - prod-network
 
   redis:
     image: redis/redis-stack
     container_name: redis.production
     restart: on-failure
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_ARGS=--requirepass ${REDIS_PASSWORD}
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    ports:
+      - "8001:8001"
     volumes:
       - redis-data-production:/data
     networks:
-      - backend-network
+      - prod-network
 
 volumes:
   redis-data-production:
@@ -45,5 +51,3 @@ networks:
   prod-network:
     external: true
     name: prod-network
-  backend-network:
-    driver: bridge
