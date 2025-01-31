@@ -181,6 +181,7 @@ public class PublicationsRepository: EntityRepository<Publication>, IPublication
         SearchResult searchResult = await ft.SearchAsync(_publicationIndex,
             new Query(query.Build())
                 .LimitFields(nameof(Publication.Title))
+                .SetSortBy(nameof(Publication.Year), ascending: false)
                 .Limit(paginationDTO.GetOffset(), paginationDTO.PageSize)
                 .Dialect(3));
 
