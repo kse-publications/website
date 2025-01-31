@@ -5,18 +5,23 @@ namespace Publications.Infrastructure.Source.Models;
 
 internal class NotionCollection : Collection
 {
+    private readonly string _notionId;
     private readonly List<ObjectId> _publicationsRelation;
     private readonly List<int> _publicationsIds = [];
     private List<ObjectId> _ignoredPublicationsRelation = [];
     private readonly List<int> _ignoredPublicationsIds = [];
+    
+    internal string GetNotionId() => _notionId;
 
     private NotionCollection(
+        string notionId,
         int id,
         string name,
         DateTime lastModifiedAt,
         List<ObjectId> publicationsRelation) 
         : base(id, name, lastModifiedAt)
     {
+        _notionId = notionId;
         _publicationsRelation = publicationsRelation;
     }
     
@@ -29,6 +34,7 @@ internal class NotionCollection : Collection
             return null;
 
         return new NotionCollection(
+            notionId: page.Id,
             id: id,
             name: name,
             lastModifiedAt: page.LastEditedTime,
@@ -45,30 +51,37 @@ internal class NotionCollection : Collection
         IEnumerable<NotionCollection> collections,
         IEnumerable<NotionPublication> publications)
     {
-        Dictionary<string, int> publicationsDictionary = publications
-            .ToDictionary(p => p.GetNotionId(), p => p.Id);
-        
         NotionCollection[] collectionsArray = collections.ToArray();
+        NotionPublication[] publicationsArray = publications.ToArray();
+        
+        Dictionary<string, NotionCollection> collectionsDictionary = collectionsArray
+            .ToDictionary(c => c.GetNotionId());
+        
+        Dictionary<string, int> publicationsDictionary = publicationsArray
+            .ToDictionary(p => p.GetNotionId(), p => p.Id);
+
+        foreach (var publication in publicationsArray)
+        {
+            foreach (ObjectId collectionRelation in publication.GetCollectionsRelation())
+            {
+                if (!collectionsDictionary.TryGetValue(collectionRelation.Id, out NotionCollection? collection))
+                    continue;
+
+                collection._publicationsIds.Add(publication.Id);
+            }
+        }
 
         foreach (var collection in collectionsArray)
         {
-            foreach (var relationId in collection._publicationsRelation)
+            foreach (ObjectId ignoredRelation in collection._ignoredPublicationsRelation)
             {
-                if (!publicationsDictionary.TryGetValue(relationId.Id, out int publicationId)) 
-                    continue;
-                
-                collection._publicationsIds.Add(publicationId);
-            }
-
-            foreach (var ignoredId in collection._ignoredPublicationsRelation)
-            {
-                if (!publicationsDictionary.TryGetValue(ignoredId.Id, out int publicationId)) 
+                if (!publicationsDictionary.TryGetValue(ignoredRelation.Id, out int publicationId))
                     continue;
                 
                 collection._ignoredPublicationsIds.Add(publicationId);
             }
         }
-        
+
         return collectionsArray;
     }
     
