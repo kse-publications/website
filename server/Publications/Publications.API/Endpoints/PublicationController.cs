@@ -52,9 +52,13 @@ public class PublicationsController : ControllerBase
         Publication? publication = await _publicationsService
             .GetByIdAsync(slug.GetId(), cancellationToken);
         
-        return publication is null
-            ? NotFound($"Publication with ID '{slug.Slug}' not found.")
-            : Ok(publication); 
+        return publication is not null
+            ? Ok(publication) 
+            : NotFound(new
+            {
+                Error = "not_found",
+                Message = $"Publication with ID '{slug.Slug}' not found."
+            }); 
     }
     
     [HttpGet("{id}/related-by-authors")]
