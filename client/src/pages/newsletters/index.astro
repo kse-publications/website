@@ -1,0 +1,49 @@
+---
+import '@/styles/globals.css'
+import Layout from '@/layouts/Layout.astro'
+import NewslettersPage from '@/components/newsletters/newsletter-section'
+
+const newsletters = [
+  {
+    title:
+      '"KSE досліджує": як виглядає прокрастинація зі філософської сторони, та чи довіряють українці інституціям?',
+    date: '01-02-2025',
+    badges: ['Interview'],
+    link: 'https://archive.sendpul.se/v/5b7wj/7js/',
+    people: ['Oleh Omelchenko', 'Andriy Fert', 'Larysa Tamilina', 'Tina Polek', 'Yehor Butsykin'],
+  },
+  {
+    title:
+      'Дайджест "KSE досліджує": як економісти та дослідники релігії фіксують збитки від обстрілів рф, а соціальні психологи досліджують союзницькі дії',
+    date: '17-01-2025',
+    badges: ['Interview'],
+    link: 'https://archive.sendpul.se/v/5b7wj/cfq/',
+    people: [
+      'Mariia Chayinska',
+      'Andriy Fert',
+      'Oleg Nivievskyi',
+      'Anastasiia Klius',
+      'Anastasiia Kozerivska',
+      'Karen Nikiforov',
+    ],
+  },
+  {
+    title: 'Зустрічайте дайджест КШЕ досліджує - над чим працюють наші викладачі та студенти',
+    date: '20-12-2024',
+    badges: ['Interview'],
+    link: 'https://archive.sendpul.se/v/4niyn/1o545/',
+    people: [
+      'Andriy Solomonskyi',
+      'Tymofii Brik',
+      'Jais Adam-Troian',
+      'Anton Liagusha',
+      'Dmytro Iarovyi',
+      'Yuliia Dukach',
+    ],
+  },
+]
+---
+
+<Layout title="KSE Publications | Newsletter">
+  <NewslettersPage client:load newsletters={newsletters} />
+</Layout>
