@@ -6,9 +6,6 @@ export default {
   content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
   prefix: '',
   theme: {
-    maxWidth: {
-      main: '1160px',
-    },
     container: {
       center: true,
       padding: '2rem',
@@ -19,6 +16,9 @@ export default {
     extend: {
       screens: {
         xs: '480px',
+      },
+      maxWidth: {
+        main: '1160px',
       },
       spacing: {
         4.5: '1.125rem',

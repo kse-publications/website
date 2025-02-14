@@ -7,8 +7,9 @@ import { captureEvent } from '@/services/posthog/posthog'
 import { SyncStatus } from '../ui/sync-status'
 
 const menuItems = [
-  { label: 'About', href: '/about' },
+  { label: 'Newsletter', href: '/newsletters' },
   { label: 'Submissions', href: '/submissions' },
+  { label: 'About', href: '/about' },
   { label: 'Team', href: '/team' },
 ]
 
