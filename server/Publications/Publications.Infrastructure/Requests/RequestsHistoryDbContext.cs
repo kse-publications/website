@@ -6,6 +6,7 @@ namespace Publications.Infrastructure.Requests;
 public class RequestsHistoryDbContext: DbContext
 {
     public DbSet<Request> Requests { get; set; } = null!;
+    public DbSet<Subscription> Subscriptions { get; set; } = null!;
 
     public RequestsHistoryDbContext(
         DbContextOptions<RequestsHistoryDbContext> options) : base(options)
@@ -16,5 +17,8 @@ public class RequestsHistoryDbContext: DbContext
     {
         modelBuilder.Entity<Request>()
             .HasKey(request => request.Id);
+
+        modelBuilder.Entity<Subscription>()
+            .HasKey(sub => sub.Email);
     }
 }
