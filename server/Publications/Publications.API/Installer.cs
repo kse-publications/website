@@ -78,4 +78,13 @@ public static class Installer
     {
         app.UseMiddleware<ErrorHandlingMiddleware>();
     }
+    
+    public static void AddMinimalApiLogger(this IServiceCollection services)
+    {
+        services.AddTransient<ILogger>(p =>
+        {
+            var logger = p.GetRequiredService<ILoggerFactory>();
+            return logger.CreateLogger("Publications.API");
+        });
+    }
 }

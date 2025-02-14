@@ -52,7 +52,24 @@ public class RequestsRepository: IRequestsRepository
             ? await query.Select(r => r.SessionId).Distinct().CountAsync() 
             : await query.CountAsync();
     }
-    
+
+    public async Task AddSubscriptionAsync(Subscription subscription)
+    {
+        var existingSubscription = await _dbContext.Subscriptions.FindAsync(subscription.Email);
+        if (existingSubscription is not null)
+        {
+            return;
+        }
+        
+        await _dbContext.Subscriptions.AddAsync(subscription);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task<Subscription[]> GetSubscriptionsAsync(CancellationToken cancellationToken)
+    {
+        return (await _dbContext.Subscriptions.ToListAsync(cancellationToken)).ToArray();
+    }
+
     private IQueryable<Request> ApplyResourceNameFilter<TResource>(IQueryable<Request> query)
     {
         string resourceName = ResourceHelper.GetResourceName<TResource>();

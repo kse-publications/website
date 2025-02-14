@@ -5,6 +5,7 @@ using Publications.Infrastructure;
 var builder = WebApplication.CreateBuilder(args);
 {
     builder.Services.AddLogging();
+    builder.Services.AddMinimalApiLogger();
     builder.Services.AddControllers().ConfigureJsonOptions();
     builder.Services.AddSwagger();
     
@@ -29,6 +30,8 @@ var app = builder.Build();
     app.UseCorsPolicies();
     app.UseHttpsRedirection();
     app.UseErrorHandlerMiddleware();
+    
+    app.MapMiscEndpoints();
 }
 
 app.MapControllers();

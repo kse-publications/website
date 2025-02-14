@@ -16,4 +16,8 @@ public interface IRequestsRepository
         DateTime? after = null,
         DateTime? before = null,
         bool distinct = true) where TResource : Entity;
+    
+    Task AddSubscriptionAsync(Subscription subscription);
+    
+    Task<Subscription[]> GetSubscriptionsAsync(CancellationToken cancellationToken);
 }
