@@ -18,28 +18,29 @@ function AboutPage({ totalPublication, totalSearches, publicationViews }: AboutP
           <p>
             The KSE Publications website was launched in the Spring of 2024 to present a collection
             of the major academic and analytical publications produced by the KSE community. Its
-            main objective is to disseminate KSE's original academic work that is relevant to the
-            fields of political and social sciences in a broader context.
+            main objective is to disseminate original scholarly work relevant to KSE’s teaching and
+            research focus.
           </p>
           <br />
           <p>
-            Specifically, the KSE Publications aim to actively promote the academic achievements of
-            the Kyiv School of Economics faculty and researchers. This series also proudly publishes
-            exceptional papers written by KSE students as part of their academic curriculum,
-            promoting the culture of excellence at our university.
+            The website collects publications authored by individuals affiliated with the KSE during
+            their tenure at the institution, as well as works produced prior to or following their
+            affiliation. Therefore, this collection does not constitute an official record of KSE’s
+            institutional achievements and shall not be construed, interpreted, or represented as
+            such.
+          </p>
+          <br />
+          <p>
+            This series also proudly publishes exceptional papers written by KSE students as part of
+            their academic curriculum, promoting the culture of excellence at our university.
           </p>
           <br />
           <p>
             To further support this mission, in the Fall of 2024 KSE Publications launched a
-            newsletter, "KSE Research Digest," to inform the students, faculty and anyone interested
-            on the academic life of the Kyiv School of Economics. With this newsletter we hope to
-            establish a strong research culture and stimulate networking within the KSE community
-            and beyond.
-          </p>
-          <br />
-          <p>
-            The KSE Publications strives to advance the use of KSE research output and increase its
-            impact globally and nationally.
+            newsletter, "KSE Research Digest," to inform the students, faculty, and anyone
+            interested in the academic life of the Kyiv School of Economics. With this newsletter,
+            we hope to establish a strong research culture and stimulate networking within the KSE
+            community and beyond.
           </p>
         </div>
         <div className="flex justify-around gap-6">
