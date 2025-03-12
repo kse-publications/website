@@ -25,7 +25,7 @@ export default function MobileMenuDrawer({ menuItems, isSync }: MobileMenuDrawer
         </div>
       </SheetTrigger>
       <SheetContent side="top" className="fixed inset-0 z-50 overflow-auto bg-white">
-        <div className="max-w-sm mx-auto mt-10 w-full">
+        <div className="mx-auto mt-10 w-full max-w-sm">
           {menuItems.map((item) => (
             <div key={item.label}>
               <a href={item.href} aria-label={`Go to ${item.label} page`}>

@@ -21,14 +21,7 @@ function TeamPage() {
         <div className="pt-6">
           <p>
             This website is collaboratively developed by students and academic faculty of the
-            university as part of an initiative to promote KSE publications. The project is
-            proposed, organized, and executed by{' '}
-            <PersonLink
-              link="https://www.linkedin.com/in/dr-larysa-tamilina-45a50431/"
-              name="Dr. Larysa Tamilina"
-            />{' '}
-            (Associate Professor at KSE).
-            <br />
+            university as part of an initiative to promote KSE publications.
             <br />
             The project is currently managed by{' '}
             <PersonLink link="https://www.linkedin.com/in/mark-motliuk/" name="Mark Motliuk" /> (KSE
@@ -68,6 +61,12 @@ function TeamPage() {
           </p>
           <p>
             -{' '}
+            <PersonLink
+              link="https://www.linkedin.com/in/dr-larysa-tamilina-45a50431/"
+              name="Dr. Larysa Tamilina"
+            />{' '}
+            was an initiator and an initial manager of the project
+            <br />-{' '}
             <PersonLink
               link="https://www.linkedin.com/in/dmytro-kolisnyk-203a61235/"
               name="Dmytro Kolisnyk"
